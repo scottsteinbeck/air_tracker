@@ -26,12 +26,12 @@
         <cfset elapsed_days = dateDiff('d', prev_date, engineHours.ehDate)>
 
         <cfset daily_engine_hrs = 0>
-        <cfif elapsed_engine_hrs gt 0>
+        <cfif elapsed_days gt 0>
             <cfset daily_engine_hrs = elapsed_engine_hrs/elapsed_days>
         </cfif>
         
         <cfloop index="iDate" from="#prev_date#" to="#engineHours.ehDate#" step="#CreateTimeSpan(1,0,0,0)#">
-            <cfset day_hours[dateformat(iDate,'yyyy-mm-dd')] =  round(daily_engine_hrs * 100)/100>
+            <cfset day_hours[dateformat(iDate,'yyyy-mm-dd')] = (daily_engine_hrs)>
         </cfloop>
 
         <cfset prev_date = engineHours.ehDate>
@@ -46,13 +46,13 @@
     </cfloop>
     
     <cfloop collection="#day_hours#" item="iDateKey">
-        <cfset month_hours[month(iDateKey)] += day_hours[iDateKey]>
+        <cfset month_hours[month(iDateKey)] += precisionEvaluate(day_hours[iDateKey])>
     </cfloop>
 
     <cfset starting_hours = engineHours.ehHoursTotal>
 
     <cfloop from="1" to="#month_hours.len()#" index="i">
-        <cfset month_acc_hours[i] = starting_hours + month_hours[i]>
+        <cfset month_acc_hours[i] = precisionEvaluate(starting_hours + month_hours[i])>
         <cfset starting_hours = month_acc_hours[i]>
     </cfloop>
 </cfif>
@@ -71,45 +71,50 @@
 </cfoutput>--->
 <!--- <cfdump var=#arraySum(hoursDsp[1])/eDays#> --->
 
-<cfoutput>
-    <form action="index.cfm?action=add_engine_hours">
-        <input type="hidden" name="action" value="add_engine_hours">
-        <input type="hidden" name="eID" value="#url.eID#"/>
-        <!--- <input type="date" value="#url.eDate#" name="eDate"/> --->
-        <select name="eDate" onchange="form.submit()">
-            <cfloop from="2014" to=#year(now())# index="YR">
-                <option value="#LSDateFormat(createDate(YR,1,1),"yyyy-mm-dd")#" <cfif YR eq year(url.eDate)>selected="selected"</cfif>>#YR#</option>
-            </cfloop>
-        </select>
-    </form>
-    <table>
-        <thead>
-        <tr>
-            <th>
-                Month
-            </th>
-            <th>
-                Monthly total
-            </th>
-            <th>
-                Running total
-            </th>
-            <th>
-                Change Hours
-            </th>
-        </tr>
-        </thead>
-        <cfloop from="1" to="12" index="month">
+<div class="card" style="width: 18rem;">
+    <cfoutput>
+        <form action="index.cfm?action=add_engine_hours">
+            <input type="hidden" name="action" value="add_engine_hours">
+            <input type="hidden" name="eID" value="#url.eID#"/>
+            <!--- <input type="date" value="#url.eDate#" name="eDate"/> --->
+            <select name="eDate" onchange="form.submit()">
+                <cfloop from="2014" to=#year(now())# index="YR">
+                    <option value="#LSDateFormat(createDate(YR,1,1),"yyyy-mm-dd")#" <cfif YR eq year(url.eDate)>selected="selected"</cfif>>#YR#</option>
+                </cfloop>
+            </select>
+        </form>
+        <table>
+            <thead>
             <tr>
-                <cfif engineHours.RecordCount gt 0>
-                    <td>#monthAsString(month)#</td>
-                    <td>#month_hours[month]#</td>
-                    <td>#month_acc_hours[month]#</td>
-                    <cfelse>
-                    <cfloop from="1" to="3" index="i"><td>---</td></cfloop>
-                </cfif>
-                <td><input type="number" name="newHours"/></td>
+                <th>
+                    Month
+                </th>
+                <th>
+                    Monthly total
+                </th>
+                <th>
+                    Running total
+                </th>
             </tr>
-        </cfloop>
-    </table>
-</cfoutput>
+            </thead>
+            <form action="index.cfm">
+                <input type=hidden name="action" value="save_engine_hours">
+                <input type=hidden name="eID" value="#url.eID#">
+                <input type=date name="eDate" value="#url.eDate#">
+                <input type="number" name="ehHoursTotal" value="0"/>
+                <input type="submit">
+            </form>
+            <cfloop from="1" to="12" index="month">
+                <tr>
+                    <td>#monthAsString(month)#</td>
+                    <cfif engineHours.RecordCount gt 0>
+                        <td>#month_hours[month]#</td>
+                        <td>#month_acc_hours[month]#</td>
+                        <cfelse>
+                        <cfloop from="1" to="2" index="i"><td>---</td></cfloop>
+                    </cfif>
+                </tr>
+            </cfloop>
+        </table>
+    </cfoutput>
+</div>

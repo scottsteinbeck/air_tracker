@@ -69,7 +69,8 @@
         <cfcase value="Cow_numbers"><cfinclude template="modules/CowNumbers/dsp_cow_numbers.cfm"></cfcase>
         <cfcase value="act_save_numbers"><cfinclude template="modules/CowNumbers/act_save_numbers.cfm"></cfcase>
         <cfcase value="engine_hours"><cfinclude template="modules/engine/dsp_engine_hours.cfm"></cfcase>
-        <cfcase value="add_engine_hours"><cfinclude template="modules/engine/add_engine_hours.cfm"></cfcase>
+        <cfcase value="add_engine_hours"><cfinclude template="modules/engine/add_engine_hours.cfm"/></cfcase>
+        <cfcase value="save_engine_hours"><cfinclude template="modules/engine/save_engine_hours.cfm"/></cfcase>
         <cfdefaultcase>
             <cfinclude template="main.cfm">
         </cfdefaultcase> 
