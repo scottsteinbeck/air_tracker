@@ -71,50 +71,87 @@
 </cfoutput>--->
 <!--- <cfdump var=#arraySum(hoursDsp[1])/eDays#> --->
 
-<div class="card" style="width: 18rem;">
-    <cfoutput>
-        <form action="index.cfm?action=add_engine_hours">
-            <input type="hidden" name="action" value="add_engine_hours">
-            <input type="hidden" name="eID" value="#url.eID#"/>
-            <!--- <input type="date" value="#url.eDate#" name="eDate"/> --->
-            <select name="eDate" onchange="form.submit()">
-                <cfloop from="2014" to=#year(now())# index="YR">
-                    <option value="#LSDateFormat(createDate(YR,1,1),"yyyy-mm-dd")#" <cfif YR eq year(url.eDate)>selected="selected"</cfif>>#YR#</option>
-                </cfloop>
-            </select>
-        </form>
-        <table>
-            <thead>
-            <tr>
-                <th>
-                    Month
-                </th>
-                <th>
-                    Monthly total
-                </th>
-                <th>
-                    Running total
-                </th>
-            </tr>
-            </thead>
-            <form action="index.cfm">
-                <input type=hidden name="action" value="save_engine_hours">
-                <input type=hidden name="eID" value="#url.eID#">
-                <input type=date name="eDate" value="#url.eDate#">
-                <input type="number" name="ehHoursTotal" value="0"/>
-                <input type="submit">
-            </form>
-            <cfloop from="1" to="12" index="month">
-                <tr>
-                    <td>#monthAsString(month)#</td>
-                    <cfif engineHours.RecordCount gt 0>
-                        <td>#month_hours[month]#</td>
-                        <td>#month_acc_hours[month]#</td>
-                        <cfelse>
-                        <cfloop from="1" to="2" index="i"><td>---</td></cfloop>
-                    </cfif>
-                </tr>
-            </cfloop>
-        </table>
-    </cfoutput>
+<div class="row justify-content-md-center">
+    <div class="col-lg-3 col-md-5 col-sm-12 mb-3" >
+        <div class="card">
+            <div class = "card-body">
+                <cfoutput>
+                    <form action="index.cfm?action=add_engine_hours">
+                        <input type="hidden" name="action" value="add_engine_hours">
+                        <input type="hidden" name="eID" value="#url.eID#"/>
+                        <!--- <input type="date" value="#url.eDate#" name="eDate"/> --->
+                        <div class="row mb-3 margin-left">
+                            <div class="col-sm-7">
+                                <lable class="visually-hidden" for="year_picker">
+                                <select name="eDate" class="form-select" id="year_picker" onchange="form.submit()">
+                                    <cfloop from="2014" to=#year(now())# index="YR">
+                                        <option value="#LSDateFormat(createDate(YR,1,1),"yyyy-mm-dd")#" <cfif YR eq year(url.eDate)>selected="selected"</cfif>>#YR#</option>
+                                    </cfloop>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <form action="index.cfm">
+                        <input type=hidden name="action" value="save_engine_hours">
+                        <input type=hidden name="eID" value="#url.eID#">
+                        
+                        <div class="row mb-3">
+                        <lable for="set_hrs_at" class="col-sm-4 col-form-label">Recored on</lable>
+                            <div class="col-sm-7">
+                                <input type=date name="eDate" id="set_hrs_at" class="form-control" value="#url.eDate#">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <lable for="hrs_amount" class="col-sm-4 col-form-label">Hours</lable>
+                            <div class="col-sm-7">
+                                <input type="number" id="hrs_amount" class="form-control" name="ehHoursTotal" value="0"/>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <input type="submit" class="btn btn-block btn-outline-primary" value="Enter"/>
+                        </div>
+                    </form>
+                </cfoutput>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-5 col-sm-12 mb-3">
+        <div class="card">
+            <div class = "card-body">
+                <cfoutput>
+                    <div class="table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Month
+                                    </th>
+                                    <th>
+                                        Monthly total
+                                    </th>
+                                    <th>
+                                        Running total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <cfloop from="1" to="12" index="month">
+                                    <tr>
+                                        <td>#monthAsString(month)#</td>
+                                        <cfif engineHours.RecordCount gt 0>
+                                            <td>#round(month_hours[month],3)#</td>
+                                            <td>#round(month_acc_hours[month],3)#</td>
+                                            <cfelse>
+                                            <cfloop from="1" to="2" index="i"><td>---</td></cfloop>
+                                        </cfif>
+                                    </tr>
+                                </cfloop>
+                            </tbody>
+                        </table>
+                    </div>
+                </cfoutput>
+            </div>
+        </div>
+    </div>
 </div>
