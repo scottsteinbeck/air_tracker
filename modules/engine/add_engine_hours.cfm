@@ -105,13 +105,13 @@
                         <div class="row mb-3">
                         <lable for="set_hrs_at" class="col-sm-4 col-form-label">Recored on</lable>
                             <div class="col-sm-7">
-                                <input type=date name="eDate" id="set_hrs_at" class="form-control" value="#url.eDate#">
+                                <input type=date name="eDate" max="#dateformat(year(url.eDate)&"-12-31","yyyy-mm-dd")#" min="#url.eDate#" id="set_hrs_at" class="form-control" value="#url.eDate#">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <lable for="hrs_amount" class="col-sm-4 col-form-label">Hours</lable>
                             <div class="col-sm-7">
-                                <input type="number" id="hrs_amount" class="form-control" name="ehHoursTotal" value="0"/>
+                                <input type="number" id="hrs_amount" class="form-control" name="ehHoursTotal" step="0.25" value="0.00"/>
                             </div>
                         </div>
                         <div class="col-12">
