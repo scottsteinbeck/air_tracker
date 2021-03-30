@@ -71,6 +71,7 @@
         <cfcase value="engine_hours"><cfinclude template="modules/engine/dsp_engine_hours.cfm"></cfcase>
         <cfcase value="add_engine_hours"><cfinclude template="modules/engine/add_engine_hours.cfm"/></cfcase>
         <cfcase value="save_engine_hours"><cfinclude template="modules/engine/save_engine_hours.cfm"/></cfcase>
+        <cfcase value="check_engine_hours"><cfinclude template="modules/engine/check_engine_hours.cfm"/></cfcase>
         <cfdefaultcase>
             <cfinclude template="main.cfm">
         </cfdefaultcase> 
