@@ -27,6 +27,7 @@
         <th>Engine Serial Number</th>
         <th>Engine Project</th>
         <th>Add Hours</th>
+        <th>Vue Hours</th>
     </thead>
     <cfoutput query="engineInfo">
         <tr>
@@ -36,7 +37,10 @@
                 </td>
             </cfloop>
             <td>
-                <a href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">+</a>
+                <a href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>    
+            </td>
+            <td>
+            <a href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Vue Hours</a>
             </td>
         </tr>
     </cfoutput>
