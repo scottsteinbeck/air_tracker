@@ -105,20 +105,23 @@
                         <div class="row mb-3">
                         <lable for="set_hrs_at" class="col-sm-4 col-form-label">Recored on</lable>
                             <div class="col-sm-7">
-                                <input type=date name="eDate" max="#dateformat(year(url.eDate)&"-12-31","yyyy-mm-dd")#" min="#url.eDate#" id="set_hrs_at" class="form-control" value="#url.eDate#">
+                                <input type=date name="eDate" max="#dateformat(year(url.eDate)&"-12-31","yyyy-mm-dd")#" min="#dateformat(year(url.eDate)&"-1-1","yyyy-mm-dd")#" id="set_hrs_at" class="form-control" value="#url.eDate#">
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <lable for="hrs_amount" class="col-sm-4 col-form-label">Hours</lable>
                             <div class="col-sm-7">
-                                <input type="number" id="hrs_amount" class="form-control" name="ehHoursTotal" step="0.25" value="0.00"/>
+                                <input id="hrs_amount" class="form-control" name="ehHoursTotal" pattern="^\d*(\.\d{0,3})?$" autofocus="autofocus"/>
                             </div>
                         </div>
+
                         <div class="col-12">
                             <input type="submit" class="btn btn-block btn-outline-primary" value="Enter"/>
                         </div>
                     </form>
                 </cfoutput>
+                <cfdump var=#engineHours#>
             </div>
         </div>
     </div>
