@@ -6,4 +6,6 @@
     <cfqueryparam value=#url.eDate# sqlType="cf_sql_date">
     )
 </cfquery>
-<cflocation url="index.cfm?action=add_engine_hours&eID=#url.eID#&eDate=#url.eDate#" addtoken="false">
+<cflocation url="index.cfm?action=add_engine_hours&eID=#url.eID#&eDate=#
+    dateformat(dateadd("m",1,url.eDate),"yyyy-mm-dd")#" 
+    addtoken="false">
