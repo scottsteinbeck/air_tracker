@@ -7,17 +7,17 @@
 <cfquery name="engineHours">
     SELECT *
     FROM engine_hours
-    WHERE eID=#url.eID#
+    WHERE ehID=#url.eID#
 </cfquery>
 
 <cfoutput>
     <div id="mainVue">
         <form action="index.cfm" method="GET">
-            <input type="hidden" name="eID" value="#url.eID#">
-            <input type="hidden" name="action" value="add_engine_hours">
-            <select name="year" onchange="form.submit()">
+        <input type="hidden" name="eID" value="#url.eID#">
+        <input type="hidden" name="action" value="add_engine_hours">
+        <select name="year" onchange="form.submit()">
                 <cfloop from="2014" to=#year(now())# index="YR">
-                    <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
+                    <option value="#YR#" <cfif YR eq url.eDate>selected="selected"</cfif>>#YR#</option>
                 </cfloop>
             </select>
         </form>
@@ -68,10 +68,10 @@
 <cfargument required="true" type="query" name="_engineHours">
     <cfset hours=0>
     <cfloop query="_engineHours">
-            <cfif month(eDate) eq _month>
-                <cfset hours = eHoursTotal>
-                <cfbreak/>
-            </cfif>
-        </cfloop>
+        <cfif month(eDate) eq _month>
+            <cfset hours = ehHoursTotal>
+            <cfbreak/>
+        </cfif>
+    </cfloop>
 <cfreturn hours>
 </cffunction>
