@@ -2,24 +2,24 @@
 <cfparam name="url.Month" default="#month(now())#">
 <cfparam name="url.dID" default="0">
 <cfquery name="Dairylist">
-    select * from Dairies
+    SELECT * FROM Dairies
 </cfquery>
 <cfquery name="MonthList">
-    select * from Month_Names
+    SELECT * FROM Month_Names
 </cfquery>
 <cfquery name="inspectionDays">
-    select * from inspections
+    SELECT * FROM inspections
 </cfquery>
 <cfquery name="questionlist">
-    select * 
-    from questions 
-    Left join dairy_question_link on dairy_question_link.qID=questions.qID and dID=#url.dID#
-    Left Join inspections on idID=#url.dID#
-                    and iYear=#url.Year#
-                    and iMonth=#url.Month#
+    SELECT * 
+    FROM questions 
+    LEFT JOIN dairy_question_link ON dairy_question_link.qID=questions.qID AND dID=#url.dID#
+    LEFT JOIN inspections ON idID=#url.dID#
+                    AND iYear=#url.Year#
+                    AND iMonth=#url.Month#
                     and iqID=questions.qid
-                where qType <> "question" or (qtype = "question" and dairy_question_link.dID is not null)
-        Order by qPriority
+                WHERE qType <> "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
+        ORDER BY qPriority
 </cfquery>
 
 
@@ -109,24 +109,36 @@ entry  --->
                     <h4>
                     <cfelse>
                         #questionlist.qID#. #questionlist.qTitle#
+                        <br><br>
                 </cfif>
-            </td>
-            <td>
+                
             <cfoutput>
-            <cfif questionlist.qType eq "Documents">
-                #questionlist.qDescription#    
-            <cfelse>
+                <cfif questionlist.qType eq "Documents">
+                    <div class="small">
+                        #questionlist.qDescription#
+                        <a href="http://127.0.0.1:62769/index.cfm?action=dairy_inspections">45 70 Documents</a>
+                    </div>
+                <cfelse>
 
-                <cfif questionlist.dqType eq "Specific"> 
-                    #dateFormat(questionlist.iDate, "mm-dd-yyyy")# <br>
-                <cfelse> 
-                    #questionlist.dqType# 
+                    <cfif questionlist.dqType eq "Specific"> 
+                        #dateFormat(questionlist.iDate, "mm-dd-yyyy")# <br>
+                    <cfelse> 
+                        #questionlist.dqType# 
+                    </cfif>
                 </cfif>
-            </cfif>
-
+                
             </cfoutput>
 
 
+            </td>
+            <td>
+                <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
+                    <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
+                    <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
+                    #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
+                    <br><br>
+                    #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
+                </cfif>
             </td>
         </tr>
         </cfoutput>  
