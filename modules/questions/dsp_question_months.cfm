@@ -27,13 +27,11 @@
         where qID = #url.qID#
     </cfquery>
 
-    <cfquery name="monthlist" returntype="array">
+    <cfquery name="monthList">
         select * 
         from month_names
         left join question_months on question_months.mID=month_names.mID
     </cfquery>
-
-    <cfdump var = #monthlist#>
 
     <!--- Form to get the question id that we're setting the months for --->
     <div class="container-fluid">
@@ -88,20 +86,28 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <cfoutput query="monthList" >
-                                <tr>
-                                    <td>
-                                        <label>
-                                            <input type="checkbox" name="months" value="#monthList.mID#"  <!--- Month checkboxes and saving logic --->
-                                            <cfif monthList.qID is not "">checked ="checked"</cfif> >
-                                        #monthList.mName#<label></td>
-                                    <td></td>
-                                </tr>
-                                </cfoutput>
+                                
+                                <cfloop from="0" to="12" index="i">
+                                    <cfoutput>
+                                        <tr>
+                                            <td>
+                                            <cfquery name="checked_questions" dbtype="query">
+                                                SELECT mID
+                                                FROM monthList
+                                                WHERE qID = #url.qID# AND mID = #i#
+                                            </cfquery>
+                                                <input type="checkbox" name="months" value="#monthList.mID[i]#"  <!--- Month checkboxes and saving logic --->
+                                                <cfif checked_questions.recordCount>checked ="checked"</cfif>>
+                                                <!--- <cfdump var=#checked_questions.mID[i]#> --->
+                                                <cfif i eq 0>all<cfelse>#monthAsString(i)#</cfif>
+                                            </td>
+                                        </tr>
+                                    </cfoutput>
+                                </cfloop>
                             </tbody>
                         </table>
                         <input type="submit" class="btn btn-outline-primary" value="Save Questions">
-                    </form>        
+                    </form>
                 </div>
             </div>
         </div>
