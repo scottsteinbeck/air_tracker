@@ -17,11 +17,23 @@
     LEFT JOIN inspections ON idID=#url.dID#
                     AND iYear=#url.Year#
                     AND iMonth=#url.Month#
-                    and iqID=questions.qid
+                    AND iqID=questions.qid
                 WHERE qType <> "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
         ORDER BY qPriority
 </cfquery>
-
+<style>
+    .fa-6{
+        font-size: 2em;
+    }
+</style>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">Farm</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/index.cfm?action=dsp_documents">Documents</a>
+    </li>
+</ul>
 
 <br>
 <!--- Form to get the dairy, month, year that an inspection will be added to--->
@@ -31,8 +43,6 @@
         <div class="row">
             <div class="col-sm-8">
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                    </div>
                     <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
                         option value="0"> none</option>
                         <cfoutput query="DairyList">
@@ -91,12 +101,22 @@ entry  --->
 </tr></table>
 </form>
 
+<cfset add_recorded_cal=false>
+<cfloop query="questionlist">
+    <cfif questionlist.qID eq 49 or questionlist.qID eq 51>
+        <cfset add_recorded_cal=true>
+        <cfbreak/>
+    </cfif>
+</cfloop>
 
-<table class="table table-hover table-striped" >
+<table class="table table-hover table-striped table-bordered">
     <thead class="thead-dark">
         <tr>
             <th>Question</th>
-            <th width=400>Inspection Dates</th>
+            <th width=70>Day</th>
+            <th width=70>Month</th>
+            <th width=70>Specific</th>
+            <cfif add_recorded_cal><th width=300>Recorded dates</th></cfif>
         </tr>
     </thead>
     <tbody>
@@ -105,10 +125,10 @@ entry  --->
             <td class="heading">
                 <cfif questionlist.qType is "Heading">
                     <h4>
-                        #questionlist.qID#. #questionlist.qTitle#
+                        <!--- #questionlist.qID#.---> #questionlist.qTitle#
                     <h4>
                     <cfelse>
-                        #questionlist.qID#. #questionlist.qTitle#
+                        <!--- #questionlist.qID#. ---> #questionlist.qTitle#
                         <br><br>
                 </cfif>
                 
@@ -116,33 +136,42 @@ entry  --->
                 <cfif questionlist.qType eq "Documents">
                     <div class="small">
                         #questionlist.qDescription#
-                        <a href="http://127.0.0.1:62769/index.cfm?action=dairy_inspections">45 70 Documents</a>
+                        <a href="/index.cfm?action=dsp_documents">45 70 Documents</a>
                     </div>
                 <cfelse>
 
-                    <cfif questionlist.dqType eq "Specific"> 
+                    <!--- <cfif questionlist.dqType eq "Specific"> 
                         #dateFormat(questionlist.iDate, "mm-dd-yyyy")# <br>
                     <cfelse> 
                         #questionlist.dqType# 
-                    </cfif>
+                    </cfif> --->
                 </cfif>
                 
             </cfoutput>
-
-
             </td>
             <td>
-                <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
-                    <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
-                    <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
-                    #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
-                    <br><br>
-                    #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
-                </cfif>
+                <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
             </td>
+            <td>
+                <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+            </td>
+            <td>
+                <cfif questionlist.dqType eq "Specific"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+            </td>
+            <cfif add_recorded_cal>
+                <td>
+                    <cfif questionlist.qID eq 49 or questionlist.qID eq 51>
+                        <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
+                            <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
+                            <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
+                            #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
+                            <br><br>
+                            #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
+                        </cfif>
+                    </cfif>
+                </td>
+            </cfif>
         </tr>
         </cfoutput>  
     </tbody>
 </table>
-
-
