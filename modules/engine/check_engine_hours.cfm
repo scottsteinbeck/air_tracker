@@ -14,7 +14,7 @@
     <div id="mainVue">
         <form action="index.cfm" method="GET">
         <input type="hidden" name="eID" value="#url.eID#">
-        <input type="hidden" name="action" value="add_engine_hours">
+        <input type="hidden" name="action" value="check_engine_hours">
         <select name="year" onchange="form.submit()">
                 <cfloop from="2014" to=#year(now())# index="YR">
                     <option value="#YR#" <cfif YR eq url.eDate>selected="selected"</cfif>>#YR#</option>
