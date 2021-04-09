@@ -17,10 +17,8 @@
     <div class="container">
         <div class="row">
             <input type="hidden" name="action" value="dairy_settings">
-            <div class="col-sm-8">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                    </div>
+            <div class="col-sm-10">
+                <div class="input-group mb-3 mt-3">
                     <select class="form-control" name="dID" id="" onchange="form.submit()">
                         <option value="0"> none</option>
                         <cfoutput query="dairylist" >
