@@ -1,4 +1,3 @@
-<cfdump var="#form#" >
 <cfquery name="clearMonths">
     delete from question_months where qID= #form.qID#
 </cfquery>
@@ -12,4 +11,5 @@
         </cfloop>
     </cfquery>
 </cfif>
-<cflocation url="index.cfm?action=question_months&qID=#form.qID#" addtoken="false">
+<cfheader name="Content-Type" value="application/json">
+{"success":true}

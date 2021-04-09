@@ -1,25 +1,29 @@
     <cfparam name="url.qID" default="0">
 
     <cfquery name="questionList">
-        select * 
-        from questions
-        order by qPriority , qID
+        SELECT questions.*, question_months.mID
+        FROM questions
+        LEFT JOIN question_months ON question_months.qID=questions.qID
+        ORDER BY qPriority , qID
     </cfquery>
-
-    <cfquery name="prevID" dbtype="query">
-        select qID
-        from questionList
-        where qID < #url.qID# and qType != 'Heading'
-        Order By qPriority desc , qID desc
-    </cfquery>
-    
-    <cfquery name="nextID" dbtype="query">
-        select qID
-        from questionList
-        where qID > #url.qID# and qType != 'Heading'
-        Order By qPriority , qID asc
-    </cfquery>
-
+    <cfset qList = []>
+    <cfoutput query="questionList" group="qID">
+        <cfset temp = {
+            'qID': qID,
+            'qTitle': qTitle,
+            'qType': qType,
+            'qDescription': qDescription,
+            'qPriority': qPriority,
+            'qFreq': qFreq,
+            'months': []
+        }>
+        <cfoutput>
+            <cfif isNumeric(mID)>
+                <cfset arrayAppend(temp.months,mID)>
+            </cfif>
+        </cfoutput>
+        <cfset arrayAppend(qList,temp)>
+    </cfoutput>
 
     <cfquery name="activeQuestion" dbtype="query">
         select *
@@ -33,106 +37,145 @@
         left join question_months on question_months.mID=month_names.mID
     </cfquery>
 
+<style>
+    .fa-6{
+        font-size: 2em;
+    }
+</style>
+
     <!--- Form to get the question id that we're setting the months for --->
+<div id="questionContainer">
     <div class="container-fluid">
         <div class="row m-2 p-2 border">
             <!--- Page tital and forward and backward arows --->
             <cfoutput>
-                <cfif prevID.recordCount>
-                    <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#prevID.qID#" ><<</a>
-                <cfelse>
-                    <a class="col-1 btn btn-secondary disabled" href="index.cfm?action=question_months&qID=#prevID.qID#" ><<</a>
-                </cfif>
+                <!--- <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#prevID.qID#" ><<</a> --->
+                <button class="col-1 btn btn-secondary" name="prevousButton" @click="leftArrowClick()"><i class="fa fa-6 fa-angle-double-left"></i></button>
 
-                <h4 class="col text-center text-truncate">#activeQuestion.qTitle#<cfif qID is "0">none</cfif></h4>
+                <h4 class="col text-center text-truncate">
+                    {{active.qTitle}}
+                </h4>
                 
-                <cfif nextID.recordCount>
-                    <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#nextID.qID#">>></a>
-                <cfelse>
-                    <a class="col-1 btn btn-secondary disabled" href="index.cfm?action=question_months&qID=#nextID.qID#">>></a>
-                </cfif>
+                <!--- <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#nextID.qID#">>></a> --->
+                <button class="col-1 btn btn-secondary" name="prevousButton" @click="rightArrowClick()"><i class="fa fa-6 fa-angle-double-right"></i></button>
             </cfoutput>
         </div>
         
         <div class="row m-2">
-            <div class="col-sm-9" id="questionContainer" style="height:600px; overflow:auto">
+            <div class="col-sm-9" id="checklistContainer" style="height:600px; overflow:auto">
                 <!--- Selector with scroll bar --->
-                <ul class="list-group list-group-flush">
-                    <cfoutput query="questionList">
-                        <cfif qType is "Heading">
-                        </ul>
-                            <h4>#questionList.qTitle#</h4>
-                        <ul  class="list-group list-group-flush">
-                        <cfelse>
-                            <li class="list-group-item <cfif qID eq url.qID>active</cfif>">
-                                <a class="btn btn-sm btn-primary <cfif qID eq url.qID>disabled</cfif>" href= "index.cfm?action=question_months&qID=#qID#" > + </a>
-                                #questionList.qTitle#
-                            </li>
-                        </cfif>
-                    </cfoutput>
+                <ul>
+                    <li v-for="(item,idx) in qList" :key="item.qID" class="list-group-item" :class="(item.qID == active.qID)?'active':''">
+                        <div v-if="item.qType == 'Heading'"><h4>{{item.qTitle}}</h4></div>
+                        <div v-else>
+                            <button class="btn btn-sm btn-primary" @click="selectClick(item)" :class="[(item.qID == active.qID)?'disabled':'']"><i class="fa fa-6 fa-plus-circle"></i></button>
+                            {{item.qTitle}} 
+                           <br/><small v-for="(id,idx) in item.months">
+                                {{months_names[id]}}<span v-if="idx < item.months.length-1">,</span>
+                            </small>
+                        </div>
+                    </li>
                 </ul>
             </div>
 
         <div class="col-sm-3">
             <div class = "card sticky-top ">
                 <div class = "card-body">
-                        <!--- Form to send to database of months  --->
-                    <form action="index.cfm?action=act_save_months" method="POST">
-                        <input type="hidden" name="qID" value="<cfoutput>#url.qID#</cfoutput>">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Month Required</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                                <cfloop from="0" to="12" index="i">
-                                    <cfoutput>
-                                        <tr>
-                                            <td>
-                                            <cfquery name="checked_questions" dbtype="query">
-                                                SELECT mID
-                                                FROM monthList
-                                                WHERE qID = #url.qID# AND mID = #i#
-                                            </cfquery>
-                                                <input type="checkbox" name="months" value="#monthList.mID[i]#"  <!--- Month checkboxes and saving logic --->
-                                                <cfif checked_questions.recordCount>checked ="checked"</cfif>>
-                                                <!--- <cfdump var=#checked_questions.mID[i]#> --->
-                                                <cfif i eq 0>all<cfelse>#monthAsString(i)#</cfif>
-                                            </td>
-                                        </tr>
-                                    </cfoutput>
-                                </cfloop>
-                            </tbody>
-                        </table>
-                        <input type="submit" class="btn btn-outline-primary" value="Save Questions">
-                    </form>
+                    <!--- Form to send to database of months  --->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div v-for="(item,id) in months_names">
+                                <input type="checkbox" name="months" v-model="active.months" :value="id">
+                                <label>{{item}}</label>
+                            </div>
+                        </tbody>
+                    </table>
+                    <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!--- <numberToMonth month_value="1"><numberToMonth> --->
+</div>
 <script>
+    // Vue(
+    //     'numberToMonth',{
+    //     data: function (){return {months_names = [ "January", "February", "March", "April", "May", "June", 
+    //         "July", "August", "September", "October", "November", "December" ]}
+    //     },
+    //     props: [month_value],
+    //     template: `<div>months_names[month_value]</div>`
+    // });
 
+    var qList = <cfoutput>#serializeJSON(qList)#</cfoutput>;
     questionMonths = new Vue({
+        el: '#questionContainer',
         data:{
-            activeQID: 0,
-        }
+            activeIndex: 0,
+            qList:qList,
+            active: this.qList[0],
+            months_names: [ "All", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+        },
+        mounted: function(){
+            this.active =  this.questionsOnly[this.activeIndex];
+        },
+        computed:{
+            questionsOnly: function(){
+                return this.qList.filter(function(x){
+                    return x.qType != 'Heading'; 
+                })
+            }
+        },
         methods:{
-
+            saveCheckedMonths: function(){
+                console.log(this.active);
+                $.ajax({
+                    method: "POST",
+                    url: "/ajax/questions/act_save_months.cfm",
+                    data: { 
+                        qID: this.active.qID, 
+                        months: this.active.months.join(",")
+                    }
+                })
+                .done(function( res ) {
+                    alert( "Data Saved: " + res.success );
+                });
+            },
+            rightArrowClick: function(){
+                var nexIdx = this.activeIndex+1;
+                this.activeIndex = (nexIdx < this.questionsOnly.length) ? nexIdx : this.activeIndex;
+                this.active = this.questionsOnly[this.activeIndex];
+                this.showActiveItem();
+            },
+            leftArrowClick: function(){
+                var prevIdx = this.activeIndex-1;
+                this.activeIndex = (prevIdx >= 0) ? prevIdx : this.activeIndex;
+                this.active = this.questionsOnly[this.activeIndex];
+                this.showActiveItem();
+            },
+            selectClick: function(item){
+                this.active = item;
+                console.log(this.qList.indexOf(item))
+                this.activeIndex = this.questionsOnly.indexOf(item);
+            },
+            showActiveItem: function(){
+                var $parentDiv = $('#checklistContainer');
+                var $innerListItem = $('.list-group-item.active');
+                $parentDiv.scrollTop(
+                    $parentDiv.scrollTop() + 
+                    $innerListItem.position().top
+                    - $parentDiv.height()/2 
+                    + $innerListItem.height()/2
+                );
+            }
         }
     });
 
-    $(document).ready(function () {
-        
-        var $parentDiv = $('#questionContainer');
-        var $innerListItem = $('.list-group-item.active');
-        $parentDiv.scrollTop(
-            $parentDiv.scrollTop() + 
-            $innerListItem.position().top
-            - $parentDiv.height()/2 
-            + $innerListItem.height()/2
-        );
-    });
+
 </script>
