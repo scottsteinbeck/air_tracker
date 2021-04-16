@@ -26,6 +26,10 @@
         font-size: 2em;
     }
 
+    .fa-4{
+        font-size: 1.5em;
+    }
+
     .focusOff:focus {
         outline: none;
         box-shadow: none;
@@ -212,7 +216,8 @@
                                     <vue-clip :options="options">
                                             <template slot="clip-uploader-action" scope="params">
                                                 <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
-                                                <div class="dz-message"><h4 class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
+                                                <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
+                                                
                                             </div>
                                         </template>
                                     
@@ -246,7 +251,7 @@
         el: '#mainVue',
 
         data:{
-            active_tab: 2,
+            active_tab: 1,
             options: {
                 url: '/ajax/documents/uploader.cfm?dID=' + dID,
                 paramName: 'file',
