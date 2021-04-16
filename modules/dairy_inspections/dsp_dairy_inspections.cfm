@@ -30,6 +30,36 @@
         outline: none;
         box-shadow: none;
     }
+
+    .upload-action.is-dragging {
+        background: #c5ffd2;
+        border-color: #70ff8f;
+    }
+
+    .upload-action {
+        min-height: 40px;
+        border: 2px dashed #ccc;
+    }
+
+    file-select > .select-button {
+        padding: 1rem;
+
+        color: white;
+        background-color: #2EA169;
+
+        border-radius: .3rem;
+
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+        transition: all 5s ease;
+    }
+        .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+        opacity: 0;
+    }
 </style>
 
 <div id="mainVue">
@@ -171,25 +201,65 @@
             </cfoutput>  
         </tbody>
     </table>
-
+            
         <div v-if="active_tab == 2">
-            Hello
+            <div class="row">
+                <div class="col-9 offset-md-2">
+                    <div class="container mt-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <template>
+                                    <vue-clip :options="options">
+                                            <template slot="clip-uploader-action" scope="params">
+                                                <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
+                                                <div class="dz-message"><h4 class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
+                                            </div>
+                                        </template>
+                                    
+                                        <template slot="clip-uploader-body" scope="props">
+                                            <div v-for="file in props.files">
+                                                <transition name="fade">
+                                                    <div v-show="file.progress != 100">
+                                                        {{ file.name }} {{ file.status }}
+                                                        <progress :value="file.progress" max="100"></progress>
+                                                    </div>
+                                                </transition>
+                                            </div>
+                                        </template>
+                                    
+                                    </vue-clip>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<script type="text/javascript" src="node_modules/vue-clip/dist/vue-clip.min.js"></script>
+
 <script>
+    var dID = <cfoutput>#url.dID#</cfoutput>;
     var vue_var = new Vue({
         el: '#mainVue',
 
         data:{
-            active_tab: 1
+            active_tab: 2,
+            options: {
+                url: '/ajax/documents/uploader.cfm?dID=' + dID,
+                paramName: 'file',
+                uploadMultiple:true
+            },
+            fadeIn: true,
+            show: true
         },
 
         methods:{
             change_tab: function(change_tab_val){
                 return this.active_tab = change_tab_val;
-            }
-        }
+            },
+        },
     });
 </script>
