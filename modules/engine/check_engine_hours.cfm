@@ -15,15 +15,21 @@
     <div id="mainVue">
 
         <!--- Date dropp down --->
-        <form action="index.cfm" method="GET">
-        <input type="hidden" name="eID" value="#url.eID#">
-        <input type="hidden" name="action" value="check_engine_hours">
-        <select name="year" onchange="form.submit()">
-                <cfloop from="2014" to=#year(now())# index="YR">
-                    <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
-                </cfloop>
-            </select>
-        </form>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="input-group mb-3 mt-2 ml-2">
+                    <form action="index.cfm" method="GET">
+                    <input type="hidden" name="eID" value="#url.eID#">
+                    <input type="hidden" name="action" value="check_engine_hours">
+                    <select name="year" onchange="form.submit()" class="form-control">
+                            <cfloop from="2014" to=#year(now())# index="YR">
+                                <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
+                            </cfloop>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!--- Display table --->
         <table class="table table-fixed table-striped">
@@ -62,8 +68,8 @@
                     <td>
                         <!--- month hours --->
                         <!--- difference between las month and this month hours --->
-                        <cfif month_hours.recordCount && month - 1 gt 0>
-                            #month_hours.ehHoursTotal - prev_month_hours.ehHoursTotal#
+                        <cfif month_hours.recordCount && isNumeric(month_hours.ehHoursTotal) && isNumeric(prev_month_hours.ehHoursTotal) && month - 1 gt 0>
+                            #precisionEvaluate(month_hours.ehHoursTotal - prev_month_hours.ehHoursTotal)#
                         <cfelse>
                             ---
                         </cfif>
