@@ -7,7 +7,7 @@
     FROM engine
 </cfquery>
 
-<a class="btn btn-outline-primary" href="index.cfm?action=add_engine">Add Engine</a>
+<a class="btn btn-outline-primary mt-2 ml-2 mb-2 pl-3 pr-3" href="index.cfm?action=add_engine">Add Engine</a>
 
 <table class="table d-none d-lg-block">
     <thead class="thead-dark">
@@ -37,7 +37,7 @@
                 <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>    
             </td>
             <td>
-                <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Vue Hours</a>
+                <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a>
             </td>
         </tr>
     </cfoutput>

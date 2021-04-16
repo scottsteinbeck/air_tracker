@@ -7,20 +7,25 @@
 <cfquery name="engineHours">
     SELECT *
     FROM engine_hours
-    WHERE ehID=#url.eID#
+    WHERE ehEID=#url.eID# and YEAR(ehDate)=#url.year#
+    ORDER BY ehDate
 </cfquery>
 
 <cfoutput>
     <div id="mainVue">
+
+        <!--- Date dropp down --->
         <form action="index.cfm" method="GET">
         <input type="hidden" name="eID" value="#url.eID#">
         <input type="hidden" name="action" value="check_engine_hours">
         <select name="year" onchange="form.submit()">
                 <cfloop from="2014" to=#year(now())# index="YR">
-                    <option value="#YR#" <cfif YR eq url.eDate>selected="selected"</cfif>>#YR#</option>
+                    <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
                 </cfloop>
             </select>
         </form>
+
+        <!--- Display table --->
         <table class="table table-fixed table-striped">
             <thead>
                 <tr>
@@ -35,23 +40,38 @@
                     </th>
                 </tr>
             </thead>
-        
-            <cfset priviousHours=0>
             <cfloop from="1" to="12" index="month">
+
+            <cfquery name="month_hours" dbtype="query">
+                SELECT ehDate,ehHoursTotal
+                FROM engineHours
+                WHERE MONTH(ehDate)=#month#
+            </cfquery>
+
+            <cfquery name="prev_month_hours" dbtype="query">
+                SELECT ehDate,ehHoursTotal
+                FROM engineHours
+                WHERE MONTH(ehDate)=#month - 1#
+            </cfquery>
+            
                 <tr>
                     <td>
+                        <!--- month of row --->
                         #monthAsString(month)#
                     </td>
                     <td>
-                        <cfif eHoursAtDate(month,engineHours) neq 0 && month - 1 gt 0>
-                        #eHoursAtDate(month,engineHours) - eHoursAtDate(month - 1,engineHours)#
+                        <!--- month hours --->
+                        <!--- difference between las month and this month hours --->
+                        <cfif month_hours.recordCount && month - 1 gt 0>
+                            #month_hours.ehHoursTotal - prev_month_hours.ehHoursTotal#
                         <cfelse>
                             ---
                         </cfif>
                     </td>
                     <td>
-                        <cfif eHoursAtDate(month,engineHours) neq 0>
-                            <cfset currentHours = eHoursAtDate(month,engineHours)>
+                        <!--- total hours --->
+                        <cfif month_hours.recordCount>
+                            <cfset currentHours = month_hours.ehHoursTotal>
                         <cfelse>
                             <cfset currentHours = "---" >
                         </cfif>
@@ -62,16 +82,3 @@
         </cfoutput>
     </table>
 </div>
-
-<cffunction access="private" returntype="numeric" name="eHoursAtDate">
-<cfargument required="true" type="any" name="_month">
-<cfargument required="true" type="query" name="_engineHours">
-    <cfset hours=0>
-    <cfloop query="_engineHours">
-        <cfif month(eDate) eq _month>
-            <cfset hours = ehHoursTotal>
-            <cfbreak/>
-        </cfif>
-    </cfloop>
-<cfreturn hours>
-</cffunction>
