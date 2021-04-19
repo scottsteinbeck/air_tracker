@@ -139,20 +139,25 @@
     </form>
 
     <cfset is_specific=false>
+    <cfset daily_weekly_set=false>
     <cfloop query="questionlist">
         <cfif questionlist.dqType eq "Specific">
             <cfset is_specific=true>
-            <cfbreak/>
         </cfif>
+        <cfif questionlist.dqType eq "Daily" or questionlist.dqType eq "Weekly">
+            <cfset daily_weekly_set=true/>
+        </cfif>
+        <cfif is_specific eq true and daily_weekly_set eq true><cfbreak/></cfif>
     </cfloop>
 
     <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
         <thead class="thead-dark">
             <tr>
                 <th>Question</th>
-                <th width=70>Day</th>
-                <th width=70>Month</th>
-                <th width=70>Specific</th>
+                <cfif daily_weekly_set>
+                    <th width=70>Day</th>
+                    <th width=70>Weekly</th>
+                </cfif>
                 <cfif is_specific><th width=300>Recorded dates</th></cfif>
             </tr>
         </thead>
@@ -179,15 +184,16 @@
                     
                 </cfoutput>
                 </td>
-                <td>
-                    <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                </td>
-                <td>
-                    <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                </td>
-                <td>
-                    <cfif questionlist.dqType eq "Specific"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                </td>
+
+                <cfif daily_weekly_set>
+                    <td>
+                        <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+                    </td>
+                    <td>
+                        <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+                    </td>
+                </cfif>
+
                 <cfif is_specific>
                     <td>
                         <cfif questionlist.dqType eq "specific">
