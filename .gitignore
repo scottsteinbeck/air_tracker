@@ -1,1 +1,4 @@
 modules/.DS_Store
+node_modules/
+user_files/
+modules/.DS_Store
