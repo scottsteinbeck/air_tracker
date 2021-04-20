@@ -64,6 +64,11 @@
         .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
         opacity: 0;
     }
+
+    .stay-top > th{
+        position: sticky;
+        top: 0;
+    }
 </style>
 
 <div id="mainVue">
@@ -152,7 +157,7 @@
 
     <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
         <thead class="thead-dark">
-            <tr>
+            <tr class="stay-top">
                 <th>Question</th>
                 <cfif daily_weekly_set>
                     <th width=70>Day</th>
