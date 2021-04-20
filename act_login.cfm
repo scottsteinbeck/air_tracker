@@ -206,7 +206,7 @@
 </div> <!-- #login --> --->
 
 <body class="text-center">
-  <form  action="index.cfm?action=login" class="form-signin">
+  <form  action="index.cfm?action=login" class="form-signin" method="post">
     <img class="mb-4" src="https://standard.wellcertified.com/sites/all/themes/wellfl/images/air-aqua.png" alt="" width="72" height="72">
     <h1 class="h2 mb-3 font-weight-normal">ATS Air District</h1>
     <h2 class="h4 mb-3 font-weight-normal">Please Sign In </h2>
