@@ -1,4 +1,4 @@
-<cfquery name="staff_type" datasource="#application.DSN#" dbtype="ODBC">
+<cfquery name="staff_type" dbtype="ODBC">
 SELECT *
 FROM user_types
 </cfquery>

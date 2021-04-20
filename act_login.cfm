@@ -68,15 +68,16 @@
               ccaNum = staff_login.suCCANum,
               pcaNum = staff_login.suPCANum
             }>
-          <cfset session.homepage = staff_login.suHome neq "" ? staff_login.suHome : "index.cfm">
-
+            
+          <cfset session.homepage = "index.cfm">
+<!---
           <cfset session.perm = {nav="",fields=""}>
           <cfif staff_login.utPermissions is not "">
             <cfset session.perm = structApply(session.perm,deserializeJson(staff_login.utPermissions))>
           </cfif>
           <cfif staff_login.suPermissions is not "">
             <cfset session.perm = structApply(session.perm,deserializeJson(staff_login.suPermissions))>
-          </cfif>
+          </cfif> 
 
           <cfset switchList = structNew()>
           <cfif staff_login.sutypeID eq 3 or staff_login.sutypeID eq 8>
@@ -109,9 +110,8 @@
               <cfset session.clientName = ClientParent.suCompany>
           </cfif>
            <cfset session.switchList = switchList>
+--->
 
-
-          <cfset session.display_name = staff_login.suFname & " " & staff_login.suLname>
           <cfset qString = rereplace(cgi.HTTP_REFERER,"http://" & cgi.http_host & "/?(index.cfm)?\??","")>
           <cfif qString does not contain "login" and qString is not "">
             <cflocation url="#cgi.http_referer#" addtoken="No">
@@ -137,7 +137,7 @@
 	
   <div id="login-body" class="clearfix"> 
           
-  <form action="index.cfm?fuseaction=login" name="login" id="login_form" method="post">
+  <form action="index.cfm?action=login" name="login" id="login_form" method="post">
     <div class="content_front">
       <div class="pad">
       
@@ -149,7 +149,7 @@
         <div class="field">
         <label>Password:</label>
         <div class=""><span class="input"><input name="password" id="login_password" class="text" type="password" value="" /> 
-        <a style="" href="index.cfm?fuseaction=forgot_password" id="forgot_my_password">Forgot password?</a></span></div>
+        <a style="" href="index.cfm?action=forgot_password" id="forgot_my_password">Forgot password?</a></span></div>
         </div> <!-- .field -->
         <div class="checkbox">
           <span class="label">&nbsp;</span>
@@ -176,7 +176,7 @@
     <div class="pad">
     <div class="well">
       If your a new customer click here &nbsp;&nbsp;&nbsp;&nbsp; 
-      <a class="btn btn-small btn-green" href="index.cfm?fuseaction=create_account">Create An Account</a>
+      <a class="btn btn-small btn-green" href="index.cfm?action=create_account">Create An Account</a>
     </div>
   </div>
 </div> <!-- #login -->
