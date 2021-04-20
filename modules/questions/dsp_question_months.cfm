@@ -49,15 +49,11 @@
         <div class="row m-2 p-2 border">
             <!--- Page tital and forward and backward arows --->
             <cfoutput>
-                <!--- <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#prevID.qID#" ><<</a> --->
-                <button class="col-1 btn btn-secondary" name="prevousButton" @click="leftArrowClick()"><i class="fa fa-6 fa-angle-double-left"></i></button>
-
+                <button class="col-1 btn btn-secondary" :class="(left_button_enabled) ? '' : 'disabled'" name="prevousButton" @click="leftArrowClick()"><i class="fa fa-6 fa-angle-double-left"></i></button>
                 <h4 class="col text-center text-truncate">
                     {{active.qTitle}}
                 </h4>
-                
-                <!--- <a class="col-1 btn btn-secondary" href="index.cfm?action=question_months&qID=#nextID.qID#">>></a> --->
-                <button class="col-1 btn btn-secondary" name="prevousButton" @click="rightArrowClick()"><i class="fa fa-6 fa-angle-double-right"></i></button>
+                <button class="col-1 btn btn-secondary" :class="(right_button_enabled) ? '' : 'disabled'" name="prevousButton" @click="rightArrowClick()"><i class="fa fa-6 fa-angle-double-right"></i></button>
             </cfoutput>
         </div>
         
@@ -70,7 +66,7 @@
                         <div v-else>
                             <button class="btn btn-sm btn-primary" @click="selectClick(item)" :class="[(item.qID == active.qID)?'disabled':'']"><i class="fa fa-6 fa-plus-circle"></i></button>
                             {{item.qTitle}} 
-                           <br/><small v-for="(id,idx) in item.months">
+                            <br/><small v-for="(id,idx) in item.months">
                                 {{months_names[id]}}<span v-if="idx < item.months.length-1">,</span>
                             </small>
                         </div>
@@ -101,18 +97,8 @@
         </div>
     </div>
 </div>
-<!--- <numberToMonth month_value="1"><numberToMonth> --->
 </div>
 <script>
-    // Vue(
-    //     'numberToMonth',{
-    //     data: function (){return {months_names = [ "January", "February", "March", "April", "May", "June", 
-    //         "July", "August", "September", "October", "November", "December" ]}
-    //     },
-    //     props: [month_value],
-    //     template: `<div>months_names[month_value]</div>`
-    // });
-
     var qList = <cfoutput>#serializeJSON(qList)#</cfoutput>;
     questionMonths = new Vue({
         el: '#questionContainer',
@@ -120,7 +106,7 @@
             activeIndex: 0,
             qList:qList,
             active: this.qList[0],
-            months_names: [ "All", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+            months_names: [ "All", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
         },
         mounted: function(){
             this.active =  this.questionsOnly[this.activeIndex];
@@ -130,7 +116,9 @@
                 return this.qList.filter(function(x){
                     return x.qType != 'Heading'; 
                 })
-            }
+            },
+            right_button_enabled: function(){return (this.activeIndex + 2 <= this.questionsOnly.length)},
+            left_button_enabled: function(){return (this.activeIndex - 1 >= 0)}
         },
         methods:{
             saveCheckedMonths: function(){
