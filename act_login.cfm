@@ -73,7 +73,6 @@
   <cfreturn s1>
 </cffunction>
 <cfif isDefined("form.user_name")>
-  <cfif isDefined("form.tos")>
     <cfinclude template="qry_sff_login.cfm">
     <cfif staff_login.recordcount>
       <cfif hash(trim(form.password)) IS trim(staff_login.suPassword)>
@@ -148,9 +147,6 @@
     <cfelse>
       <cfset message.error = "User does not exist">
     </cfif>
-  <cfelse>
-    <cfset message.error = "Please Accept the Terms Of Service">
-  </cfif>
 </cfif>
 
 
