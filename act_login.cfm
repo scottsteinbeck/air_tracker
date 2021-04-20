@@ -9,31 +9,55 @@
   <link rel="apple-touch-icon" sizes="72x72" href="icon72.jpg"/>
   <link rel="apple-touch-icon" sizes="114x114" href="icon114.jpg"/>
   <link rel="apple-touch-icon" sizes="144x144" href="icon144.jpg"/>
-  <link type="text/css" rel="stylesheet" href="/cssmin/login.min.css" />
   <style>
-  @media screen and (max-width: 430px) {
-    #login h1#title {
-      height: 70px;
-      width: 95%;
-      background-size: contain;
-      background-position: bottom center;
-    }
-    #login-body .field div {
-      width: 95%;
-    }
-    #login {
-      margin: 50px auto;
-      width: 95%;
-    }
-    #login-body input#login_email, #login-body input#login_password{
-        display: block;
-        float: none;
-        position: static;
-        width: 95%;
-    }
-    #login .field .label, #login .checkbox .label, #login .field label, #login .checkbox label {
-      width: auto;
-    }
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-align: center;
+    -ms-flex-pack: center;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+  }
+
+  .form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+  }
+  .form-signin .checkbox {
+    font-weight: 400;
+  }
+  .form-signin .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+  }
+  .form-signin .form-control:focus {
+    z-index: 2;
+  }
+  .form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
   </style>
 </head>
@@ -132,7 +156,7 @@
 
 
 <body >
-<div id="login">
+<!--- <div id="login">
 	<h1 id="title"><a href="">Agri Mapping</a></h1>
 	
   <div id="login-body" class="clearfix"> 
@@ -179,20 +203,25 @@
       <a class="btn btn-small btn-green" href="index.cfm?action=create_account">Create An Account</a>
     </div>
   </div>
-</div> <!-- #login -->
+</div> <!-- #login --> --->
 
-
-<style type="text/css">
-  .well {
-    background-color: #F5F5F5;
-    border: 1px solid #E3E3E3;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
-    margin-bottom: 20px;
-    min-height: 20px;
-    padding: 10px;
-    font-weight: bold;
-  }
-</style>
+<body class="text-center">
+  <form  action="index.cfm?action=login" class="form-signin">
+    <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <label for="user_name" class="sr-only">Email address</label>
+    <input type="email" id="user_name" class="form-control" placeholder="Email address" required autofocus>
+    <label for="password" class="sr-only">Password</label>
+    <input type="password" id="password" class="form-control" placeholder="Password" required>
+    <cfif isDefined("message.error")>
+      <div class="form-control">
+        <label>&nbsp;</label>
+        <div class="" style="color:red; font-weight:bold">Error: <cfoutput>#message.error#</cfoutput></div>
+      </div> <!-- .field -->
+    </cfif>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
+  </form>
 </body>
 </html>
 
