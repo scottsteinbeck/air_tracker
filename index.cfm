@@ -47,8 +47,6 @@
     <cfset url.action="login">
   </cfif>
 
-      <cfdump var=#session#>
-
     <cfswitch expression="#url.action#"> 
         <cfcase value="dairy_settings"><cfinclude template="modules/dairy/dsp_dairy_settings.cfm"></cfcase>
         <cfcase value="act_save_settings"><cfinclude template="modules/dairy/act_save_settings.cfm"></cfcase> 
