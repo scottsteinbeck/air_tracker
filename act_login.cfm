@@ -211,7 +211,7 @@
     <h1 class="h2 mb-3 font-weight-normal">ATS Air District</h1>
     <h2 class="h4 mb-3 font-weight-normal">Please Sign In </h2>
     <label for="user_name" class="sr-only">Email address</label>
-    <input type="email" id="user_name" class="form-control" placeholder="Email address" required autofocus>
+    <input type="text" id="user_name" class="form-control" placeholder="Username/Email address" required autofocus>
     <label for="password" class="sr-only">Password</label>
     <input type="password" id="password" class="form-control" placeholder="Password" required>
     <cfif isDefined("message.error")>
