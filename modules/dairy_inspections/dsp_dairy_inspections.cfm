@@ -1,6 +1,7 @@
 <cfparam name="url.year" default="#year(now())#">
 <cfparam name="url.Month" default="#month(now())#">
 <cfparam name="url.dID" default="0">
+<cfinclude template="auto_inspection.cfm">
 <cfquery name="Dairylist">
     SELECT * FROM Dairies
 </cfquery>
@@ -15,12 +16,12 @@
     FROM questions 
     LEFT JOIN dairy_question_link ON dairy_question_link.qID=questions.qID AND dID=#url.dID#
     LEFT JOIN inspections ON idID=#url.dID#
-                    AND iYear=#url.Year#
-                    AND iMonth=#url.Month#
-                    AND iqID=questions.qid
+                    AND year(iDate)=#url.Year#
+                    AND month(iDate)=#url.Month#
                 WHERE qType <> "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
         ORDER BY qPriority
 </cfquery>
+
 <style>
     .fa-6{
         font-size: 2em;
@@ -71,6 +72,7 @@
     }
 </style>
 
+
 <div id="mainVue">
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -83,65 +85,121 @@
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
+    <!--- phone vue --->
     <div class="container">
-        <form action="index.cfm" method="GET">
+        <div class="d-lg-none">
+            <form action="index.cfm" method="GET">
+                <input type="hidden" name="action" value="dairy_inspections">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="input-group mb-3">
+                            <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
+                                <option value="0"> none</option>
+                                <cfoutput query="DairyList">
+                                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                                </cfoutput>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <select name="Month" id="" class="form-control"> <!--- Month Select --->
+                                <option value="0"> none</option>
+                                <cfoutput query="monthList" >
+                                    <option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
+                                </cfoutput>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="input-group">
+                            <select name="year" id="" class="form-control">  <!--- Year Select --->
+                                <cfoutput>
+                                    <cfloop from="2017" to="#year(now())#" index="YR">
+                                        <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+                                    </cfloop>
+                                </cfoutput>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <input type="submit" value="change" class="btn btn-outline-primary btn-sm mt-1 ml-3" style="height: 37px">
+                </div>
+            </form>
+        </div>
+
+        <!--- computer vue --->
+        <div class="d-none d-lg-block">
+            <form action="index.cfm" method="GET">
+                <input type="hidden" name="action" value="dairy_inspections">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="input-group mb-3">
+                            <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
+                                <option value="0"> none</option>
+                                <cfoutput query="DairyList">
+                                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                                </cfoutput>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
+                        <cfoutput query="monthList">
+                            <label class="btn btn-outline-secondary active">
+                                <input type="radio" name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
+                            </label>
+                        </cfoutput>
+                    </div>
+
+                    <div class="col">
+                        <div class="input-group">
+                            <select name="year" id="" class="form-control">  <!--- Year Select --->
+                                <cfoutput>
+                                    <cfloop from="2017" to="#year(now())#" index="YR">
+                                        <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+                                    </cfloop>
+                                </cfoutput>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <input type="submit" value="change" class="btn btn-outline-primary btn-sm mt-1 ml-3" style="height: 37px">
+                </div>
+            </form>
+        </div>
+
+        <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
+        entry  --->
+        <form action="index.cfm?action=add_inspection" method="POST">
             <input type="hidden" name="action" value="dairy_inspections">
-            <div class="row">
-                <div class="col-sm-8">
-                    <div class="input-group mb-3">
-                        <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
-                            <option value="0"> none</option>
-                            <cfoutput query="DairyList">
-                                <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
-                            </cfoutput>
-                        </select>
-                    </div>
-                </div>
+            <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
 
-                <div class="col">
-                    <div class="input-group mb-3">
-                        <select name="Month" id="" class="form-control"> <!--- Month Select --->
-                            <option value="0"> none</option>
-                            <cfoutput query="monthList" >
-                                <option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
-                            </cfoutput>
-                        </select>
-                    </div>
-                </div>
+            <input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
+            <input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
 
-                <div class="col">
-                    <div class="input-group">
-                        <select name="year" id="" class="form-control">  <!--- Year Select --->
-                            <cfoutput>
-                                <cfloop from="2017" to="#year(now())#" index="YR">
-                                    <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
-                                </cfloop>
-                            </cfoutput>
-                        </select>
-                    </div>
-                </div>
-                <input type="submit" value="change" class="btn btn-outline-primary btn-sm" style="height: 37px">
-            </div>
+            <table>
+                <tr>
+                    <td>
+                        Inspection Date 
+                        <input type="Date" Name="InspectionDate" Value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
+                    </td>
+                    <td>
+                        <input type="submit" value="add" class="btn btn-outline-primary btn-sm">
+                    </td>
+                </tr>
+            </table>
         </form>
-
-
-    <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
-    entry  --->
-    <form action="index.cfm?action=add_inspection" method="POST">
-        <input type="hidden" name="action" value="dairy_inspections">
-        <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
-
-        <input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
-        <input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
-
-        <table><tr>
-            <td>Inspection Date 
-                <input type="Date" Name="InspectionDate" Value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
-    </td>
-
-    <td><input type="submit" value="add" class="btn btn-outline-primary btn-sm"></td>
-    </tr></table>
-    </form>
+    </div>
 
     <cfset is_specific=false>
     <cfset daily_weekly_set=false>
@@ -155,6 +213,23 @@
         <cfif is_specific eq true and daily_weekly_set eq true><cfbreak/></cfif>
     </cfloop>
 
+    <cfif isEmpty(lastInspection.lastDate)>
+        <cfset newDate=createDate(url.year,"01","01")>
+        <cfdump var=#newDate#>
+    <cfelse>
+        <cfset newDate=lastInspection.lastDate>
+    </cfif>
+    <cfloop condition="newDate lt now()">
+        <cfset newDate=dateAdd("d",randRange(80,90),newDate)>
+        <cfquery name="addNewDates">
+            INSERT
+            INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral)
+            VALUES (#newDate#,#url.dID#,#randRange(0,2) + round(rand()*100)/100#,#randRange(2,11) + round(rand()*100)/100#);
+        </cfquery>
+    </cfloop>
+
+    
+    
     <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
         <thead class="thead-dark">
             <tr class="stay-top">
@@ -164,88 +239,101 @@
                     <th width=70>Weekly</th>
                 </cfif>
                 <cfif is_specific><th width=300>Recorded dates</th></cfif>
+                <th width=150>manure level</th>
             </tr>
         </thead>
         <tbody>
             <cfoutput query="questionlist" group="qID" >
-            <tr>
-                <td class="heading">
-                    <cfif questionlist.qType is "Heading">
-                        <h4>
-                            <!--- #questionlist.qID#.---> #questionlist.qTitle#
-                        <h4>
-                        <cfelse>
-                            <!--- #questionlist.qID#. ---> #questionlist.qTitle#
-                            <br><br>
-                    </cfif>
-                    
-                <cfoutput>
-                    <cfif questionlist.qType eq "Documents">
-                        <div class="small">
-                            #questionlist.qDescription#
-                            <a href="##" @click="change_tab(2)">45 70 Documents</a>
-                        </div>
-                    </cfif>
-                    
-                </cfoutput>
-                </td>
-
-                <cfif daily_weekly_set>
-                    <td>
-                        <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                    </td>
-                    <td>
-                        <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                    </td>
-                </cfif>
-
-                <cfif is_specific>
-                    <td>
-                        <cfif questionlist.dqType eq "specific">
-                            <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
-                                <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
-                                <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
-                                #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
+                <tr>
+                    <td class="heading">
+                        <cfif questionlist.qType is "Heading">
+                            <h4>
+                                <!--- #questionlist.qID#.---> #questionlist.qTitle#
+                            <h4>
+                            <cfelse>
+                                <!--- #questionlist.qID#. ---> #questionlist.qTitle#
                                 <br><br>
-                                #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
-                            </cfif>
                         </cfif>
+                        
+                    <cfoutput>
+                        <cfif questionlist.qType eq "Documents">
+                            <div class="small">
+                                #questionlist.qDescription#
+                                <a href="##" @click="change_tab(2)">4570 Documents</a>
+                            </div>
+                        </cfif>
+                        
+                    </cfoutput>
                     </td>
-                </cfif>
-            </tr>
-            </cfoutput>  
+
+                    <cfif daily_weekly_set>
+                        <td>
+                            <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+                        </td>
+                        <td>
+                            <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+                        </td>
+                    </cfif>
+
+                    <cfif is_specific>
+                        <td>
+                            <cfif questionlist.dqType eq "specific">
+                                <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
+                                    <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
+                                    <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
+                                    #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
+                                    <br><br>
+                                    #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
+                                </cfif>
+                            </cfif>
+                        </td>
+                    </cfif>
+                    <td>
+                        <!--- <cfif isNull(questionlist.qShowManurlevel)> --->
+                            <cfif questionlist.qShowManurlevel gt 0>
+                                #dateFormat(questionlist.iDate,"yyyy-mm-dd")#<br>
+                                <cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurlevel eq 1>
+                                    Manyre #questionlist.iManureInchCorral#"
+                                <cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurlevel eq 2>
+                                    Manyre #questionlist.iManureInchConcrete#"
+                                </cfif>
+                            </cfif>
+                        <!--- </cfif> --->
+                    </td>
+                </tr>
+            </cfoutput> 
+            
         </tbody>
     </table>
-            
-        <div v-if="active_tab == 2">
-            <div class="row">
-                <div class="col-9 offset-md-2">
-                    <div class="container mt-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <template>
-                                    <vue-clip :options="options">
-                                            <template slot="clip-uploader-action" scope="params">
-                                                <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
-                                                <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
-                                                
-                                            </div>
-                                        </template>
-                                    
-                                        <template slot="clip-uploader-body" scope="props">
-                                            <div v-for="file in props.files">
-                                                <transition name="fade">
-                                                    <div v-show="file.progress != 100">
-                                                        {{ file.name }} {{ file.status }}
-                                                        <progress :value="file.progress" max="100"></progress>
-                                                    </div>
-                                                </transition>
-                                            </div>
-                                        </template>
-                                    
-                                    </vue-clip>
-                                </template>
-                            </div>
+        
+    <div v-if="active_tab == 2">
+        <div class="row">
+            <div class="col-9 offset-md-2">
+                <div class="container mt-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <template>
+                                <vue-clip :options="options">
+                                        <template slot="clip-uploader-action" scope="params">
+                                            <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
+                                            <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
+                                            
+                                        </div>
+                                    </template>
+                                
+                                    <template slot="clip-uploader-body" scope="props">
+                                        <div v-for="file in props.files">
+                                            <transition name="fade">
+                                                <div v-show="file.progress != 100">
+                                                    {{ file.name }} {{ file.status }}
+                                                    <progress :value="file.progress" max="100"></progress>
+                                                </div>
+                                            </transition>
+                                        </div>
+                                    </template>
+                                
+                                </vue-clip>
+                            </template>
                         </div>
                     </div>
                 </div>
