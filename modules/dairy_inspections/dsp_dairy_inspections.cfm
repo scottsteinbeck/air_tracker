@@ -70,6 +70,17 @@
         position: sticky;
         top: 0;
     }
+
+    .-lucee-dump table{
+        border:1px solid #ccc;
+        border-collapse: collapse;
+    }
+    .-lucee-dump table td{
+        border: 1px solid #f79494;
+        background: #ffc5c5;
+        padding: 5px;
+        font-size: 10px;
+    }
 </style>
 
 
@@ -203,6 +214,7 @@
 
     <cfset is_specific=false>
     <cfset daily_weekly_set=false>
+    <cfset show_M_level_column=(replace(valuelist(questionlist.qShowManurelevel),",","","All") != "")>
     <cfloop query="questionlist">
         <cfif questionlist.dqType eq "Specific">
             <cfset is_specific=true>
@@ -213,9 +225,9 @@
         <cfif is_specific eq true and daily_weekly_set eq true><cfbreak/></cfif>
     </cfloop>
 
+
     <cfif isEmpty(lastInspection.lastDate)>
-        <cfset newDate=createDate(url.year,"01","01")>
-        <cfdump var=#newDate#>
+        <cfset newDate=createDate(2017,"01","01")>
     <cfelse>
         <cfset newDate=lastInspection.lastDate>
     </cfif>
@@ -223,11 +235,10 @@
         <cfset newDate=dateAdd("d",randRange(80,90),newDate)>
         <cfquery name="addNewDates">
             INSERT
-            INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral)
-            VALUES (#newDate#,#url.dID#,#randRange(0,2) + round(rand()*100)/100#,#randRange(2,11) + round(rand()*100)/100#);
+            INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
+            VALUES (#newDate#,#url.dID#,#randRange(0,2) + round(rand()*100)/100#,#randRange(2,9) + round(rand()*100)/100#,#randRange(2,9) + round(rand()*100)/100#);
         </cfquery>
     </cfloop>
-
     
     
     <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
@@ -239,7 +250,7 @@
                     <th width=70>Weekly</th>
                 </cfif>
                 <cfif is_specific><th width=300>Recorded dates</th></cfif>
-                <th width=150>manure level</th>
+                <cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
             </tr>
         </thead>
         <tbody>
@@ -283,23 +294,28 @@
                                     <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
                                     #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
                                     <br><br>
-                                    #"From " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
+                                    #"To " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
                                 </cfif>
                             </cfif>
                         </td>
                     </cfif>
-                    <td>
-                        <!--- <cfif isNull(questionlist.qShowManurlevel)> --->
-                            <cfif questionlist.qShowManurlevel gt 0>
-                                #dateFormat(questionlist.iDate,"yyyy-mm-dd")#<br>
-                                <cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurlevel eq 1>
-                                    Manyre #questionlist.iManureInchCorral#"
-                                <cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurlevel eq 2>
-                                    Manyre #questionlist.iManureInchConcrete#"
+
+                    <cfif show_M_level_column>
+                        <td>
+                            <!--- <cfif isNull(questionlist.qShowManurelevel)> --->
+                                <cfif questionlist.qShowManurelevel gt 0>
+                                    #dateFormat(questionlist.iDate,"yyyy-mm-dd")#<br>
+                                    <cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurelevel eq "corral">
+                                        Manyre #questionlist.iManureInchCorral#"
+                                    <cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurelevel eq "concrete">
+                                        Manyre #questionlist.iManureInchConcrete#"
+                                    <cfelseif questionlist.iManureInchFenceline gt 0 && questionlist.qShowManurelevel eq "fenceline">
+                                        Manyre #questionlist.iManureInchFenceline#"
+                                    </cfif>
                                 </cfif>
-                            </cfif>
-                        <!--- </cfif> --->
-                    </td>
+                            <!--- </cfif> --->
+                        </td>
+                    </cfif>
                 </tr>
             </cfoutput> 
             
