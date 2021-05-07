@@ -236,7 +236,7 @@
         <cfquery name="addNewDates">
             INSERT
             INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
-            VALUES (#newDate#,#url.dID#,#randRange(0,2) + round(rand()*100)/100#,#randRange(2,9) + round(rand()*100)/100#,#randRange(2,9) + round(rand()*100)/100#);
+            VALUES (#newDate#,#url.dID#,#randRange(0,3)#,#randRange(2,10)#,#randRange(2,10)#);
         </cfquery>
     </cfloop>
     
@@ -306,11 +306,11 @@
                                 <cfif questionlist.qShowManurelevel gt 0>
                                     #dateFormat(questionlist.iDate,"yyyy-mm-dd")#<br>
                                     <cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurelevel eq "corral">
-                                        Manyre #questionlist.iManureInchCorral#"
+                                        Manure #questionlist.iManureInchCorral#"
                                     <cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurelevel eq "concrete">
-                                        Manyre #questionlist.iManureInchConcrete#"
+                                        Manure #questionlist.iManureInchConcrete#"
                                     <cfelseif questionlist.iManureInchFenceline gt 0 && questionlist.qShowManurelevel eq "fenceline">
-                                        Manyre #questionlist.iManureInchFenceline#"
+                                        Manure #questionlist.iManureInchFenceline#"
                                     </cfif>
                                 </cfif>
                             <!--- </cfif> --->
