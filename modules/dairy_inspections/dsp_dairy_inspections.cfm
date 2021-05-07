@@ -83,16 +83,17 @@
     }
 </style>
 
-
 <div id="mainVue">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <button :class="[(active_tab == 1) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(1)">Farm</button>
-        </li>
-        <li class="nav-item">
-            <button :class="[(active_tab == 2) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(2)">Documents</button>
-        </li>
-    </ul>
+    <cfif session.USer_TYPEID eq 1>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <button :class="[(active_tab == 1) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(1)">Farm</button>
+            </li>
+            <li class="nav-item">
+                <button :class="[(active_tab == 2) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(2)">Documents</button>
+            </li>
+        </ul>
+    </cfif>
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
@@ -189,27 +190,31 @@
             </form>
         </div>
 
-        <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
-        entry  --->
-        <form action="index.cfm?action=add_inspection" method="POST">
-            <input type="hidden" name="action" value="dairy_inspections">
-            <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
+        <cfif session.USer_TYPEID eq 1>
+            <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
+            entry  --->
+            <form action="index.cfm?action=add_inspection" method="POST">
+                <input type="hidden" name="action" value="dairy_inspections">
+                <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
 
-            <input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
-            <input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
+                <input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
+                <input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
 
-            <table>
-                <tr>
-                    <td>
-                        Inspection Date 
-                        <input type="Date" Name="InspectionDate" Value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
-                    </td>
-                    <td>
-                        <input type="submit" value="add" class="btn btn-outline-primary btn-sm">
-                    </td>
-                </tr>
-            </table>
-        </form>
+                <table>
+                    <tr>
+                        <td>
+                            Inspection Date 
+                            <input type="Date" Name="InspectionDate" Value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
+                        </td>
+                        <td>
+                            <input type="submit" value="add" class="btn btn-outline-primary btn-sm">
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        <cfelse>
+            <br>
+        </cfif>
     </div>
 
     <cfset is_specific=false>
@@ -270,7 +275,7 @@
                         <cfif questionlist.qType eq "Documents">
                             <div class="small">
                                 #questionlist.qDescription#
-                                <a href="##" @click="change_tab(2)">4570 Documents</a>
+                                <cfif session.USer_TYPEID eq 1> <a href="##" @click="change_tab(2)">4570 Documents</a> </cfif>
                             </div>
                         </cfif>
                         

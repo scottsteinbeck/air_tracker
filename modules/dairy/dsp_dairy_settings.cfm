@@ -25,8 +25,8 @@
             </select>
         </div>
     </div>
-    </form>
-    <form action="index.cfm?action=act_save_settings" method="POST">
+</form>
+<form action="index.cfm?action=act_save_settings" method="POST">
     <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
     <input type="hidden" name="dqType" value="<cfoutput>#url.dqType#</cfoutput>">
     <input type="hidden" name="action" value="dairy">
@@ -42,19 +42,28 @@
             <tr>
                 <td><cfif qtype eq "Heading"><h4>#questionlist.qTitle#<h4><cfelse>#questionlist.qTitle#</cfif></td>
                 <td>
-                    <cfif qtype neq "Heading">
-                        <input type="checkbox"  name="questions" value="#questionlist.qID#" <!--- checkboxes for each question that needs to be available on final form --->
-                    <cfif questionList.dID is not "">checked ="checked"</cfif>> 
-                    <select name="sel_#qID#">
-                        <option <cfif dqType eq "Daily"> selected = "selected"</cfif> value="Daily">Daily</option>  <!--- if statement is the saving selected results logic--->
-                        <option <cfif dqType eq "Weekly"> selected = "selected"</cfif> value="Weekly"> Weekly</option>
-                        <option <cfif dqType eq "Specific"> selected = "selected"</cfif> value="specific">Specific</option>
-                    </select>
+                    <cfif session.USer_TYPEID eq 1>
+                    
+                        <cfif qtype neq "Heading">
+                            <input type="checkbox"  name="questions" value="#questionlist.qID#" <!--- checkboxes for each question that needs to be available on final form --->
+                            <cfif questionList.dID is not "">checked ="checked"</cfif>>
+
+                            <select name="sel_#qID#">
+                                <option <cfif dqType eq "Daily"> selected = "selected"</cfif> value="Daily">Daily</option>  <!--- if statement is the saving selected results logic--->
+                                <option <cfif dqType eq "Weekly"> selected = "selected"</cfif> value="Weekly"> Weekly</option>
+                                <option <cfif dqType eq "Specific"> selected = "selected"</cfif> value="specific">Specific</option>
+                            </select>
+                        </cfif>
+                <cfelse>
+                    <cfif questionList.dID is not ""><i class="fa fa-6 fa-check"></i></cfif>
+                    <cfif dqType eq "Daily">Daily</cfif>
+                    <cfif dqType eq "Weekly">Weekly</cfif>
+                    <cfif dqType eq "Specific">Specific</cfif>
                 </cfif>
-                </td>
+            </td>
             </tr>
             </cfoutput>  
         </tbody>
     </table>
-    <input type="submit" value="Save Questions" class="btn btn-outline-primary margin-left" style="margin-bottom: 10px">
+    <cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class="btn btn-outline-primary margin-left" style="margin-bottom: 10px"> </cfif>
 </form>

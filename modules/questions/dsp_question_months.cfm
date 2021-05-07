@@ -92,7 +92,7 @@
                             </div>
                         </tbody>
                     </table>
-                    <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button>
+                    <cfif session.USer_TYPEID eq 1> <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button> </cfif>
                 </div>
             </div>
         </div>

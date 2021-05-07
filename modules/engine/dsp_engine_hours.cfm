@@ -22,8 +22,8 @@
         <th>Location</th>
         <th>Serial Number</th>
         <th>Project</th>
-        <th>Add Hours</th>
-        <th>Vue Hours</th>
+        <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
+        <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
     </thead>
     <cfoutput query="engineInfo">
         <tr>
@@ -33,12 +33,18 @@
                     #engineInfo[i][engineInfo.currentRow]#
                 </td>
             </cfloop>
-            <td>
-                <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>    
-            </td>
-            <td>
-                <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a>
-            </td>
+            
+            <cfif session.USER_TYPEID eq 1> 
+                <td>
+                    <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>
+                </td>
+            </cfif>
+
+            <cfif session.USer_TYPEID eq 2>
+                <td>
+                    <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a> 
+                </td>
+            </cfif>
         </tr>
     </cfoutput>
 </table>
@@ -101,7 +107,8 @@
             <li class="list-group-item py-1 pl-2 text-wrap"><strong>Location</strong> #engineInfo.eLocation[engineInfo.currentRow] ?: "---"#</li>
             <li class="list-group-item py-1 pl-2 text-wrap">
                 <div style="float:right">
-                    <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>
+                    <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a> </cfif>
+                    <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a> </cfif>
                 </div> 
                 <strong>Max Hours</strong> #decimalFormat(yearTotalHours)# / #engineInfo.eMaxHours[engineInfo.currentRow]#
                 <br/>

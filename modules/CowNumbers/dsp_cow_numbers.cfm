@@ -31,51 +31,49 @@
 </form>
 
 <form action="index.cfm?action=act_save_numbers" method="POST">
-<input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
-<input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
-<div id='mainVue'>
-    <table id="cownumbers" class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Permitted</th>
-                <th>Qtr1</th>
-                <th>Qtr2</th>
-                <th>Qtr3</th>
-                <th>Qtr4</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="row in typeList">
-                <td>
-                    {{row.Name}}
-                </td>
-                <td v-for="column in columns">
-                    <input type="number" v-model="row[column]" :readonly="column=='cnPermitted'" />
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    {{totalRow.Name}}
-                </td>
-                <td v-for="column in columns" class="text-center">
-                    {{totalRow[column]}}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    {{supportStockRow.Name}}
-                </td>
-                <td v-for="column in columns" class="text-center">
-                    {{supportStockRow[column]}}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-
-    <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left">
+    <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
+    <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
+    <div id='mainVue'>
+        <table id="cownumbers" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Permitted</th>
+                    <th>Qtr1</th>
+                    <th>Qtr2</th>
+                    <th>Qtr3</th>
+                    <th>Qtr4</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="row in typeList">
+                    <td>
+                        {{row.Name}}
+                    </td>
+                    <td v-for="column in columns">
+                        <input type="number" v-model="row[column]" :readonly="column=='cnPermitted'" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{totalRow.Name}}
+                    </td>
+                    <td v-for="column in columns" class="text-center">
+                        {{totalRow[column]}}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{supportStockRow.Name}}
+                    </td>
+                    <td v-for="column in columns" class="text-center">
+                        {{supportStockRow[column]}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left"> </cfif>
 </form> 
 
 

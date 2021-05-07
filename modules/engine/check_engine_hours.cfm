@@ -87,4 +87,5 @@
             </cfloop>
         </cfoutput>
     </table>
+    <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary ml-2">Engine Hours<a/>
 </div>
