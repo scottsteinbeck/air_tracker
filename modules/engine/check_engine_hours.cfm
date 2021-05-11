@@ -14,6 +14,16 @@
 <cfoutput>
     <div id="mainVue">
 
+
+        <div class="row m-2 p-2">
+            <!--- Page tital and forward and backward arows --->
+            <cfoutput>
+                <h4 class="col text-center text-truncate">
+                    #engineInfo.eName# engine
+                </h4>
+            </cfoutput>
+        </div>
+
         <!--- Date dropp down --->
         <div class="row">
             <div class="col-sm-8">
