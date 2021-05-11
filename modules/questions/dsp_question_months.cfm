@@ -1,5 +1,5 @@
     <cfparam name="url.qID" default="0">
-
+    <cfif session.USer_TYPEID eq 2> <cflocation url="/index.cfm?action=dairy_inspections"> </cfif>
     <cfquery name="questionList">
         SELECT questions.*, question_months.mID
         FROM questions
@@ -92,7 +92,7 @@
                             </div>
                         </tbody>
                     </table>
-                    <cfif session.USer_TYPEID eq 1> <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button> </cfif>
+                    <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button>
                 </div>
             </div>
         </div>

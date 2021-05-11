@@ -1,3 +1,5 @@
+<cfif session.USer_TYPEID eq 2> <cflocation url="/index.cfm?action=dairy_inspections"> </cfif>
+
 <cfparam name="url.dID" default="0">
 <cfparam name="url.dqType" default="0">
 
@@ -10,7 +12,6 @@
     left join dairy_question_link on dairy_question_link.qID=questions.qID and dID=#url.dID#
     ORDER BY qPriority
 </cfquery>
-
 
 
 <form action="index.cfm" method="GET">

@@ -6,8 +6,8 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-        <li class="nav-item <cfif url.action is 'dairy_settings'>active</cfif>"><a class="nav-link" href="index.cfm?action=dairy_settings">Dairy Settings</a></li>
-        <li class="nav-item <cfif url.action is 'question_months'>active</cfif>"><a class="nav-link" href="index.cfm?action=question_months">Question Months</a></li>
+        <cfif session.USer_TYPEID eq 1> <li class="nav-item <cfif url.action is 'dairy_settings'>active</cfif>"><a class="nav-link" href="index.cfm?action=dairy_settings">Dairy Settings</a></li></cfif>
+        <cfif session.USer_TYPEID eq 1> <li class="nav-item <cfif url.action is 'question_months'>active</cfif>"><a class="nav-link" href="index.cfm?action=question_months">Question Months</a></li></cfif>
         <li class="nav-item <cfif url.action is 'dairy_inspections'>active</cfif>"><a class="nav-link" href="index.cfm?action=dairy_inspections">Dairy Inspections</a></li>
         <li class="nav-item <cfif url.action is 'Cow_numbers'>active</cfif>"><a class="nav-link" href="index.cfm?action=Cow_numbers">Cow Numbers</a></li>
         <li class="nav-item <cfif url.action is 'engine_hours'>active</cfif>"><a class="nav-link" href="index.cfm?action=engine_hours">Engine Hours</a></li>
