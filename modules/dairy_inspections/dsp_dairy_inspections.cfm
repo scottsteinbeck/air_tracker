@@ -1,6 +1,6 @@
 <cfparam name="url.year" default="#year(now())#">
 <cfparam name="url.Month" default="#month(now())#">
-<cfparam name="url.dID" default="0">
+<cfparam name="url.dID" default="1">
 <cfinclude template="auto_inspection.cfm">
 <cfquery name="Dairylist">
     SELECT * FROM Dairies
@@ -84,16 +84,14 @@
 </style>
 
 <div id="mainVue">
-    <cfif session.USer_TYPEID eq 1>
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <button :class="[(active_tab == 1) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(1)">Farm</button>
-            </li>
-            <li class="nav-item">
-                <button :class="[(active_tab == 2) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(2)">Documents</button>
-            </li>
-        </ul>
-    </cfif>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <button :class="[(active_tab == 1) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(1)">Farm</button>
+        </li>
+        <li class="nav-item">
+            <button :class="[(active_tab == 2) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(2)">Documents</button>
+        </li>
+    </ul>
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
@@ -105,7 +103,7 @@
                 <div class="row">
                     <div class="col-sm-8">
                         <div class="input-group mb-3">
-                            <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
+                            <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
                                 <option value="0"> none</option>
                                 <cfoutput query="DairyList">
                                     <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
@@ -118,7 +116,7 @@
                 <div class="row">
                     <div class="col">
                         <div class="input-group mb-3">
-                            <select name="Month" id="" class="form-control"> <!--- Month Select --->
+                            <select name="Month" id="" onchange="form.submit()"  class="form-control"> <!--- Month Select --->
                                 <option value="0"> none</option>
                                 <cfoutput query="monthList" >
                                     <option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
@@ -129,7 +127,7 @@
 
                     <div class="col">
                         <div class="input-group">
-                            <select name="year" id="" class="form-control">  <!--- Year Select --->
+                            <select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
                                 <cfoutput>
                                     <cfloop from="2017" to="#year(now())#" index="YR">
                                         <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
@@ -138,9 +136,6 @@
                             </select>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <input type="submit" value="change" class="btn btn-outline-primary btn-sm mt-1 ml-3" style="height: 37px">
                 </div>
             </form>
         </div>
@@ -152,7 +147,7 @@
                 <div class="row">
                     <div class="col-sm-8">
                         <div class="input-group mb-3">
-                            <select name="dID" id="" class="form-control">  <!--- Dairy Select  --->
+                            <select name="dID" id="" onchange="form.submit()"  class="form-control">  <!--- Dairy Select  --->
                                 <option value="0"> none</option>
                                 <cfoutput query="DairyList">
                                     <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
@@ -166,14 +161,14 @@
                     <div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
                         <cfoutput query="monthList">
                             <label class="btn btn-outline-secondary active">
-                                <input type="radio" name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
+                                <input type="radio" onchange="form.submit()"  name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
                             </label>
                         </cfoutput>
                     </div>
 
                     <div class="col">
                         <div class="input-group">
-                            <select name="year" id="" class="form-control">  <!--- Year Select --->
+                            <select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
                                 <cfoutput>
                                     <cfloop from="2017" to="#year(now())#" index="YR">
                                         <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
@@ -183,17 +178,13 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="row">
-                    <input type="submit" value="change" class="btn btn-outline-primary btn-sm mt-1 ml-3" style="height: 37px">
-                </div>
             </form>
         </div>
 
         <cfif session.USer_TYPEID eq 1>
             <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
             entry  --->
-            <form action="index.cfm?action=add_inspection" method="POST">
+            <form action="index.cfm?action=add_inspection" method="POST" class="mt-2 mb-2">
                 <input type="hidden" name="action" value="dairy_inspections">
                 <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
 
@@ -275,7 +266,7 @@
                         <cfif questionlist.qType eq "Documents">
                             <div class="small">
                                 #questionlist.qDescription#
-                                <cfif session.USer_TYPEID eq 1> <a href="##" @click="change_tab(2)">4570 Documents</a> </cfif>
+                                <a href="##" @click="change_tab(2)">4570 Documents</a>
                             </div>
                         </cfif>
                         
@@ -326,39 +317,46 @@
             
         </tbody>
     </table>
-        
+    
+    
     <div v-if="active_tab == 2">
         <div class="row">
-            <div class="col-9 offset-md-2">
-                <div class="container mt-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <template>
-                                <vue-clip :options="options">
-                                        <template slot="clip-uploader-action" scope="params">
-                                            <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
-                                            <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
-                                            
-                                        </div>
-                                    </template>
-                                
-                                    <template slot="clip-uploader-body" scope="props">
-                                        <div v-for="file in props.files">
-                                            <transition name="fade">
-                                                <div v-show="file.progress != 100">
-                                                    {{ file.name }} {{ file.status }}
-                                                    <progress :value="file.progress" max="100"></progress>
-                                                </div>
-                                            </transition>
-                                        </div>
-                                    </template>
-                                
-                                </vue-clip>
-                            </template>
+            <div class="col offset-md-3 mt-3">
+                <cfdirectory action="list" directory="user_files/#url.dID#/" recurse="false" name="files4570">
+                <cfoutput query="files4570"><a href="user_files/#url.dID#/#files4570.name#">#files4570.name#</a><br></cfoutput>
+            </div>
+            <cfif session.USer_TYPEID eq 1>
+                <div class="col-9 mx-auto">
+                    <div class="container mt-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <template>
+                                    <vue-clip :options="options">
+                                            <template slot="clip-uploader-action" scope="params">
+                                                <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
+                                                <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
+                                                
+                                            </div>
+                                        </template>
+                                    
+                                        <template slot="clip-uploader-body" scope="props">
+                                            <div v-for="file in props.files">
+                                                <transition name="fade">
+                                                    <div v-show="file.progress != 100">
+                                                        {{ file.name }} {{ file.status }}
+                                                        <progress :value="file.progress" max="100"></progress>
+                                                    </div>
+                                                </transition>
+                                            </div>
+                                        </template>
+                                    
+                                    </vue-clip>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </cfif>
         </div>
     </div>
 </div>
