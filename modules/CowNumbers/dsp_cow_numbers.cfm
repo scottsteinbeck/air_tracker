@@ -14,20 +14,25 @@
 </cfquery>
 
 <form action="index.cfm" method="GET">
-    <input type="hidden" name="action" value="cow_numbers">
-    <select name="dID" id="" onchange="form.submit()">
-        <option value="0"> none</option>
-        <cfoutput query="DairyList" >
-            <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
-        </cfoutput>
-    </select>
-
-    <select name="year" id="" onchange="form.submit()"> 
-        <cfoutput><cfloop from="2014" to="#year(now())#" index="YR">
-        <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
-        </cfloop>
-        </cfoutput>
-    </select>  
+    <div class="row m-2">
+        <div class="col-lg-3 col-6">
+            <input type="hidden" name="action" value="cow_numbers">
+            <select name="dID" id="" onchange="form.submit()" class="form-control">
+                <option value="0"> none</option>
+                <cfoutput query="DairyList" >
+                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                </cfoutput>
+            </select>
+        </div>
+        <div class="col-lg-2 col-4">
+            <select name="year" id="" onchange="form.submit()" class="form-control"> 
+                <cfoutput><cfloop from="2014" to="#year(now())#" index="YR">
+                <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+                </cfloop>
+                </cfoutput>
+            </select>  
+        </div>
+    </div>
 </form>
 
 <form action="index.cfm?action=act_save_numbers" method="POST">
@@ -35,7 +40,7 @@
     <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
     <div id='mainVue'>
         <div id="no-more-tables">
-            <table id="cownumbers" class="table table-bordered">
+            <table id="cownumbers" class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>Type</th>
