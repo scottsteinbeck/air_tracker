@@ -34,44 +34,70 @@
     <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
     <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
     <div id='mainVue'>
-        <table id="cownumbers" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Permitted</th>
-                    <th>Qtr1</th>
-                    <th>Qtr2</th>
-                    <th>Qtr3</th>
-                    <th>Qtr4</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="row in typeList">
-                    <td>
-                        {{row.Name}}
-                    </td>
-                    <td v-for="column in columns">
-                        <input type="number" v-model="row[column]" :readonly="column=='cnPermitted'" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        {{totalRow.Name}}
-                    </td>
-                    <td v-for="column in columns" class="text-center">
-                        {{totalRow[column]}}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        {{supportStockRow.Name}}
-                    </td>
-                    <td v-for="column in columns" class="text-center">
-                        {{supportStockRow[column]}}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="no-more-tables">
+            <table id="cownumbers" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Permitted</th>
+                        <th>Qtr1</th>
+                        <th>Qtr2</th>
+                        <th>Qtr3</th>
+                        <th>Qtr4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="d-md-none">
+                        <td data-title="Title">
+                            {{totalRow.Name}}
+                        </td>
+                        <td v-for="column in columns" class="text-center" :data-title="tableHeaders[column]">
+                            {{totalRow[column]}}
+                        </td>
+                    </tr>
+                    <tr class="d-md-none">
+                        <td data-title="Title">
+                            {{supportStockRow.Name}}
+                        </td>
+                        <td v-for="column in columns" class="text-center" :data-title="tableHeaders[column]">
+                            {{supportStockRow[column]}}
+                        </td>
+                    </tr>
+
+                    <tr v-for="row in typeList">
+                        <td data-title="Type">
+                            {{row.Name}}
+                        </td>
+                        <td v-for="column in columns" :data-title="tableHeaders[column]">
+                            <cfif session.USer_TYPEID eq 1>
+                                <input type="number" v-model="row[column]" :readonly="column=='cnPermitted'"/>
+                            <cfelse>
+                                <div class="text-center">
+                                    {{row[column]}}
+                                </div>
+                            </cfif>
+                        </td>
+                    </tr>
+
+                    <tr class="only-desktop">
+                        <td>
+                            {{totalRow.Name}}
+                        </td>
+                        <td v-for="column in columns" class="text-center">
+                            {{totalRow[column]}}
+                        </td>
+                    </tr>
+                    <tr class="only-desktop">
+                        <td>
+                            {{supportStockRow.Name}}
+                        </td>
+                        <td v-for="column in columns" class="text-center">
+                            {{supportStockRow[column]}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left"> </cfif>
 </form> 
@@ -113,7 +139,8 @@ cowNumbers = new Vue({
     },
     data: {
         typeList: typeList,
-        columns: ["cnPermitted","CnQtr1","CnQtr2","CnQtr3","CnQtr4"]
+        columns: ["cnPermitted","CnQtr1","CnQtr2","CnQtr3","CnQtr4"],
+        tableHeaders: {cnPermitted:"Permitted",CnQtr1:"Qtr1",CnQtr2:"Qtr2",CnQtr3:"Qtr3",CnQtr4:"Qtr4"}
     },
     
     methods: {
@@ -121,3 +148,57 @@ cowNumbers = new Vue({
     },
 });
 </script>
+
+<style>
+    @media only screen and (max-width: 768px) {
+        
+        /* Force table to not be like tables anymore */
+        #no-more-tables table, 
+        #no-more-tables thead, 
+        #no-more-tables tbody, 
+        #no-more-tables th, 
+        #no-more-tables td, 
+        #no-more-tables tr { 
+            display: block; 
+        }
+    
+        /* Hide table headers (but not display: none;, for accessibility) */
+        #no-more-tables thead tr { 
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+    
+        #no-more-tables tr { border: 1px solid #ccc; }
+    
+        #no-more-tables td { 
+            /* Behave  like a "row" */
+            border: none;
+            border-bottom: 1px solid #eee; 
+            position: relative;
+            padding-left: 50%;
+            white-space: normal;
+            text-align:left;
+        }
+    
+        #no-more-tables td:before { 
+            /* Now like a table header */
+            position: absolute;
+            /* Top/left values mimic padding */
+            top: 6px;
+            left: 6px;
+            width: 45%; 
+            padding-right: 10px; 
+            white-space: nowrap;
+            text-align:left;
+            font-weight: bold;
+        }
+    
+        /*
+        Label the data
+        */
+        #no-more-tables td:before { content: attr(data-title); }
+
+        #no-more-tables tr.only-desktop{display: none}
+    }
+</style>
