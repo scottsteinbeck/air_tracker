@@ -47,7 +47,7 @@
     <!--- Form to get the question id that we're setting the months for --->
 <div id="questionContainer">
     <div class="container-fluid">
-        <div class="row m-2 p-2 border">
+        <div class="row m-2 p-2 only-desktop">
             <!--- Page tital and forward and backward arows --->
             <cfoutput>
                 <button class="col-1 btn btn-secondary" :class="(left_button_enabled) ? '' : 'disabled'" name="prevousButton" @click="leftArrowClick()"><i class="fa fa-6 fa-angle-double-left"></i></button>
@@ -59,7 +59,7 @@
         </div>
         
         <div class="row m-2">
-            <div class="col-sm-9" id="checklistContainer" style="height:600px; overflow:auto">
+            <div class="col-sm-9 only-desktop" id="checklistContainer" style="height:600px; overflow:auto">
                 <!--- Selector with scroll bar --->
                 <ul>
                     <li v-for="(item,idx) in qList" :key="item.qID" class="list-group-item" :class="(item.qID == active.qID)?'active':''">
@@ -75,29 +75,38 @@
                 </ul>
             </div>
 
-        <div class="col-sm-3">
-            <div class = "card sticky-top ">
-                <div class = "card-body">
-                    <!--- Form to send to database of months  --->
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Month Required</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <div v-for="(item,id) in months_names">
-                                <input type="checkbox" name="months" v-model="active.months" :value="id">
-                                <label>{{item}}</label>
-                            </div>
-                        </tbody>
-                    </table>
-                    <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button>
+            <div class="d-md-none">
+                <select name="questions" class="form-control m-2" v-model="selected" @change="selectClick(selected)">
+                    <option v-for="(item,idx) in qList" :key="item.qID" :value="item" :disabled="item.qType == 'Heading'" class="text-truncate">
+                        {{item.qNumber}} {{truncate(item.qTitle)}}
+                    <option>
+                </select>
+                {{active.qTitle}}
+            </div>
+
+            <div class="col-sm-3">
+                <div class = "card sticky-top ">
+                    <div class = "card-body">
+                        <!--- Form to send to database of months  --->
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Month Required</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <div v-for="(item,id) in months_names">
+                                    <input type="checkbox" name="months" v-model="active.months" :value="id">
+                                    <label>{{item}}</label>
+                                </div>
+                            </tbody>
+                        </table>
+                        <button @click="saveCheckedMonths()" class="btn btn-outline-primary">Save Questions</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 <script>
     var qList = <cfoutput>#serializeJSON(qList)#</cfoutput>;
@@ -108,9 +117,11 @@
             qList:qList,
             active: this.qList[0],
             months_names: [ "All", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+            selected: null,
         },
         mounted: function(){
-            this.active =  this.questionsOnly[this.activeIndex];
+            this.active = this.questionsOnly[this.activeIndex];
+            this.selected = this.questionsOnly[this.activeIndex];
         },
         computed:{
             questionsOnly: function(){
@@ -119,11 +130,15 @@
                 })
             },
             right_button_enabled: function(){return (this.activeIndex + 2 <= this.questionsOnly.length)},
-            left_button_enabled: function(){return (this.activeIndex - 1 >= 0)}
+            left_button_enabled: function(){return (this.activeIndex - 1 >= 0)},
         },
         methods:{
+            truncate: function(val)
+            {
+                return val.substr(0,25)+"...";
+            },
             saveCheckedMonths: function(){
-                console.log(this.active);
+                // console.log(this.active);
                 $.ajax({
                     method: "POST",
                     url: "/ajax/questions/act_save_months.cfm",
@@ -141,17 +156,20 @@
                 this.activeIndex = (nexIdx < this.questionsOnly.length) ? nexIdx : this.activeIndex;
                 this.active = this.questionsOnly[this.activeIndex];
                 this.showActiveItem();
+                this.selected = this.questionsOnly[this.activeIndex];
             },
             leftArrowClick: function(){
                 var prevIdx = this.activeIndex-1;
                 this.activeIndex = (prevIdx >= 0) ? prevIdx : this.activeIndex;
                 this.active = this.questionsOnly[this.activeIndex];
                 this.showActiveItem();
+                this.selected = this.questionsOnly[this.activeIndex];
             },
             selectClick: function(item){
                 this.active = item;
-                console.log(this.qList.indexOf(item))
+                // console.log(this.qList.indexOf(item))
                 this.activeIndex = this.questionsOnly.indexOf(item);
+                this.selected = this.questionsOnly[this.activeIndex];
             },
             showActiveItem: function(){
                 var $parentDiv = $('#checklistContainer');
@@ -165,6 +183,9 @@
             }
         }
     });
-
-
 </script>
+<style>
+    @media only screen and (max-width: 768px){
+        .only-desktop{display: none}
+    }
+</style>
