@@ -1,0 +1,8 @@
+{
+    "dependencies":{
+        "lucee-spreadsheet":"^2.19.0"
+    },
+    "installPaths":{
+        "lucee-spreadsheet":"modules/lucee-spreadsheet/"
+    }
+}

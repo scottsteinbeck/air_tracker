@@ -15,6 +15,22 @@
         </ul>
     </div>
 
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXjnq7WPH_QYZ3RGhQIfOxQVWe_ViGT-I46Iv0azvUg-v6aVVjtdQm3tetP5FHykqwuw&usqp=CAU"
-    alt="logo" style="width:200px">
+    <div class="row d-none d-lg-block">
+        <div class="col-5">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXjnq7WPH_QYZ3RGhQIfOxQVWe_ViGT-I46Iv0azvUg-v6aVVjtdQm3tetP5FHykqwuw&usqp=CAU"
+            alt="logo" style="width:200px">
+        </div>
+    </div>
+    
+    <div class="row d-lg-none mt-2">
+        <div class="col-8 mt-3">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXjnq7WPH_QYZ3RGhQIfOxQVWe_ViGT-I46Iv0azvUg-v6aVVjtdQm3tetP5FHykqwuw&usqp=CAU"
+            alt="logo" style="width:150px">
+        </div>
+
+        <div class="col-4">    
+            <img src="images/ATS_logo_top-843.png"
+            alt="logo" style="width:150px">
+        </div>
+    </div>
 </nav>

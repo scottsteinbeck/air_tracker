@@ -11,41 +11,47 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <style>
-      .btn-outline-primary {
-          color: #fff;
-          background-color: #0082d8;
-          border-color: #000000;
-      }
-      .btn-outline-primary:hover {
-          color: #fff;
-          background-color: #0096fa;
-          border-color: #000000;
-      }
+        .btn-outline-primary {
+            color: #fff;
+            background-color: #0082d8;
+            border-color: #000000;
+        }
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #0096fa;
+            border-color: #000000;
+        }
 
-      .btn-danger{
-          color: #fff;
-          background-color: #cc392f;
-          border-color: #000000;
-      }
-      .btn-danger:hover{
-          color: #fff;
-          background-color: #e84135;
-          border-color: #000000;
-      }
-      .margin-left{
-          margin-left: 20px;
-      }
-  </style>
+        .btn-danger{
+            color: #fff;
+            background-color: #cc392f;
+            border-color: #000000;
+        }
+        .btn-danger:hover{
+            color: #fff;
+            background-color: #e84135;
+            border-color: #000000;
+        }
+        .margin-left{
+            margin-left: 20px;
+        }
+    </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 </head>
 <body>
+    <cfparam name="session.dID" default="0">
+    <cfif structKeyExists(url,"dID")>
+        <cfset session.dID = url.dID>
+    <cfelse>
+        <cfset url.dID = session.dID>
+    </cfif>
 
-  <cfif structKeyExists(session,"loggedin")>
-    <cfinclude template="navigation.cfm">
-  <cfelse> 
-    <cfset url.action="login">
-  </cfif>
+    <cfif structKeyExists(session,"loggedin")>
+        <cfinclude template="navigation.cfm">
+    <cfelse> 
+        <cfset url.action="login">
+    </cfif>
 
     <cfswitch expression="#url.action#"> 
         <cfcase value="dairy_settings"><cfinclude template="modules/dairy/dsp_dairy_settings.cfm"></cfcase>

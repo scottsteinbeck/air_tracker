@@ -1,3 +1,4 @@
+<cfparam name="url.dID" default="1">
 <cfset setDate=createDate(2017,1,1)>
 <cfquery name="engineInfo">
     SELECT *,
@@ -5,6 +6,12 @@
     ifnull((SELECT Concat(min(ehHoursTotal),",",min(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS min_hours,
     ifnull((SELECT Concat(max(ehHoursTotal),",",max(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)-1),0) AS previous_max_hours 
     FROM engine
+    WHERE eDID = #url.dID#
+</cfquery>
+
+<cfquery name="DairyList">
+    SELECT dID, dCompanyName
+    FROM dairies
 </cfquery>
 
 <style>
@@ -14,8 +21,29 @@
     }
 </style>
 
-<div class="container-xxl">
-    <a class="btn btn-outline-primary mt-2 ml-2 mb-2 pl-3 pr-3" href="index.cfm?action=add_engine">Add Engine</a>
+    <div class="container-xxl">
+        <div class="row mt-2 mb-2">
+            <div class="col-4">
+                <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine">Add Engine</a>
+                <span class="d-none d-lg-inline">
+                    <!--- <form action="ajax" --->
+                    <button class="btn btn-outline-primary pl-3 pr-3" name="generateExcel">Generate Excel Sheet</button>
+                </span>
+            </div>
+
+            <div class="col-5">
+                <form action="index.cfm">
+                    <input type="hidden" name="action" value="engine_hours">
+                    <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
+                        <cfoutput query="DairyList">
+                            <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                        </cfoutput>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="d-none d-lg-block">
         <table class="table">
             <thead class="thead-dark">
