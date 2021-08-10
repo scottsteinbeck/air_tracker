@@ -14,4 +14,8 @@ component {
       , alwaysSetTimeout:true // default: false
       , validate:false // default: false
   };
+
+  function onApplicationStart() {
+      application.lucee_spreadsheet = New lib.spreadsheetLibrary.Spreadsheet();
+  }
 }

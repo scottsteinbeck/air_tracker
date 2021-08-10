@@ -1,56 +1,114 @@
 <cfquery name="engineHours">
-    SELECT *
+    SELECT * ,year(ehDate) AS ehYear
     FROM engine
     LEFT JOIN engine_hours
     ON engine.eID = engine_hours.ehEID
-    WHERE eDID = 21 AND year(ehDate) = #2017#
+    WHERE eDID = #url.dID#
+    ORDER BY eID,ehDate
 </cfquery>
 
-<cfdump var=#engineHours#>
+<cfquery name="engineInfo" dbtype="query">
+    SELECT eID, eName, eMake, eMaxHours
+    FROM engineHours
+    GROUP BY eID, eName, eMake, eMaxHours
+</cfquery>
+
+<cfquery name="dairyName">
+    SELECT dCompanyName
+    FROM dairies
+    WHERE dID = #url.dID#
+</cfquery>
+
+<cfset dayEngineHours = {}>
+<cfoutput query="engineHours" group="eID">
+    <cfset dayEngineHours[eID] = {}>
+    <cfset prevDate = ehDate>
+    <cfset prevHours = 0>
+    
+    <cfoutput>
+        <cfset daysBetween = dateDiff("d",prevDate,ehDate)>
+        <cfif prevHours gt ehHoursTotal>
+            <cfset prevHours= 0>
+        </cfif>
+        <cfset hoursBetween = ehHoursTotal - prevHours>
+        <cfset avgHrsPerDay =  (daysBetween != 0) ? hoursBetween/daysBetween : 0>
+
+        <cfloop from="#prevDate#" to="#ehDate#" index="i">
+            <cfset dayEngineHours[eID][i] = avgHrsPerDay>
+        </cfloop>
+
+        <cfset prevDate = ehDate>
+        <cfset prevHours = ehHoursTotal>
+    </cfoutput>
+</cfoutput>
 
 <head>
 </head>
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Make</th>
-                <th>Max Hours</th>
-                <th>Hours</th>
-            </tr>
-        <thead>
-        <cfoutput query="engineHours">
-            <tr>
-                <td>#eName#</td>
-                <td>#eMake#</td>
-                <td>#eMaxHours#</td>
-                <td>
-                    <cfset yearStart = listToArray(engineHours.min_hours)>
-        <cfset lastYearEnd = listToArray(engineHours.previous_max_hours)>
-        <cfset yearTotalHours = 0>
-        <cfif (yearStart[1] eq 0 and lastYearEnd[1] eq 0) or (max_hours eq 0)>
-            <!--- We have no information for this year, this mean the yearEnd is also 0 --->
-            <!--- since we have no hours, the hours are 0 --->
-            <cfset yearTotalHours = 0>
-        <cfelseif (yearStart[1] gt 0 and lastYearEnd[1] eq 0 ) or (yearStart[1] eq lastYearEnd[1]) >
-            <!--- we have no previous hours recorded  --->
-            <!--- we just need to subtract the end from the start and we have accumulated hours --->
-            <cfset yearTotalHours = max_hours - yearStart[1]>
-        <cfelse> 
-            <!--- we have previous year data so we must find the esimated start of the year engine hours --->
-            <cfset daysBetween = dateDiff('d', lastYearEnd[2],yearStart[2])>
-            <cfset hoursBetween = yearStart[1] - lastYearEnd[1]>
-            <cfset daysSinceFirstOfYear =  dateDiff('d', yearStart[2],setDate)>
+    <cfset xlTable = {}>
 
-            <cfset avgHrsPerDay =  (hoursBetween/daysBetween)>
-            <!--- calculate hours from first of year to the year start date --->
-            <cfset yearTotalHours = daysSinceFirstOfYear * avgHrsPerDay>
-            <!--- calculate elapsed hours during the rest of the year --->
-            <cfset yearTotalHours += max_hours - yearStart[1]> 
-        </cfif>
-                    </td>
-            </tr>
-        </cfoutput>
-    </table>
+    <cfloop from="2016" to="#year(now())#" index="YR">
+
+        <cfset xlTable["#YR#"] = [["Name","Make","Max Hours","January","February","March",
+        "April","May","June","July","August","September","October","November","December"]]>
+
+        <!--- <cfoutput> <h2>#YR#</h2></cfoutput> --->
+
+        <!--- <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Make</th>
+                    <th>Max Hours</th>
+                    <th>January</th>
+                    <th>February</th>
+                    <th>March</th>
+                    <th>April</th>
+                    <th>May</th>
+                    <th>June</th>
+                    <th>July</th>
+                    <th>August</th>
+                    <th>September</th>
+                    <th>October</th>
+                    <th>November</th>
+                    <th>December</th>
+                </tr>
+            <thead> --->
+                <cfoutput query="engineInfo">
+                <!--- <tr>
+                    <td>#eName#</td>
+                    <td>#eMake#</td>
+                    <td>#eMaxHours#</td> --->
+                    <cfset arrayAppend(xlTable["#YR#"],[eName,eMake,eMaxHours])>
+
+                    <cfloop from="1" to="12" index="MO">
+                        <cfset startOfMonth = createDate(YR,MO,1)>
+                        <cfset endOfMonth = dateAdd('d',-1,dateAdd('m',1,startOfMonth))>
+                        <cfset monthHours = 0>
+                        <cfloop from="#startOfMonth#" to="#endOfMonth#" index="monthDate">
+                            <cfif structKeyExists(dayEngineHours[eID],monthDate)>
+                                <cfset monthHours += dayEngineHours[eID][monthDate]>
+                            </cfif>
+                        </cfloop>
+                        <!--- <td>#round(monthHours *100)/100#</td> --->
+                        <cfset arrayAppend(xlTable["#YR#"][1 + engineInfo.currentRow],round(monthHours *100)/100)>
+                    </cfloop>
+                <!--- </tr> --->
+            </cfoutput>
+        <!--- </table> --->
+    </cfloop>
+
+    <cfscript>
+        spreadsheet = application.lucee_spreadsheet;
+        workbook = spreadsheet.newXlsx("2016");
+
+        for(i = 2016; i <= year(now()); i++)
+        {
+            if(i > 2016) spreadsheet.createSheet(workbook,"#i#");
+            spreadsheet.setActiveSheet(workbook,"#i#");
+            spreadsheet.addRows(workbook,xlTable[i]);
+        }
+
+        spreadsheet.download(workbook,"#replace(dairyName.dCompanyName[1]," ","_","all")#" & "_engines");
+    </cfscript>
 </body>

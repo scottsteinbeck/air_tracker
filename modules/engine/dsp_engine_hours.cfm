@@ -22,12 +22,17 @@
 </style>
 
     <div class="container-xxl">
-        <div class="row mt-2 mb-2">
+        <div class="row mx-0 mt-2 mb-2">
             <div class="col-4">
                 <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine">Add Engine</a>
                 <span class="d-none d-lg-inline">
                     <!--- <form action="ajax" --->
-                    <button class="btn btn-outline-primary pl-3 pr-3" name="generateExcel">Generate Excel Sheet</button>
+                    <cfoutput>
+                        <form style="display:inline;" action="ajax/engine_hours/export_hours.cfm">
+                            <input type="hidden" name="dID" value="#url.dID#"/>
+                            <input style="display:inline;" type="submit" class="btn btn-outline-primary pl-3 pr-3" value="Generate Excel Sheet"/>
+                        </form>
+                    </cfoutput>
                 </span>
             </div>
 
@@ -110,12 +115,12 @@
             <!--- calculate hours from first of year to the year start date --->
             <cfset yearTotalHours = daysSinceFirstOfYear * avgHrsPerDay>
             <!--- calculate elapsed hours during the rest of the year --->
-            <cfset yearTotalHours += max_hours - yearStart[1]> 
+            <cfset yearTotalHours += max_hours - yearStart[1]>
         </cfif>
 
         <!--- <cfdump var="#dateDiff(engineInfo.min)#"> --->
         <div class="card d-lg-none">
-        <div class="card-header py-1">
+        <div class="card-header text-white bg-secondary py-1 mt-3">
             <div>#engineInfo.eName[engineInfo.currentRow]#</div>
         </div>
             <ul class="list-group list-group-flush"> 
@@ -134,4 +139,5 @@
             </ul>
         </div>
     </cfoutput>
+    <br>
 </div>
