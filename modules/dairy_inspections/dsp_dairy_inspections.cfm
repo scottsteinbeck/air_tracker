@@ -12,8 +12,8 @@
     SELECT * FROM inspections
 </cfquery>
 <cfquery name="questionlist">
-    SELECT * 
-    FROM questions 
+    SELECT *
+    FROM questions
     LEFT JOIN dairy_question_link ON dairy_question_link.qID=questions.qID AND dID=#url.dID#
     LEFT JOIN inspections ON idID=#url.dID#
                     AND year(iDate)=#url.Year#
@@ -194,8 +194,8 @@
                 <table>
                     <tr>
                         <td>
-                            Inspection Date 
-                            <input type="Date" Name="InspectionDate" Value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
+                            Inspection Date
+                            <input type="Date" name="InspectionDate" value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
                         </td>
                         <td>
                             <input type="submit" value="add" class="btn btn-outline-primary btn-sm">
@@ -235,8 +235,8 @@
             VALUES (#newDate#,#url.dID#,#randRange(0,3)#,#randRange(2,10)#,#randRange(2,10)#);
         </cfquery>
     </cfloop>
-    
-    
+
+
     <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
         <thead class="thead-dark">
             <tr class="stay-top">
@@ -261,7 +261,7 @@
                                 <!--- #questionlist.qID#. ---> #questionlist.qTitle#
                                 <br><br>
                         </cfif>
-                        
+
                     <cfoutput>
                         <cfif questionlist.qType eq "Documents">
                             <div class="small">
@@ -269,7 +269,7 @@
                                 <a href="##" @click="change_tab(2)">4570 Documents</a>
                             </div>
                         </cfif>
-                        
+
                     </cfoutput>
                     </td>
 
@@ -313,12 +313,12 @@
                         </td>
                     </cfif>
                 </tr>
-            </cfoutput> 
-            
+            </cfoutput>
+
         </tbody>
     </table>
-    
-    
+
+
     <div v-if="active_tab == 2">
         <div class="row">
             <div class="col offset-md-3 mt-3">
@@ -335,10 +335,10 @@
                                             <template slot="clip-uploader-action" scope="params">
                                                 <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
                                                 <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
-                                                
+
                                             </div>
                                         </template>
-                                    
+
                                         <template slot="clip-uploader-body" scope="props">
                                             <div v-for="file in props.files">
                                                 <transition name="fade">
@@ -349,7 +349,7 @@
                                                 </transition>
                                             </div>
                                         </template>
-                                    
+
                                     </vue-clip>
                                 </template>
                             </div>

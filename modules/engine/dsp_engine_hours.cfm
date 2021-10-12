@@ -2,9 +2,9 @@
 <cfset setDate=createDate(2017,1,1)>
 <cfquery name="engineInfo">
     SELECT *,
-    ifnull((SELECT max(ehHoursTotal) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS max_hours, 
+    ifnull((SELECT max(ehHoursTotal) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS max_hours,
     ifnull((SELECT Concat(min(ehHoursTotal),",",min(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS min_hours,
-    ifnull((SELECT Concat(max(ehHoursTotal),",",max(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)-1),0) AS previous_max_hours 
+    ifnull((SELECT Concat(max(ehHoursTotal),",",max(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)-1),0) AS previous_max_hours
     FROM engine
     WHERE eDID = #url.dID#
 </cfquery>
@@ -40,6 +40,7 @@
                 <form action="index.cfm">
                     <input type="hidden" name="action" value="engine_hours">
                     <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
+						<option value="">none</option>
                         <cfoutput query="DairyList">
                             <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                         </cfoutput>
@@ -76,8 +77,8 @@
                             #engineInfo[i][engineInfo.currentRow]#
                         </td>
                     </cfloop>
-                    
-                    <cfif session.USER_TYPEID eq 1> 
+
+                    <cfif session.USER_TYPEID eq 1>
                         <td>
                             <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>
                         </td>
@@ -85,7 +86,7 @@
 
                     <cfif session.USer_TYPEID eq 2>
                         <td>
-                            <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a> 
+                            <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a>
                         </td>
                     </cfif>
                 </tr>
@@ -105,7 +106,7 @@
             <!--- we have no previous hours recorded  --->
             <!--- we just need to subtract the end from the start and we have accumulated hours --->
             <cfset yearTotalHours = max_hours - yearStart[1]>
-        <cfelse> 
+        <cfelse>
             <!--- we have previous year data so we must find the esimated start of the year engine hours --->
             <cfset daysBetween = dateDiff('d', lastYearEnd[2],yearStart[2])>
             <cfset hoursBetween = yearStart[1] - lastYearEnd[1]>
@@ -123,7 +124,7 @@
         <div class="card-header text-white bg-secondary py-1 mt-3">
             <div>#engineInfo.eName[engineInfo.currentRow]#</div>
         </div>
-            <ul class="list-group list-group-flush"> 
+            <ul class="list-group list-group-flush">
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Grower</strong> #engineInfo.eGrower[engineInfo.currentRow]#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Ranch</strong> #engineInfo.eRanch[engineInfo.currentRow]#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Location</strong> #engineInfo.eLocation[engineInfo.currentRow] ?: "---"#</li>
@@ -131,11 +132,11 @@
                     <div style="float:right">
                         <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a> </cfif>
                         <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a> </cfif>
-                    </div> 
+                    </div>
                     <strong>Max Hours</strong> #decimalFormat(yearTotalHours)# / #engineInfo.eMaxHours[engineInfo.currentRow]#
                     <br/>
                     <progress value="#yearTotalHours#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
-                </li> 
+                </li>
             </ul>
         </div>
     </cfoutput>
