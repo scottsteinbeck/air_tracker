@@ -181,7 +181,7 @@
             </form>
         </div>
 
-        <cfif session.USer_TYPEID eq 1>
+        <!--- <cfif session.USer_TYPEID eq 1>
             <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
             entry  --->
             <form action="index.cfm?action=add_inspection" method="POST" class="mt-2 mb-2">
@@ -204,8 +204,8 @@
                 </table>
             </form>
         <cfelse>
-            <br>
-        </cfif>
+        </cfif> --->
+		<br>
     </div>
 
     <cfset is_specific=false>
@@ -223,100 +223,101 @@
 
 
     <cfif isEmpty(lastInspection.lastDate)>
-        <cfset newDate=createDate(2017,"01","01")>
+        <cfset newDate=dateAdd("d",randRange(80,90),createDate(2017,"01","01"))>
     <cfelse>
-        <cfset newDate=lastInspection.lastDate>
+        <cfset newDate=dateAdd("d",randRange(80,90),lastInspection.lastDate)>
     </cfif>
     <cfloop condition="newDate lt now()">
-        <cfset newDate=dateAdd("d",randRange(80,90),newDate)>
         <cfquery name="addNewDates">
-            INSERT
-            INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
+            INSERT INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
             VALUES (#newDate#,#url.dID#,#randRange(0,3)#,#randRange(2,10)#,#randRange(2,10)#);
         </cfquery>
+		<cfset newDate=dateAdd("d",randRange(80,90),newDate)>
     </cfloop>
 
 
-    <table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
-        <thead class="thead-dark">
-            <tr class="stay-top">
-                <th>Question</th>
-                <cfif daily_weekly_set>
-                    <th width=70>Day</th>
-                    <th width=70>Weekly</th>
-                </cfif>
-                <cfif is_specific><th width=300>Recorded dates</th></cfif>
-                <cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
-            </tr>
-        </thead>
-        <tbody>
-            <cfoutput query="questionlist" group="qID" >
-                <tr>
-                    <td class="heading">
-                        <cfif questionlist.qType is "Heading">
-                            <h4>
-                                <!--- #questionlist.qID#.---> #questionlist.qTitle#
-                            <h4>
-                            <cfelse>
-                                <!--- #questionlist.qID#. ---> #questionlist.qTitle#
-                                <br><br>
-                        </cfif>
+	<div class="">
+		<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
+			<thead class="thead-dark">
+				<tr class="stay-top">
+					<th>Question</th>
+					<cfif daily_weekly_set>
+						<th width=70>Day</th>
+						<th width=70>Weekly</th>
+					</cfif>
+					<cfif is_specific><th width=300>Recorded dates</th></cfif>
+					<cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
+				</tr>
+			</thead>
+			<tbody>
+				<cfoutput query="questionlist" group="qID" >
+					<tr>
+						<td class="heading">
+							<cfif questionlist.qType is "Heading">
+								<h4>
+									<!--- #questionlist.qID#.---> #questionlist.qTitle#
+								<h4>
+								<cfelse>
+									<!--- #questionlist.qID#. ---> #questionlist.qTitle#
+									<br><br>
+							</cfif>
 
-                    <cfoutput>
-                        <cfif questionlist.qType eq "Documents">
-                            <div class="small">
-                                #questionlist.qDescription#
-                                <a href="##" @click="change_tab(2)">4570 Documents</a>
-                            </div>
-                        </cfif>
+						<cfoutput>
+							<cfif questionlist.qType eq "Documents">
+								<div class="small">
+									#questionlist.qDescription#
+									<a href="##" @click="change_tab(2)">4570 Documents</a>
+								</div>
+							</cfif>
+						</cfoutput>
+						</td>
 
-                    </cfoutput>
-                    </td>
+						<cfif daily_weekly_set>
+							<td>
+								<cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+							</td>
+							<td>
+								<cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+							</td>
+						</cfif>
 
-                    <cfif daily_weekly_set>
-                        <td>
-                            <cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                        </td>
-                        <td>
-                            <cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-                        </td>
-                    </cfif>
+						<cfset manureLevel = 0>
+						<cfif questionlist.qShowManurelevel gt 0>
+							<cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurelevel eq "corral">
+								<cfset manureLevel = '#questionlist.iManureInchCorral#'>
+							<cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurelevel eq "concrete">
+								<cfset manureLevel = '#questionlist.iManureInchConcrete#'>
+							<cfelseif questionlist.iManureInchFenceline gt 0 && questionlist.qShowManurelevel eq "fenceline">
+								<cfset manureLevel = '#questionlist.iManureInchFenceline#'>
+							</cfif>
+						</cfif>
+						<cfif is_specific>
+							<td>
+								<cfif manureLevel neq 0>
+									#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
+								<cfelse>
+									<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
+										<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
+											Form: #year(now())#-10-1&nbsp;&nbsp;&nbsp;To: #year(now())#-5-1
+										</cfif>
+									<!--- </cfif> --->
+								</cfif>
+							</td>
+						</cfif>
 
-                    <cfif is_specific>
-                        <td>
-                            <cfif questionlist.dqType eq "specific">
-                                <cfif questionlist.qType neq "Heading" && Dairylist.dSummerManure neq 0 && Dairylist.dWinterManure neq 0>
-                                    <cfset summerDate = createDate(year(now()) , month(Dairylist.dSummerManure) , day(Dairylist.dSummerManure))>
-                                    <cfset winterDate = createDate(year(now()) , month(Dairylist.dWinterManure) , day(Dairylist.dWinterManure))>
-                                    #"From " & dateformat(summerDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,summerDate),"yyyy-mm-dd")#
-                                    <br><br>
-                                    #"To " & dateformat(winterDate,"yyyy-mm-dd") & " to " & dateformat(dateadd('d',20,winterDate), "yyyy-mm-dd")#
-                                </cfif>
-                            </cfif>
-                        </td>
-                    </cfif>
+						<cfif show_M_level_column>
+							<td>
+								<cfif manureLevel neq 0>
+									#manureLevel#"
+								</cfif>
+							</td>
+						</cfif>
+					</tr>
+				</cfoutput>
 
-                    <cfif show_M_level_column>
-                        <td>
-                            <!--- <cfif isNull(questionlist.qShowManurelevel)> --->
-                                <cfif questionlist.qShowManurelevel gt 0>
-                                    #dateFormat(questionlist.iDate,"yyyy-mm-dd")#<br>
-                                    <cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurelevel eq "corral">
-                                        Manure #questionlist.iManureInchCorral#"
-                                    <cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurelevel eq "concrete">
-                                        Manure #questionlist.iManureInchConcrete#"
-                                    <cfelseif questionlist.iManureInchFenceline gt 0 && questionlist.qShowManurelevel eq "fenceline">
-                                        Manure #questionlist.iManureInchFenceline#"
-                                    </cfif>
-                                </cfif>
-                            <!--- </cfif> --->
-                        </td>
-                    </cfif>
-                </tr>
-            </cfoutput>
-
-        </tbody>
-    </table>
+			</tbody>
+		</table>
+	</div>
 
 
     <div v-if="active_tab == 2">
@@ -332,11 +333,13 @@
                             <div class="card-body">
                                 <template>
                                     <vue-clip :options="options">
-                                            <template slot="clip-uploader-action" scope="params">
-                                                <div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
-                                                <div class="dz-message"><i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i><h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4></div>
-
-                                            </div>
+										<template slot="clip-uploader-action" scope="params">
+												<div v-bind:class="{'is-dragging': params.dragging}" class="upload-action">
+											<div class="dz-message">
+												<i class="fa fa-4 fa-file text-muted pt-3 pb-3"></i>
+												<h4 style="display: inline;" class="text-muted pt-3 pb-3" > Click or Drag and Drop files here upload </h4>
+											</div>
+											</div>
                                         </template>
 
                                         <template slot="clip-uploader-body" scope="props">
@@ -376,7 +379,9 @@
                 uploadMultiple:true
             },
             fadeIn: true,
-            show: true
+            show: true,
+
+			// dateAndMunureData:
         },
 
         methods:{
