@@ -106,15 +106,16 @@
 
                     <tr v-for="row in typeList">
                         <td data-title="Type">
-                            {{row.Name}}
+                            {{row.Name}} -
+                            {{row.TiD}}
                         </td>
                         <td v-for="column in columns" :data-title="tableHeaders[column]">
                             <cfif session.USer_TYPEID eq 1>
-                                <input type="number" v-model="row[column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted"/>
-                                <input type="number" v-model="row[column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1"/>
-                                <input type="number" v-model="row[column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2"/>
-                                <input type="number" v-model="row[column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3"/>
-                                <input type="number" v-model="row[column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4"/>
+                                <input type="number" :name="'dn_'+row.TiD+'_Permitted'" v-model="row[column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted"/>
+                                <input type="number" :name="'dn_'+row.TiD+'_Qtr1'" v-model="row[column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1"/>
+                                <input type="number" :name="'dn_'+row.TiD+'_Qtr2'" v-model="row[column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2"/>
+                                <input type="number" :name="'dn_'+row.TiD+'_Qtr3'" v-model="row[column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3"/>
+                                <input type="number" :name="'dn_'+row.TiD+'_Qtr4'" v-model="row[column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4"/>
                             <cfelse>
                                 <div class="text-center">
                                     {{row[column]}}

@@ -68,8 +68,15 @@
 
     .stay-top > th{
         position: sticky;
-        top: 0;
+        top: 110px;
     }
+
+	div.stay-top{
+		background-color: #ffffff;
+		padding: 10px;
+		position: sticky;
+		top: 0px;
+	}
 
     .-lucee-dump table{
         border:1px solid #ccc;
@@ -96,117 +103,119 @@
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
     <!--- phone vue --->
-    <div class="container">
-        <div class="d-lg-none">
-            <form action="index.cfm" method="GET">
-                <input type="hidden" name="action" value="dairy_inspections">
-                <div class="row">
-                    <div class="col-sm-8">
-                        <div class="input-group mb-3">
-                            <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
-                                <option value="0"> none</option>
-                                <cfoutput query="DairyList">
-                                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
-                                </cfoutput>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+	<div class="stay-top">
+		<div class="container">
+			<div class="d-lg-none">
+				<form action="index.cfm" method="GET">
+					<input type="hidden" name="action" value="dairy_inspections">
+					<div class="row">
+						<div class="col-sm-8">
+							<div class="input-group mb-3">
+								<select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
+									<option value="0"> none</option>
+									<cfoutput query="DairyList">
+										<option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+									</cfoutput>
+								</select>
+							</div>
+						</div>
+					</div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="input-group mb-3">
-                            <select name="Month" id="" onchange="form.submit()"  class="form-control"> <!--- Month Select --->
-                                <option value="0"> none</option>
-                                <cfoutput query="monthList" >
-                                    <option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
-                                </cfoutput>
-                            </select>
-                        </div>
-                    </div>
+					<div class="row">
+						<div class="col">
+							<div class="input-group mb-3">
+								<select name="Month" id="" onchange="form.submit()"  class="form-control"> <!--- Month Select --->
+									<option value="0"> none</option>
+									<cfoutput query="monthList" >
+										<option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
+									</cfoutput>
+								</select>
+							</div>
+						</div>
 
-                    <div class="col">
-                        <div class="input-group">
-                            <select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
-                                <cfoutput>
-                                    <cfloop from="2017" to="#year(now())#" index="YR">
-                                        <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
-                                    </cfloop>
-                                </cfoutput>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+						<div class="col">
+							<div class="input-group">
+								<select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
+									<cfoutput>
+										<cfloop from="2017" to="#year(now())#" index="YR">
+											<option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+										</cfloop>
+									</cfoutput>
+								</select>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
 
-        <!--- computer vue --->
-        <div class="d-none d-lg-block">
-            <form action="index.cfm" method="GET">
-                <input type="hidden" name="action" value="dairy_inspections">
-                <div class="row">
-                    <div class="col-sm-8">
-                        <div class="input-group mb-3">
-                            <select name="dID" id="" onchange="form.submit()"  class="form-control">  <!--- Dairy Select  --->
-                                <option value="0"> none</option>
-                                <cfoutput query="DairyList">
-                                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
-                                </cfoutput>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+			<!--- computer vue --->
+			<div class="d-none d-lg-block">
+				<form action="index.cfm" method="GET">
+					<input type="hidden" name="action" value="dairy_inspections">
+					<div class="row">
+						<div class="col-sm-8">
+							<div class="input-group mb-3">
+								<select name="dID" id="" onchange="form.submit()"  class="form-control">  <!--- Dairy Select  --->
+									<option value="0"> none</option>
+									<cfoutput query="DairyList">
+										<option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+									</cfoutput>
+								</select>
+							</div>
+						</div>
+					</div>
 
-                <div class="row">
-                    <div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
-                        <cfoutput query="monthList">
-                            <label class="btn btn-outline-secondary active">
-                                <input type="radio" onchange="form.submit()"  name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
-                            </label>
-                        </cfoutput>
-                    </div>
+					<div class="row">
+						<div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
+							<cfoutput query="monthList">
+								<label class="btn btn-outline-secondary active">
+									<input type="radio" onchange="form.submit()"  name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
+								</label>
+							</cfoutput>
+						</div>
 
-                    <div class="col">
-                        <div class="input-group">
-                            <select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
-                                <cfoutput>
-                                    <cfloop from="2017" to="#year(now())#" index="YR">
-                                        <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
-                                    </cfloop>
-                                </cfoutput>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+						<div class="col">
+							<div class="input-group">
+								<select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
+									<cfoutput>
+										<cfloop from="2017" to="#year(now())#" index="YR">
+											<option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+										</cfloop>
+									</cfoutput>
+								</select>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
 
-        <!--- <cfif session.USer_TYPEID eq 1>
-            <!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
-            entry  --->
-            <form action="index.cfm?action=add_inspection" method="POST" class="mt-2 mb-2">
-                <input type="hidden" name="action" value="dairy_inspections">
-                <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
+			<!--- <cfif session.USer_TYPEID eq 1>
+				<!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
+				entry  --->
+				<form action="index.cfm?action=add_inspection" method="POST" class="mt-2 mb-2">
+					<input type="hidden" name="action" value="dairy_inspections">
+					<input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
 
-                <input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
-                <input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
+					<input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
+					<input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
 
-                <table>
-                    <tr>
-                        <td>
-                            Inspection Date
-                            <input type="Date" name="InspectionDate" value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
-                        </td>
-                        <td>
-                            <input type="submit" value="add" class="btn btn-outline-primary btn-sm">
-                        </td>
-                    </tr>
-                </table>
-            </form>
-        <cfelse>
-        </cfif> --->
-		<br>
-    </div>
+					<table>
+						<tr>
+							<td>
+								Inspection Date
+								<input type="Date" name="InspectionDate" value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
+							</td>
+							<td>
+								<input type="submit" value="add" class="btn btn-outline-primary btn-sm">
+							</td>
+						</tr>
+					</table>
+				</form>
+			<cfelse>
+			</cfif> --->
+			<br>
+		</div>
+	</div>
 
     <cfset is_specific=false>
     <cfset daily_weekly_set=false>
@@ -258,7 +267,7 @@
 									<!--- #questionlist.qID#.---> #questionlist.qTitle#
 								<h4>
 								<cfelse>
-									<!--- #questionlist.qID#. ---> #questionlist.qTitle#
+									#questionlist.qNumber# #questionlist.qTitle#
 									<br><br>
 							</cfif>
 
@@ -298,7 +307,7 @@
 								<cfelse>
 									<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
 										<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
-											Form: #year(now())#-10-1&nbsp;&nbsp;&nbsp;To: #year(now())#-5-1
+											Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
 										</cfif>
 									<!--- </cfif> --->
 								</cfif>
