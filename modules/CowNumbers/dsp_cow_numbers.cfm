@@ -106,8 +106,7 @@
 
                     <tr v-for="row in typeList">
                         <td data-title="Type">
-                            {{row.Name}} -
-                            {{row.TiD}}
+                            {{row.Name}}
                         </td>
                         <td v-for="column in columns" :data-title="tableHeaders[column]">
                             <cfif session.USer_TYPEID eq 1>
