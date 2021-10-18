@@ -10,7 +10,7 @@
 <cfquery name="typelist" returntype="array">
     select *
     from cow_types
-    left join cow_numbers on cow_types.tID=cow_numbers.cnTID and cndID=#url.dID#
+    left join cow_numbers on cow_types.tID=cow_numbers.cnTID and cndID=#url.dID# and cnYear = #url.year#
 </cfquery>
 
 <div id='mainVue'>
