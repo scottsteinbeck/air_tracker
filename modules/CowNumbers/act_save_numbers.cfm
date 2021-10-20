@@ -26,4 +26,4 @@
     </cfquery>
 </cfloop>
 
-<cflocation url="index.cfm?action=cow_numbers&dID=#form.dID#" addtoken="false">
+<cflocation url="index.cfm?action=cow_numbers&dID=#form.dID#&year=#form.year#" addtoken="false">

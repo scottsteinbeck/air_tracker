@@ -104,7 +104,69 @@
                         </td>
                     </tr>
 
-                    <tr v-for="row in typeList">
+					<!---
+						I used v-for="n in [0,1,2,3,4,6,5]" insted of v-for="row in typeList" because
+						of the way the rows needed to be ordered and because rows needed to be added that wheren't
+						in the typeList array
+					--->
+					<template v-for="n in [0,1,2,3,4,6,5]">
+						<!---
+							The calves row needs to go between the support stock totals row and the totals row
+							at the botten of the table
+						--->
+						<tr class="only-desktop" v-if="n == 5">
+							<td>
+								{{supportStockRow.Name}}
+							</td>
+							<td v-for="column in columns" class="text-center">
+								{{supportStockRow[column]}}
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								{{typeList[n].Name}}
+							</td>
+							<td v-for="column in columns">
+								<cfif session.USer_TYPEID eq 1>
+									<!--- the inputs are named in a way that they can be easly red in the query by knowing the tID --->
+									<!--- canEdit is a struct that stores true or false values for Permitted Qtr1 Qtr2 ect that gove us the locked or unlokced state of the text box --->
+									<!--- the typeList values that are in each text box are models so the total rows will update when they are changed --->
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4"/>
+								<cfelse>
+									<!--- only show the text with no text box if the user is not an admin --->
+									<div class="text-center">
+										{{typeList[n][column]}}
+									</div>
+								</cfif>
+							</td>
+						</tr>
+
+						<tr class="only-desktop" v-if="n == 5">
+							<td>
+								{{totalRow.Name}}
+							</td>
+							<td v-for="column in columns" class="text-center">
+								{{totalRow[column]}}
+							</td>
+						</tr>
+
+						<!--- the if n == 1 causes mature animals row to be the second row down --->
+						<tr v-if="n == 1">
+							<td>
+								{{matureAnimalsRow.Name}}
+							</td>
+							<td v-for="column in columns" class="text-center">
+								{{matureAnimalsRow[column]}}
+							</td>
+						</tr>
+					</template>
+
+                    <!--- <tr v-for="row in typeList">
                         <td data-title="Type">
                             {{row.Name}}
                         </td>
@@ -121,24 +183,7 @@
                                 </div>
                             </cfif>
                         </td>
-                    </tr>
-
-                    <tr class="only-desktop">
-                        <td>
-                            {{totalRow.Name}}
-                        </td>
-                        <td v-for="column in columns" class="text-center">
-                            {{totalRow[column]}}
-                        </td>
-                    </tr>
-                    <tr class="only-desktop">
-                        <td>
-                            {{supportStockRow.Name}}
-                        </td>
-                        <td v-for="column in columns" class="text-center">
-                            {{supportStockRow[column]}}
-                        </td>
-                    </tr>
+                    </tr> --->
                 </tbody>
             </table>
         </div>
@@ -154,6 +199,26 @@ var typeList = <cfoutput>#serializeJSON(typelist)#</cfoutput>;
 cowNumbers = new Vue({
     el: '#mainVue',
     computed: {
+		// the mature animals row is the milk and dry in each column to be added
+		// this function adds the minl and dry for each column and returns the resolt
+		matureAnimalsRow: function(){
+			var _self = this;
+			var totals = { Name:"Mature Animals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0 };
+			for(var i=0; i < _self.typeList.length; i++) {
+				var row = _self.typeList[i];
+				// since milk and dry are both of the mature type in row we are skipping everything that
+				// is not of the mature type
+				if(row.Type != "Mature"){ continue; }
+				for(var t=0; t < _self.columns.length; t++) {
+					// the column variable is a struct that contains string names for each column in the table
+					var colName = _self.columns[t];
+					if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
+					else{ totals[colName] += 0; }
+				}
+			}
+			return totals;
+		},
+
         totalRow: function () {
             var _self = this;
             var totals = { Name:"Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
@@ -187,7 +252,7 @@ cowNumbers = new Vue({
         typeList: typeList,
         columns: ["cnPermitted","CnQtr1","CnQtr2","CnQtr3","CnQtr4"],
         tableHeaders: {cnPermitted:"Permitted",CnQtr1:"Qtr1",CnQtr2:"Qtr2",CnQtr3:"Qtr3",CnQtr4:"Qtr4"},
-		canEdit: {permitted: false, qtr1: false, qtr2: false, qtr3: false, qtr4: false}
+		canEdit: {permitted: false, qtr1: false, qtr2: false, qtr3: false, qtr4: false},
     },
 
     methods: {
