@@ -1,5 +1,8 @@
 <cfparam name="url.dID" default="1">
-<cfset setDate=createDate(2017,1,1)>
+<cfparam name="url.year" default="#year(now())#">
+
+<cfset setDate=createDate(url.year,1,1)>
+
 <cfquery name="engineInfo">
     SELECT *,
     ifnull((SELECT max(ehHoursTotal) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS max_hours,
@@ -47,6 +50,18 @@
                     </select>
                 </form>
             </div>
+
+			<form action="index.cfm">
+				<cfoutput>
+					<input type="hidden" name="action" value="engine_hours">
+					<input type="hidden" name="dID" value="#url.dID#"/>
+					<select name="year" onchange="form.submit()" class="form-control">
+						<cfloop from="2014" to=#year(now())# index="YR">
+							<option value="#YR#" <cfif YR eq year(setDate)>selected="selected"</cfif>>#YR#</option>
+						</cfloop>
+					</select>
+				</cfoutput>
+			</form>
         </div>
     </div>
 
@@ -80,13 +95,13 @@
 
                     <cfif session.USER_TYPEID eq 1>
                         <td>
-                            <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.currentRow#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>
+                            <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#LSDateFormat(now(),"yyyy-mm-dd")#">Add Hours</a>
                         </td>
                     </cfif>
 
                     <cfif session.USer_TYPEID eq 2>
                         <td>
-                            <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.currentRow#&year=#year(now())#">Vue Hours</a>
+                            <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a>
                         </td>
                     </cfif>
                 </tr>
