@@ -2,12 +2,28 @@
 <cfparam name="url.year" default="#year(now())#">
 
 <cfset setDate=createDate(url.year,1,1)>
-
+<!--- 
+    cy_last_hours_run_entry - Current Year Engine Hours maximum with date 
+    cy_first_hours_run_entry - Current Year Engine Hours minimum with date
+    py_last_hours_run_entry - Previous Year Engine Hours maximum with date 
+--->
 <cfquery name="engineInfo">
     SELECT *,
-    ifnull((SELECT max(ehHoursTotal) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS max_hours,
-    ifnull((SELECT Concat(min(ehHoursTotal),",",min(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)),0) AS min_hours,
-    ifnull((SELECT Concat(max(ehHoursTotal),",",max(ehDate)) FROM engine_hours WHERE ehEID = eID AND year(ehDate)=year(#setDate#)-1),0) AS previous_max_hours
+    ifnull((
+        SELECT Concat(max(ehHoursTotal),",",max(ehDate))
+        FROM engine_hours 
+        WHERE ehEID = eID AND year(ehDate)=year(#setDate#)
+    ),0) AS cy_last_hours_run_entry,
+    ifnull((
+        SELECT Concat(min(ehHoursTotal),",",min(ehDate)) 
+        FROM engine_hours 
+        WHERE ehEID = eID AND year(ehDate)=year(#setDate#)
+    ),0) AS cy_first_hours_run_entry,
+    ifnull((
+        SELECT Concat(max(ehHoursTotal),",",max(ehDate)) 
+        FROM engine_hours WHERE ehEID = eID 
+        AND year(ehDate)=year(#setDate#)-1
+    ),0) AS py_last_hours_run_entry
     FROM engine
     WHERE eDID = #url.dID#
 </cfquery>
@@ -108,33 +124,47 @@
             </cfoutput>
         </table>
     </div>
+    <!--- 
+        Senario 1. No previous or current year data = Total accumulated engine hours used: 0
+        Senario 2. No previous, only current year data = whatever is our end - start within the current year
+        Sendrio 3. Previous year & current year data = calculate the daily hours and add to the accumulation within the year
+        
+    --->
+
 
     <cfoutput query="engineInfo">
-        <cfset yearStart = listToArray(engineInfo.min_hours)>
-        <cfset lastYearEnd = listToArray(engineInfo.previous_max_hours)>
-        <cfset yearTotalHours = 0>
-        <cfif (yearStart[1] eq 0 and lastYearEnd[1] eq 0) or (max_hours eq 0)>
-            <!--- We have no information for this year, this mean the yearEnd is also 0 --->
-            <!--- since we have no hours, the hours are 0 --->
-            <cfset yearTotalHours = 0>
-        <cfelseif (yearStart[1] gt 0 and lastYearEnd[1] eq 0 ) or (yearStart[1] eq lastYearEnd[1]) >
-            <!--- we have no previous hours recorded  --->
-            <!--- we just need to subtract the end from the start and we have accumulated hours --->
-            <cfset yearTotalHours = max_hours - yearStart[1]>
-        <cfelse>
-            <!--- we have previous year data so we must find the esimated start of the year engine hours --->
-            <cfset daysBetween = dateDiff('d', lastYearEnd[2],yearStart[2])>
-            <cfset hoursBetween = yearStart[1] - lastYearEnd[1]>
-            <cfset daysSinceFirstOfYear =  dateDiff('d', yearStart[2],setDate)>
+       <cfset currentYearFirst = listToArray(cy_first_hours_run_entry)>
+       <cfset currentYearLast = listToArray(cy_last_hours_run_entry)>
+       <cfset previousYearLast = listToArray(py_last_hours_run_entry)>
 
-            <cfset avgHrsPerDay =  (hoursBetween/daysBetween)>
-            <!--- calculate hours from first of year to the year start date --->
-            <cfset yearTotalHours = daysSinceFirstOfYear * avgHrsPerDay>
-            <!--- calculate elapsed hours during the rest of the year --->
-            <cfset yearTotalHours += max_hours - yearStart[1]>
+       <cfset yearTotalHours = 0>
+        <!--- check to see if we are missing dates --->
+        <cfif arrayLen(currentYearFirst) eq 2 and arrayLen(currentYearLast) eq 2>
+            <cfset currentYearFirstEngineHours = currentYearFirst[1]>
+            <cfset currentYearLastEngineHours = currentYearLast[1]>
+            <!--- Accumulated hours elapsed from first to last entries for the year --->
+            <cfset yearTotalHours += currentYearLastEngineHours - currentYearFirstEngineHours >
+        </cfif>
+        <cfif arrayLen(currentYearFirst) eq 2 and arrayLen(previousYearLast) eq 2 >
+            <cfset currentYearFirstHoursDate = currentYearFirst[2]>
+            <cfset currentYearFirstHours = currentYearFirst[1]>
+            <cfset previousYearLastHoursDate = previousYearLast[2]>
+            <cfset previousYearLastHours= previousYearLast[1]>
+            <cfset firstOfYear = createDate(year(currentYearFirstHoursDate),1,1)>
+            <!--- first engine hours taken after the first of the year --->
+            <cfif currentYearFirstHoursDate gt createDate(year(currentYearFirstHoursDate),1,1)>
+                <!--- get average hours per day between of elapsed hours between last year and this year --->
+                <cfset daysBetween = dateDiff('d', previousYearLastHoursDate,currentYearFirstHoursDate)>
+                <cfset hoursBetween = currentYearFirstHours - previousYearLastHours>
+                <cfset avgHrsPerDay =  (hoursBetween/daysBetween)>
+
+                <cfset daysFromFirstOfYearToStart = dateDiff('d', firstOfYear, currentYearFirstHoursDate)>
+                <!--- add on hours accumulated from start of year to first entry in current year--->
+                <cfset yearTotalHours += avgHrsPerDay * daysFromFirstOfYearToStart>
+            </cfif>
         </cfif>
 
-        <!--- <cfdump var="#dateDiff(engineInfo.min)#"> --->
+
         <div class="card d-lg-none">
         <div class="card-header text-white bg-secondary py-1 mt-3">
             <div>#engineInfo.eName[engineInfo.currentRow]#</div>
