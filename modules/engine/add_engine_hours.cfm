@@ -32,8 +32,8 @@
         <cfif elapsed_days gt 0>
             <cfset daily_engine_hrs = elapsed_engine_hrs/elapsed_days>
         </cfif>
-        
-        <!--- set eatch day in day_hours equal to the corisponding daily_engine_hrs value starting at the last entry and ending 
+
+        <!--- set eatch day in day_hours equal to the corisponding daily_engine_hrs value starting at the last entry and ending
         before the most reacent one --->
         <cfloop index="iDate" from="#prev_date#" to="#engineHours.ehDate#" step="#CreateTimeSpan(1,0,0,0)#">
             <cfset day_hours[dateformat(iDate,'yyyy-mm-dd')] = (daily_engine_hrs)>
@@ -50,7 +50,7 @@
             </cfloop>
         </cfif>
     </cfloop>
-    
+
     <!--- set eatch month in month_hours to the acumulated hours per day fore that month --->
     <cfloop collection="#day_hours#" item="iDateKey">
         <cfset month_hours[month(iDateKey)] += precisionEvaluate(day_hours[iDateKey])>
@@ -101,7 +101,7 @@
                     <form action="index.cfm">
                         <input type=hidden name="action" value="save_engine_hours">
                         <input type=hidden name="eID" value="#url.eID#">
-                        
+
                         <div class="row mb-3">
                         <lable for="set_hrs_at" class="col-sm-4 col-form-label">Recored on</lable>
                             <div class="col-sm-7">
@@ -120,6 +120,7 @@
                             <input type="submit" class="btn btn-block btn-outline-primary" value="Enter"/>
                         </div>
                     </form>
+					<a href="index.cfm?action=engine_hours" class="col-3 mt-3 btn btn-block btn-outline-primary">Done</a>
                 </cfoutput>
                 <!--- <cfdump var=#engineHours#> --->
             </div>
