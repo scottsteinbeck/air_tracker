@@ -2,26 +2,26 @@
 <cfparam name="url.year" default="#year(now())#">
 
 <cfset setDate=createDate(url.year,1,1)>
-<!--- 
-    cy_last_hours_run_entry - Current Year Engine Hours maximum with date 
+<!---
+    cy_last_hours_run_entry - Current Year Engine Hours maximum with date
     cy_first_hours_run_entry - Current Year Engine Hours minimum with date
-    py_last_hours_run_entry - Previous Year Engine Hours maximum with date 
+    py_last_hours_run_entry - Previous Year Engine Hours maximum with date
 --->
 <cfquery name="engineInfo">
     SELECT *,
     ifnull((
         SELECT Concat(max(ehHoursTotal),",",max(ehDate))
-        FROM engine_hours 
+        FROM engine_hours
         WHERE ehEID = eID AND year(ehDate)=year(#setDate#)
     ),0) AS cy_last_hours_run_entry,
     ifnull((
-        SELECT Concat(min(ehHoursTotal),",",min(ehDate)) 
-        FROM engine_hours 
+        SELECT Concat(min(ehHoursTotal),",",min(ehDate))
+        FROM engine_hours
         WHERE ehEID = eID AND year(ehDate)=year(#setDate#)
     ),0) AS cy_first_hours_run_entry,
     ifnull((
-        SELECT Concat(max(ehHoursTotal),",",max(ehDate)) 
-        FROM engine_hours WHERE ehEID = eID 
+        SELECT Concat(max(ehHoursTotal),",",max(ehDate))
+        FROM engine_hours WHERE ehEID = eID
         AND year(ehDate)=year(#setDate#)-1
     ),0) AS py_last_hours_run_entry
     FROM engine
@@ -103,7 +103,7 @@
             <cfoutput query="engineInfo">
                 <tr>
                     <cfloop array="#engineInfo.columnArray()#" index="i">
-                        <cfif (i eq "eID" or i eq "eTeir" or i eq "eDID" or i eq "max_hours" or i eq "min_hours" or i eq "previous_max_hours")><cfcontinue></cfif>
+                        <cfif (i eq "eID" or i eq "eTeir" or i eq "eDID" or i eq "cy_last_hours_run_entry" or i eq "cy_first_hours_run_entry" or i eq "py_last_hours_run_entry")><cfcontinue></cfif>
                         <td>
                             #engineInfo[i][engineInfo.currentRow]#
                         </td>
@@ -124,11 +124,12 @@
             </cfoutput>
         </table>
     </div>
-    <!--- 
+
+    <!---
         Senario 1. No previous or current year data = Total accumulated engine hours used: 0
         Senario 2. No previous, only current year data = whatever is our end - start within the current year
         Sendrio 3. Previous year & current year data = calculate the daily hours and add to the accumulation within the year
-        
+
     --->
 
 
