@@ -1,9 +1,9 @@
 <cfquery name="engineHours" returntype="ARRAY">
-	SELECT *, 'false' as dirty, date_format(ehDate,"%d") as monthday,
-		(select a.ehHoursTotal - b.ehHoursTotal
+	SELECT *, 'false' as dirty, date_format(ehDate,"%e") as monthday,
+		(select b.ehID
 		from engine_hours b
 		where b.ehEID = a.ehEID and b.ehDate < a.ehDate
-		order by b.ehDate desc limit 1) as firstTotal
+		order by b.ehDate desc limit 1) as prevID
 	FROM engine_hours a
 	WHERE a.ehEID = #url.eID#
 </cfquery>
@@ -84,7 +84,7 @@
 										This data comes directaly from the query.
 									--->
 									<div class="col-2 text-center p-0  border-left">
-										{{event.firstTotal}}
+										{{calculateHoursRun(event)}}
 									</div>
 								</div>
 							</template>
@@ -97,11 +97,13 @@
 
 			</div>
 		</div>
-		<a href="index.cfm?action=engine_hours" class="col-3 mt-3 btn btn-block btn-outline-primary">Done</a>
+		<button class="col-3 mt-3 btn btn-block btn-outline-primary" @click="saveData(false)">Save</button>
+		<button class="col-3 mt-3 btn btn-block btn-outline-primary" @click="saveData(true)">Save and Close</button>
 	</div>
 </div>
 
 <script>
+	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
 	var urlYear = <cfoutput>#url.eDate#</cfoutput>;
 	var urlEID = <cfoutput>#url.eID#</cfoutput>;
@@ -131,8 +133,18 @@
 			firstYear: 2014,
 
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
-			engineHours: engineHours,
+			engineHours: lastSaved ? lastSaved: engineHours,
 			urlEID: urlEID,
+		},
+		computed: {
+			dirtyHours: function(){ return this.engineHours.filter( function(x){ return (x.dirty == true)}); },
+
+			engineHoursByID: function(){
+				return this.engineHours.reduce(function(acc,x){
+					acc[x.ehID] = x;
+					return acc;
+				},{});
+			}
 		},
 		methods: {
 			// This function filters the data in engineHours and only returns data from the selected year and
@@ -155,9 +167,9 @@
 						ehEID:_self.urlEID,
 						ehHoursTotal:0,
 						ehID:0,
-						ehMeterChanged:"",
+						ehMeterChanged:0,
 						ehNotes:"",
-						ehUseType:"",
+						ehUseType:0,
 						monthday: 1,
 						dirty: true
 					};
@@ -165,6 +177,12 @@
 					return _self.getEvents(_month);
 				}
 				return filteredEgnHrs;
+			},
+
+			calculateHoursRun: function(item) {
+				if(!this.engineHoursByID.hasOwnProperty(item.prevID)) return "--";
+				var lastHours = this.engineHoursByID[item.prevID].ehHoursTotal;
+				return (item.ehHoursTotal - lastHours).toFixed(2);
 			},
 
 			abbreviatedMonth: function(_month){ return _month.substring(0,3); },
@@ -182,6 +200,24 @@
 
 					return total;
 				}, 0 );
+			},
+
+			saveData: function(goBack)
+			{
+				var _self = this;
+				localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
+				$.ajax({
+					url: "/modules/engine/save_engine_hours.cfm",
+					type: "POST",
+					data: { egnHrs: JSON.stringify(_self.dirtyHours) },
+					success: function(res)
+					{
+						if(res.success){
+							localStorage.removeItem("lastSaved");
+							if(goBack) window.location = "/index.cfm?action=dsp_engine_hours";
+						}
+					}
+				});
 			}
 		}
 	});

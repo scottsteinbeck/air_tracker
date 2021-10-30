@@ -1,15 +1,32 @@
-<cfset incrementMonth = 0>
-<cfif url.ehHoursTotal neq "">
-	<cfset incrementMonth = 1>
-	<cfquery name="addHours">
-		INSERT INTO engine_hours(ehEID,ehHoursTotal,ehDate)
-		VALUES (
-		<cfqueryparam value="#url.eID#">,
-		<cfqueryparam value=#url.ehHoursTotal#>,
-		<cfqueryparam value=#url.eDate# sqlType="cf_sql_date">
-		)
-	</cfquery>
-</cfif>
-<cflocation url="index.cfm?action=add_engine_hours&eID=#url.eID#&eDate=#
-    dateformat(dateadd("m",incrementMonth,url.eDate),"yyyy-mm-dd")#"
-    addtoken="false">
+<cfset result={"success": true, "message": ""}>
+<cftry>
+	<cfset egnHrs=deserializeJson(form.egnHrs)>
+	<cfloop array="#egnHrs#" item="engineData">
+		<cfquery name="addHours">
+			INSERT INTO engine_hours (ehID, ehEID, ehDate, ehHoursTotal, ehMeterChanged, ehUseType)
+			VALUES (<cfqueryparam value="#engineData.ehID#">,
+				<cfqueryparam value="#engineData.ehEID#">,
+				<cfqueryparam cfsqltype="date" value="#engineData.ehDate#">,
+				<cfqueryparam value="#engineData.ehHoursTotal#">,
+				<cfqueryparam value="#engineData.ehMeterChanged#">,
+				<cfqueryparam value="#engineData.ehUseType#">)
+
+			ON DUPLICATE KEY UPDATE
+			ehDate = VALUES(ehDate),
+			ehHoursTotal = VALUES(ehHoursTotal),
+			ehMeterChanged = VALUES(ehMeterChanged),
+			ehUseType = VALUES(ehUseType)
+		</cfquery>
+	</cfloop>
+
+	<cfcatch>
+		<cfheader statuscode="500" statustext="error">
+		<cfset result.success = false>
+		<cfset result.message = cfcatch>
+	</cfcatch>
+
+	<cffinally>
+		<cfheader name="Content-Type" value="application/json">
+		<cfoutput>#serializeJSON(result)#</cfoutput>
+	</cffinally>
+</cftry>
