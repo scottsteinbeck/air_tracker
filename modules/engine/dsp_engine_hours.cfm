@@ -111,7 +111,7 @@
 
                     <cfif session.USER_TYPEID eq 1>
                         <td>
-                            <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Add Hours</a>
+                            <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
                         </td>
                     </cfif>
 
@@ -176,7 +176,7 @@
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Location</strong> #engineInfo.eLocation[engineInfo.currentRow] ?: "---"#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap">
                     <div style="float:right">
-                        <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Add Hours</a> </cfif>
+                        <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a> </cfif>
                         <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">Vue Hours</a> </cfif>
                     </div>
                     <strong>Max Hours</strong> #decimalFormat(yearTotalHours)# / #engineInfo.eMaxHours[engineInfo.currentRow]#
