@@ -9,8 +9,8 @@
 				<cfqueryparam value="#engineData.ehEID#">,
 				<cfqueryparam cfsqltype="date" value="#createDate(year(engineData.ehDate),month(engineData.ehDate),engineData.monthDay)#">,
 				<cfqueryparam value="#engineData.ehHoursTotal#">,
-				<cfqueryparam value="#engineData.ehMeterChanged ? 1 : 0#">,
-				<cfqueryparam value="#engineData.ehUseType ? 1 : 0#">)
+				<cfqueryparam cfsqltype="cf_sql_integer" value="#engineData.ehMeterChanged ? 1 : 0#">,
+				<cfqueryparam cfsqltype="cf_sql_integer" value="#engineData.ehUseType ? 1 : 0#">)
 
 			ON DUPLICATE KEY UPDATE
 			ehDate = VALUES(ehDate),

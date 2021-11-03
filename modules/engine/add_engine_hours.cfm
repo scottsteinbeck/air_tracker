@@ -56,17 +56,17 @@
 
 										<!--- Display the day in a input box. --->
 										<div class="col-2 text-center p-0 border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.monthday" style="width:30px">
+											<input @input="event.dirty = true" type="text" v-model="event.monthday" style="width:30px" pattern="/d*">
 										</div>
 
 										<!--- Display the monthly total hours in an input box. --->
 										<div class="col-4 text-center p-0  border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.ehHoursTotal" style="width:80px">
+											<input @input="event.dirty = true" type="text" v-model="event.ehHoursTotal" style="width:80px" pattern="/d*">
 										</div>
 
 										<!--- Display a check box that can be selected if the monthly total hours is for power loss. --->
 										<div class="col-2 text-center p-0 border-left">
-											<input type="checkbox" value="1" v-model="event.ehUseType">
+											<input type="checkbox" value="1" v-model="event.ehUseType" @click="event.dirty = true">
 										</div>
 
 										<!---
