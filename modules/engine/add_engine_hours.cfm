@@ -43,25 +43,31 @@
 						</div>
 
 						<!--- The data is displayed here. --->
-						<div class="row mb-2 border" v-for="(month,monthIdx) in months">
+						<div class="row mb-2 border" v-for="(month,monthIdx) in months"
+							:style="[(months[currentMonth - 1] == months[monthIdx] && n == 1) ? {'background' : '##fdffb8'} : {}]">
 
-							<!--- If the screen is big enough display the full month name. --->
-							<div class="col-2 d-none d-lg-block">{{month}}</div>
-							<!--- If the screen is not big enought only display the first three letters of the months name. --->
-							<div class="col-2 d-lg-none">{{abbreviatedMonth(month)}}</div>
+							<div class="col-2">{{month}}</div>
 
 							<div class="col-10">
 								<template v-for="event in getEvents(monthIdx,(currentYear - n + 1))">
-									<div class="row m-2">
+									<div class="row mt-2 mb-2">
 
 										<!--- Display the day in a input box. --->
 										<div class="col-2 text-center p-0 border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.monthday" style="width:30px" pattern="/d*">
+											<input @input="event.dirty = true" type="text" v-model="event.monthday"
+											style="width:30px" onclick="$(this).select()">
+
+											<button v-if="months[currentMonth - 1] == months[monthIdx] && n == 1"
+												@click="setCurrentDay(monthIdx,(currentYear - n + 1))" class="m-1 btn btn-secondary btn-sm">
+												Now
+											</button>
 										</div>
 
 										<!--- Display the monthly total hours in an input box. --->
 										<div class="col-4 text-center p-0  border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.ehHoursTotal" style="width:80px" pattern="/d*">
+											<input @input="event.dirty = true" type="text" v-model="event.ehHoursTotal"
+												style="width:80px" onclick="$(this).select()"
+												:style="[(calculateHoursRun(event) <= 0 && event.ehHoursTotal == 0) ? {'border-color': '##d10011'} : {}]">
 										</div>
 
 										<!--- Display a check box that can be selected if the monthly total hours is for power loss. --->
@@ -78,7 +84,13 @@
 											This data comes directaly from the query.
 										--->
 										<div class="col-2 text-center p-0  border-left">
-											{{calculateHoursRun(event)}}
+											<div v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</div>
+											<div v-if="event.ehMeterChanged == true">--</div>
+
+											<div v-show="calculateHoursRun(event) < 0">
+												M/C
+												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
+											</div>
 										</div>
 									</div>
 								</template>
@@ -105,22 +117,24 @@
 		el: '#mainVue',
 		data: {
 			months: [
-				"January",
-				"February",
-				"March",
-				"April",
+				"Jan",
+				"Feb",
+				"Mar",
+				"Apr",
 				"May",
-				"June",
-				"July",
-				"August",
-				"September",
-				"October",
-				"November",
-				"December"
+				"Jun",
+				"Jul",
+				"Aug",
+				"Sep",
+				"Oct",
+				"Nov",
+				"Dec"
 			],
 
-			// currentYear is this year. It is not the year selected from the drop down.
 			currentYear: dateObj.getFullYear(),
+			currentMonth: dateObj.getMonth(),
+			currentDay: dateObj.getDay(),
+
 			firstYear: 2014,
 
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
@@ -145,7 +159,7 @@
 						// Add in default year totals
 						acc[dte.getFullYear()] = { "pl": 0, "service": 0 };
 					}
-					var hours = Math.round(parseFloat(_self.calculateHoursRun(x)) * 100)/100;
+					var hours = parseFloat(_self.calculateHoursRun(x));
 					if(x.ehUseType == 0){
 						acc[dte.getFullYear()]['service'] += hours;
 					} else {
@@ -153,7 +167,7 @@
 					}
 					return acc;
 				},{});
-			}
+			},
 		},
 		methods: {
 			// This function filters the data in engineHours and only returns data from the year and
@@ -194,7 +208,17 @@
 				return (item.ehHoursTotal - lastHours).toFixed(2);
 			},
 
-			abbreviatedMonth: function(_month){ return _month.substring(0,3); },
+			setCurrentDay: function(_month,_year)
+			{
+				this.engineHours.map(function(x){
+					var dte = new Date(x.ehDate);
+					console.log(dte.getMonth() == _month && dte.getFullYear() == _year);
+					if(dte.getMonth() == _month && dte.getFullYear() == _year)
+					{
+						x = new Date();
+					}
+				});
+			},
 
 			saveData: function(goBack)
 			{
@@ -213,7 +237,7 @@
 						}
 					}
 				});
-			}
-		}
+			},
+		},
 	});
 </script>
