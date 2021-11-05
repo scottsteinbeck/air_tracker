@@ -96,6 +96,7 @@
                     <th>Location</th>
                     <th>Serial Number</th>
                     <th>Project</th>
+					<th>Current Hours</th>
                     <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
                     <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
                 </tr>
@@ -108,6 +109,12 @@
                             #engineInfo[i][engineInfo.currentRow]#
                         </td>
                     </cfloop>
+
+					<td>
+						<strong>Max Hours</strong> #decimalFormat(totalHrsForYear(engineInfo))# / #engineInfo.eMaxHours[engineInfo.currentRow]#
+                    	<br/>
+                    	<progress value="#totalHrsForYear(engineInfo)#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
+					</td>
 
                     <cfif session.USER_TYPEID eq 1>
                         <td>
@@ -134,38 +141,6 @@
 
 
     <cfoutput query="engineInfo">
-       <cfset currentYearFirst = listToArray(cy_first_hours_run_entry)>
-       <cfset currentYearLast = listToArray(cy_last_hours_run_entry)>
-       <cfset previousYearLast = listToArray(py_last_hours_run_entry)>
-
-       <cfset yearTotalHours = 0>
-        <!--- check to see if we are missing dates --->
-        <cfif arrayLen(currentYearFirst) eq 2 and arrayLen(currentYearLast) eq 2>
-            <cfset currentYearFirstEngineHours = currentYearFirst[1]>
-            <cfset currentYearLastEngineHours = currentYearLast[1]>
-            <!--- Accumulated hours elapsed from first to last entries for the year --->
-            <cfset yearTotalHours += currentYearLastEngineHours - currentYearFirstEngineHours >
-        </cfif>
-        <cfif arrayLen(currentYearFirst) eq 2 and arrayLen(previousYearLast) eq 2 >
-            <cfset currentYearFirstHoursDate = currentYearFirst[2]>
-            <cfset currentYearFirstHours = currentYearFirst[1]>
-            <cfset previousYearLastHoursDate = previousYearLast[2]>
-            <cfset previousYearLastHours= previousYearLast[1]>
-            <cfset firstOfYear = createDate(year(currentYearFirstHoursDate),1,1)>
-            <!--- first engine hours taken after the first of the year --->
-            <cfif currentYearFirstHoursDate gt createDate(year(currentYearFirstHoursDate),1,1)>
-                <!--- get average hours per day between of elapsed hours between last year and this year --->
-                <cfset daysBetween = dateDiff('d', previousYearLastHoursDate,currentYearFirstHoursDate)>
-                <cfset hoursBetween = currentYearFirstHours - previousYearLastHours>
-                <cfset avgHrsPerDay =  (hoursBetween/daysBetween)>
-
-                <cfset daysFromFirstOfYearToStart = dateDiff('d', firstOfYear, currentYearFirstHoursDate)>
-                <!--- add on hours accumulated from start of year to first entry in current year--->
-                <cfset yearTotalHours += avgHrsPerDay * daysFromFirstOfYearToStart>
-            </cfif>
-        </cfif>
-
-
         <div class="card d-lg-none">
         <div class="card-header text-white bg-secondary py-1 mt-3">
             <div>#engineInfo.eName[engineInfo.currentRow]#</div>
@@ -179,12 +154,53 @@
                         <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a> </cfif>
                         <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">Vue Hours</a> </cfif>
                     </div>
-                    <strong>Max Hours</strong> #decimalFormat(yearTotalHours)# / #engineInfo.eMaxHours[engineInfo.currentRow]#
+                    <strong>Max Hours</strong> #decimalFormat(totalHrsForYear(engineInfo))# / #engineInfo.eMaxHours[engineInfo.currentRow]#
                     <br/>
-                    <progress value="#yearTotalHours#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
+                    <progress value="#totalHrsForYear(engineInfo)#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
                 </li>
             </ul>
         </div>
     </cfoutput>
     <br>
 </div>
+
+<cfscript>
+	public function totalHrsForYear(egnInfo)
+	{
+		currentYearFirst = listToArray(egnInfo.cy_first_hours_run_entry);
+        currentYearLast = listToArray(egnInfo.cy_last_hours_run_entry);
+        previousYearLast = listToArray(egnInfo.py_last_hours_run_entry);
+
+        yearTotalHours = 0;
+        // check to see if we are missing dates
+        if(arrayLen(currentYearFirst) eq 2 and arrayLen(currentYearLast) eq 2)
+		{
+            currentYearFirstEngineHours = currentYearFirst[1];
+            currentYearLastEngineHours = currentYearLast[1];
+            // Accumulated hours elapsed from first to last entries for the year
+            yearTotalHours += currentYearLastEngineHours - currentYearFirstEngineHours;
+		}
+
+        if(arrayLen(currentYearFirst) eq 2 and arrayLen(previousYearLast) eq 2)
+		{
+            currentYearFirstHoursDate = currentYearFirst[2];
+            currentYearFirstHours = currentYearFirst[1];
+            previousYearLastHoursDate = previousYearLast[2];
+            previousYearLastHours= previousYearLast[1];
+            firstOfYear = createDate(year(currentYearFirstHoursDate),1,1);
+            // first engine hours taken after the first of the year
+            if(currentYearFirstHoursDate gt createDate(year(currentYearFirstHoursDate),1,1))
+			{
+                // get average hours per day between of elapsed hours between last year and this year
+                daysBetween = dateDiff('d', previousYearLastHoursDate,currentYearFirstHoursDate);
+                hoursBetween = currentYearFirstHours - previousYearLastHours;
+                avgHrsPerDay =  (hoursBetween/daysBetween);
+
+                daysFromFirstOfYearToStart = dateDiff('d', firstOfYear, currentYearFirstHoursDate);
+                // add on hours accumulated from start of year to first entry in current year
+                 yearTotalHours += avgHrsPerDay * daysFromFirstOfYearToStart;
+			}
+		}
+		return yearTotalHours;
+	}
+</cfscript>

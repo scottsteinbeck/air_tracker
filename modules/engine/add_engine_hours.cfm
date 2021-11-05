@@ -9,8 +9,10 @@
 </cfquery>
 
 <div id="mainVue">
-	<button class="btn btn-block btn-outline-primary ml-2" style="max-width:150px" @click="saveData(false)">Save</button>
-	<button class="btn btn-block btn-outline-primary ml-2" style="max-width:150px" @click="saveData(true)">Save and Close</button>
+	<div class="row justify-content-center">
+		<button class="col-6 btn btn-block btn-outline-primary m-2" style="max-width:150px" @click="saveData(false)">Save</button>
+		<button class="col-6 btn btn-block btn-outline-primary m-2" style="max-width:150px" @click="saveData(true)">Save and Close</button>
+	</div>
 
 	<!--- Display data for all years. --->
 	<div class="row">
@@ -58,14 +60,14 @@
 											style="width:30px" onclick="$(this).select()">
 
 											<button v-if="months[currentMonth - 1] == months[monthIdx] && n == 1"
-												@click="setCurrentDay(monthIdx,(currentYear - n + 1))" class="m-1 btn btn-secondary btn-sm">
+												@click="setCurrentDay(event)" class="m-1 btn btn-secondary btn-sm">
 												Now
 											</button>
 										</div>
 
 										<!--- Display the monthly total hours in an input box. --->
 										<div class="col-4 text-center p-0  border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.ehHoursTotal"
+											<input @input="event.dirty = true" type="number" v-model="event.ehHoursTotal"
 												style="width:80px" onclick="$(this).select()"
 												:style="[(calculateHoursRun(event) <= 0 && event.ehHoursTotal == 0) ? {'border-color': '##d10011'} : {}]">
 										</div>
@@ -99,7 +101,7 @@
 					</cfoutput>
 
 					<!--- Display the total the engine has been running for this year. --->
-					<span class="pr-2 border-right">Yearly total: {{monthTotals[currentYear - n + 1]["service"]}}</span>
+					<span class="pr-2 border-right">Yearly total: {{monthTotals[currentYear - n + 1]["service"] | toDecimalFormat}}</span>
 					Yearly P/L total: {{monthTotals[currentYear - n + 1]["pl"]}}
 				</div>
 			</div>
@@ -112,6 +114,19 @@
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
 	var urlEID = <cfoutput>#url.eID#</cfoutput>;
 	var dateObj = new Date();
+
+	Vue.filter('toDecimalFormat', function (value) {
+		if (isNaN( parseFloat(value) )) {
+			console.log(value)
+			return value;
+		}
+		var formatter = new Intl.NumberFormat({
+			style: 'decimal',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 3,
+		});
+		return formatter.format(parseFloat(value));
+	});
 
 	vueObj = new Vue({
 		el: '#mainVue',
@@ -159,7 +174,7 @@
 						// Add in default year totals
 						acc[dte.getFullYear()] = { "pl": 0, "service": 0 };
 					}
-					var hours = parseFloat(_self.calculateHoursRun(x));
+					var hours = parseFloat((_self.calculateHoursRun(x) == "--" || x.ehMeterChanged == 1) ? 0 : _self.calculateHoursRun(x));
 					if(x.ehUseType == 0){
 						acc[dte.getFullYear()]['service'] += hours;
 					} else {
@@ -208,17 +223,7 @@
 				return (item.ehHoursTotal - lastHours).toFixed(2);
 			},
 
-			setCurrentDay: function(_month,_year)
-			{
-				this.engineHours.map(function(x){
-					var dte = new Date(x.ehDate);
-					console.log(dte.getMonth() == _month && dte.getFullYear() == _year);
-					if(dte.getMonth() == _month && dte.getFullYear() == _year)
-					{
-						x = new Date();
-					}
-				});
-			},
+			setCurrentDay: function(item) { item.monthday = new Date().getDay(); },
 
 			saveData: function(goBack)
 			{
