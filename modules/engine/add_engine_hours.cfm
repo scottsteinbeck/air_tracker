@@ -1,11 +1,8 @@
 <cfquery name="engineHours" returntype="ARRAY">
-	SELECT *, 'false' as dirty, date_format(ehDate,"%e") as monthday,
-		(select b.ehID
-		from engine_hours b
-		where b.ehEID = a.ehEID and b.ehDate < a.ehDate
-		order by b.ehDate desc limit 1) as prevID
+	SELECT *, 'false' as dirty, date_format(ehDate,"%e") as monthday
 	FROM engine_hours a
-	WHERE a.ehEID = #url.eID#
+	WHERE a.ehEID = #url.eID# AND ehDeleteDate IS NULL
+	order by a.ehDate
 </cfquery>
 
 <div id="mainVue">
@@ -93,6 +90,10 @@
 												M/C
 												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
 											</div>
+
+											<div v-show="doesRepeat(event)">
+												<button class="btn btn-danger btn-sm" @click="deleteEngineHours(event)">X</button>
+											</div>
 										</div>
 									</div>
 								</template>
@@ -159,6 +160,15 @@
 		computed: {
 			dirtyHours: function(){ return this.engineHours.filter( function(x){ return (x.dirty == true)}); },
 
+			engineHoursSorted: function(){
+				return this.engineHours
+				.sort(function(a,b){ return new Date(a.ehDate) - new Date(b.ehDate)})
+				.map(function(x,i,a){
+					var prevArrItem = i <= 0 ? 0 : i-1;
+					x.prevID = a[prevArrItem].ehID;
+					return x;
+				});
+			},
 			engineHoursByID: function(){
 				return this.engineHours.reduce(function(acc,x){
 					acc[x.ehID] = x;
@@ -191,7 +201,7 @@
 				var _self = this;
 
 				// Filter engineHours by the year and the month passed in to the function.
-				var filteredEgnHrs = _self.engineHours.filter(function(x) {
+				var filteredEgnHrs = _self.engineHoursSorted.filter(function(x) {
 					var dte = new Date(x.ehDate);
 					return (dte.getFullYear() == _year && dte.getMonth() == _month);
 				});
@@ -224,6 +234,35 @@
 			},
 
 			setCurrentDay: function(item) { item.monthday = new Date().getDay(); },
+
+			doesRepeat: function(item){
+				if(!this.engineHoursByID.hasOwnProperty(item.prevID)){ return false; }
+				var oldID = item.prevID;
+				var oldDate = new Date(this.engineHoursByID[oldID].ehDate);
+				var newDate = new Date(item.ehDate);
+				if(item.ehHoursTotal == 28.2){
+					// console.log(item,oldDate.getMonth(), newDate.getMonth());
+
+				}
+				return (oldDate.getMonth() == newDate.getMonth());
+			},
+
+			deleteEngineHours: function(item)
+			{
+				var _self = this;
+				$.ajax({
+					url: "/modules/engine/delete_engine_hours.cfm",
+					type: "POST",
+					data: { ehID: item.ehID },
+					success: function(res)
+					{
+						if(res.success){
+							var itemIndex = _self.engineHours.indexOf(item);
+							_self.engineHours.splice(itemIndex,1);
+						}
+					}
+				});
+			},
 
 			saveData: function(goBack)
 			{
