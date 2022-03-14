@@ -1,18 +1,31 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="numeral.min.js"></script>
 <cfparam name="url.dID" default="0">
 <cfparam name="url.year" default="#year(now())#">
 <cfparam name="url.Month" default="#month(now())#">
 
 <cfquery name="DairyList">
-    select * from dairies
+    SELECT * FROM dairies
 </cfquery>
-<cfquery name="typelist" returntype="array">
-    select *
-    from cow_types
-    left join cow_numbers on cow_types.tID=cow_numbers.cnTID and cndID=#url.dID# and cnYear = #url.year#
+<cfquery name="cownumbers">
+    SELECT *
+    FROM cow_numbers 
+    WHERE cndID=#url.dID# AND cnYear = #url.year#
 </cfquery>
 
+<cfif !cownumbers.recordCount>
+    <cfquery name="importYear">
+        INSERT INTO cow_numbers( cnTID, cnPermitted, CnQtr1, CnQtr2, CnQtr3, CnQtr4, CndID, CnYear)
+        SELECT cnTID, cnPermitted, CnQtr1, CnQtr2, CnQtr3, CnQtr4, CndID, #url.year#
+        FROM cow_numbers
+        WHERE cndID=#url.dID# AND cnYear = #url.year-1#
+    </cfquery>
+</cfif>
+
+<cfquery name="typelist" returntype="array">
+    SELECT *
+    FROM cow_types
+    LEFT JOIN cow_numbers ON cow_types.tID=cow_numbers.cnTID AND cndID=#url.dID# AND cnYear = #url.year#
+</cfquery>
 <div id='mainVue'>
 <form action="index.cfm" method="GET">
     <div class="row m-2">
@@ -119,7 +132,7 @@
 								{{supportStockRow.Name}}
 							</td>
 							<td v-for="column in columns" class="text-center">
-								{{supportStockRow[column]}}
+								{{supportStockRow[column] | formatNumber}}
 							</td>
 						</tr>
 
@@ -132,11 +145,11 @@
 									<!--- the inputs are named in a way that they can be easly red in the query by knowing the tID --->
 									<!--- canEdit is a struct that stores true or false values for Permitted Qtr1 Qtr2 ect that gove us the locked or unlokced state of the text box --->
 									<!--- the typeList values that are in each text box are models so the total rows will update when they are changed --->
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4" onclick="$(this).select()"/>
 								<cfelse>
 									<!--- only show the text with no text box if the user is not an admin --->
 									<div class="text-center">
@@ -151,7 +164,7 @@
 								{{totalRow.Name}}
 							</td>
 							<td v-for="column in columns" class="text-center">
-								{{totalRow[column]}}
+								{{totalRow[column] | formatNumber}}
 							</td>
 						</tr>
 
@@ -161,29 +174,10 @@
 								{{matureAnimalsRow.Name}}
 							</td>
 							<td v-for="column in columns" class="text-center">
-								{{matureAnimalsRow[column]}}
+								{{matureAnimalsRow[column] | formatNumber}}
 							</td>
 						</tr>
 					</template>
-
-                    <!--- <tr v-for="row in typeList">
-                        <td data-title="Type">
-                            {{row.Name}}
-                        </td>
-                        <td v-for="column in columns" :data-title="tableHeaders[column]">
-                            <cfif session.USer_TYPEID eq 1>
-                                <input type="number" :name="'dn_'+row.TiD+'_Permitted'" v-model="row[column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted"/>
-                                <input type="number" :name="'dn_'+row.TiD+'_Qtr1'" v-model="row[column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1"/>
-                                <input type="number" :name="'dn_'+row.TiD+'_Qtr2'" v-model="row[column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2"/>
-                                <input type="number" :name="'dn_'+row.TiD+'_Qtr3'" v-model="row[column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3"/>
-                                <input type="number" :name="'dn_'+row.TiD+'_Qtr4'" v-model="row[column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4"/>
-                            <cfelse>
-                                <div class="text-center">
-                                    {{row[column]}}
-                                </div>
-                            </cfif>
-                        </td>
-                    </tr> --->
                 </tbody>
             </table>
         </div>
@@ -196,6 +190,10 @@
 //vue version
 var typeList = <cfoutput>#serializeJSON(typelist)#</cfoutput>;
 
+Vue.filter("formatNumber", function (value) {
+    return Number(value).toLocaleString()
+});
+
 cowNumbers = new Vue({
     el: '#mainVue',
     computed: {
@@ -204,7 +202,7 @@ cowNumbers = new Vue({
 		matureAnimalsRow: function(){
 			var _self = this;
 			var totals = { Name:"Mature Animals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0 };
-			for(var i=0; i < _self.typeList.length; i++) {
+            for(var i=0; i < _self.typeList.length; i++) {
 				var row = _self.typeList[i];
 				// since milk and dry are both of the mature type in row we are skipping everything that
 				// is not of the mature type
@@ -238,7 +236,7 @@ cowNumbers = new Vue({
             var totals = { Name:"Support Stock Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
             for(var i = 0; i < _self.typeList.length; i++){
                 var row = _self.typeList[i];
-                if(row.Type != "Support"){ continue; }
+                if(row.Type != "Support" || row.Name == "Calves"){ continue; }
                 for(var t = 0; t < _self.columns.length; t++){
                     var colName = _self.columns[t];
                     if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
