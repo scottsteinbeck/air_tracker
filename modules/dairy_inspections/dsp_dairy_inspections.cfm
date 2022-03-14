@@ -188,31 +188,6 @@
 					</div>
 				</form>
 			</div>
-
-			<!--- <cfif session.USer_TYPEID eq 1>
-				<!--- post form for dID,month, and year values to be recieved from the URL and usde in the inspection
-				entry  --->
-				<form action="index.cfm?action=add_inspection" method="POST" class="mt-2 mb-2">
-					<input type="hidden" name="action" value="dairy_inspections">
-					<input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
-
-					<input type="hidden" name=month value="<cfoutput>#url.Month#</cfoutput>">
-					<input type="hidden" name=year value="<cfoutput>#url.Year#</cfoutput>">
-
-					<table>
-						<tr>
-							<td>
-								Inspection Date
-								<input type="Date" name="InspectionDate" value="<cfoutput>#dateformat(now(),"yyyy-mm-dd")#</cfoutput>">
-							</td>
-							<td>
-								<input type="submit" value="add" class="btn btn-outline-primary btn-sm">
-							</td>
-						</tr>
-					</table>
-				</form>
-			<cfelse>
-			</cfif> --->
 			<br>
 		</div>
 	</div>
@@ -230,12 +205,12 @@
         <cfif is_specific eq true and daily_weekly_set eq true><cfbreak/></cfif>
     </cfloop>
 
-
     <cfif isEmpty(lastInspection.lastDate)>
         <cfset newDate=dateAdd("d",randRange(80,90),createDate(2017,"01","01"))>
     <cfelse>
         <cfset newDate=dateAdd("d",randRange(80,90),lastInspection.lastDate)>
     </cfif>
+
     <cfloop condition="newDate lt now()">
         <cfquery name="addNewDates">
             INSERT INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
@@ -306,9 +281,9 @@
 									#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 								<cfelse>
 									<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
-										<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
-											Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
-										</cfif>
+									<cfif questionlist.qID eq 5 or questionlist.qID eq 41 or questionlist.dqType eq "Specific">
+										Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
+									</cfif>
 									<!--- </cfif> --->
 								</cfif>
 							</td>

@@ -65,6 +65,7 @@
 		<h2 class="d-flex justify-content-center"><cfoutput>#dairyName.dCompanyName#</cfoutput></h2>
 	</cfif>
 
+    
     <cfswitch expression="#url.action#">
         <cfcase value="dairy_settings"><cfinclude template="modules/dairy/dsp_dairy_settings.cfm"></cfcase>
         <cfcase value="act_save_settings"><cfinclude template="modules/dairy/act_save_settings.cfm"></cfcase>
@@ -77,6 +78,7 @@
         <cfcase value="act_save_numbers"><cfinclude template="modules/CowNumbers/act_save_numbers.cfm"></cfcase>
         <cfcase value="engine_hours"><cfinclude template="modules/engine/dsp_engine_hours.cfm"></cfcase>
         <cfcase value="add_engine_hours"><cfinclude template="modules/engine/add_engine_hours.cfm"/></cfcase>
+        <cfcase value="add_engine"><cfinclude template="modules/engine/dsp_add_engine.cfm"/></cfcase>
         <cfcase value="save_engine_hours"><cfinclude template="modules/engine/save_engine_hours.cfm"/></cfcase>
         <cfcase value="check_engine_hours"><cfinclude template="modules/engine/check_engine_hours.cfm"/></cfcase>
         <cfcase value="dsp_documents"><cfinclude template="modules/dairy_inspections/dsp_documents.cfm"/></cfcase>

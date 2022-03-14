@@ -43,7 +43,10 @@
     <div class="container-xxl">
         <div class="row mx-0 mt-2 mb-2">
             <div class="col-4">
-                <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine">Add Engine</a>
+                <cfoutput>
+                    <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">Add Engine</a>
+                </cfoutput>
+
                 <span class="d-none d-lg-inline">
                     <!--- <form action="ajax" --->
                     <cfoutput>

@@ -41,7 +41,7 @@
         <tbody>
             <cfoutput query="questionlist" >
             <tr>
-                <td><cfif qtype eq "Heading"><h4>#questionlist.qTitle#<h4><cfelse>#questionlist.qTitle#</cfif></td>
+                <td><cfif qtype eq "Heading"><h4>#questionlist.qTitle#<h4><cfelse>#questionlist.qNumber# #questionlist.qTitle#</cfif></td>
                 <td>
                     <cfif session.USer_TYPEID eq 1>
                     
