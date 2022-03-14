@@ -6,19 +6,28 @@
 <cfquery name="DairyList">
     SELECT * FROM dairies
 </cfquery>
+
 <cfquery name="cownumbers">
     SELECT *
     FROM cow_numbers 
-    WHERE cndID=#url.dID# AND cnYear = #url.year#
+    WHERE cndID=#url.dID# AND cnTID = 1 AND CnYear != #url.year#
 </cfquery>
 
-<cfif !cownumbers.recordCount>
+<cfif url.keyExists("replaceFromYear")>
+
+    <cfquery>
+        DELETE
+        FROM cow_numbers
+        WHERE cndID=#url.dID# AND cnYear = #url.year#
+    </cfquery>
+
     <cfquery name="importYear">
         INSERT INTO cow_numbers( cnTID, cnPermitted, CnQtr1, CnQtr2, CnQtr3, CnQtr4, CndID, CnYear)
         SELECT cnTID, cnPermitted, CnQtr1, CnQtr2, CnQtr3, CnQtr4, CndID, #url.year#
         FROM cow_numbers
-        WHERE cndID=#url.dID# AND cnYear = #url.year-1#
+        WHERE cndID=#url.dID# AND cnYear = #url.replaceFromYear#
     </cfquery>
+
 </cfif>
 
 <cfquery name="typelist" returntype="array">
@@ -26,32 +35,34 @@
     FROM cow_types
     LEFT JOIN cow_numbers ON cow_types.tID=cow_numbers.cnTID AND cndID=#url.dID# AND cnYear = #url.year#
 </cfquery>
-<div id='mainVue'>
-<form action="index.cfm" method="GET">
-    <div class="row m-2">
-        <div class="col-lg-3 col-6">
-            <input type="hidden" name="action" value="cow_numbers">
-            <select name="dID" id="" onchange="form.submit()" class="form-control">
-                <option value="0"> none</option>
-                <cfoutput query="DairyList" >
-                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
-                </cfoutput>
-            </select>
-        </div>
-        <div class="col-lg-2 col-4">
-            <select name="year" id="" onchange="form.submit()" class="form-control">
-                <cfoutput><cfloop from="2014" to="#year(now())#" index="YR">
-                <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
-                </cfloop>
-                </cfoutput>
-            </select>
-        </div>
-    </div>
-</form>
 
-<form action="index.cfm?action=act_save_numbers" method="POST">
-    <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
-    <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
+<div id='mainVue'>
+
+    <form action="index.cfm" method="GET">
+        <div class="row m-2">
+            <div class="col-lg-3 col-6">
+                <input type="hidden" name="action" value="cow_numbers">
+                <select name="dID" id="" onchange="form.submit()" class="form-control">
+                    <option value="0"> none</option>
+                    <cfoutput query="DairyList" >
+                        <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                    </cfoutput>
+                </select>
+            </div>
+            <div class="col-lg-2 col-4">
+                <select name="year" id="" onchange="form.submit()" class="form-control">
+                    <cfoutput><cfloop from="2014" to="#year(now())#" index="YR">
+                    <option value="#YR#" <cfif url.year eq YR>selected ="selected"</cfif> >#YR#</option>
+                    </cfloop>
+                    </cfoutput>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <form action="index.cfm?action=act_save_numbers" method="POST">
+        <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
+        <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
         <div id="no-more-tables">
             <table id="cownumbers" class="table table-bordered table-striped">
                 <thead>
@@ -181,8 +192,29 @@
                 </tbody>
             </table>
         </div>
-		<cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left"> </cfif>
+		<cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left mb-3"> </cfif>
 	</form>
+    
+    <cfif session.USer_TYPEID eq 1>
+        <div class="d-flex justify-content-end mr-2 ml-auto">
+            <form method="GET" action="/index.cfm" class="form-inline" id="replaceYearForm">
+                <label>Replace the data from this year with data from another year. &nbsp;</label>
+                
+                <cfoutput>
+                    <input type="hidden" name="action" value="cow_numbers">
+                    <input type="hidden" name="dID" value="#url.dID#">
+                    <input type="hidden" name="year" value="#url.year#">
+                </cfoutput>
+                <select name="replaceFromYear" class="form-control">
+                    <cfoutput query="cownumbers">
+                        <option value="#dateFormat(cownumbers.CnYear,"YYYY")#">Year #dateFormat(cownumbers.CnYear,"YYYY")#, Milk Qtr1 #cownumbers.CnQtr1#</option>
+                    </cfoutput>
+                </select>
+                <input type="button" @click="replaceFromOtherYear()" value="Replace data" class="btn btn-outline-primary margin-left">
+            </form>
+        </div>
+    </cfif>
+
 </div>
 
 
@@ -263,7 +295,13 @@ cowNumbers = new Vue({
 				if(confirm("Are you shure you want to unlock the Permitted input boxes?"))
 				{ this.canEdit.permitted = true; }
 			}
-		}
+		},
+
+        replaceFromOtherYear: function()
+        {
+            if(confirm('Do you want to replace the data from this year with the data from another year?')) 
+            { document.getElementById("replaceYearForm").submit(); }
+        },
     },
 });
 </script>
