@@ -25,7 +25,7 @@
         AND year(ehDate)=year(#setDate#)-1
     ),0) AS py_last_hours_run_entry
     FROM engine
-    WHERE eDID = #url.dID#
+    WHERE eDID = #url.dID# AND eDeleteDate IS NULL
 </cfquery>
 
 <cfquery name="DairyList">
@@ -94,14 +94,16 @@
                     <th>Max Hours</th>
                     <th>Grower</th>
                     <th>Ranch</th>
-                    <th>FamilyHP</th>
+                    <th>HP</th>
                     <th>Permit</th>
                     <th>Location</th>
                     <th>Serial Number</th>
                     <th>Project</th>
+                    <th>Family</th>
 					<th>Current Hours</th>
                     <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
                     <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
+                    <th></th>
                 </tr>
             </thead>
             <cfoutput query="engineInfo">
@@ -121,7 +123,8 @@
 
                     <cfif session.USER_TYPEID eq 1>
                         <td>
-                            <a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
+                            <a class="btn btn-outline-primary btn-block" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
+                            <a href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#" class="btn btn-outline-primary btn-block">Edit engine</a>
                         </td>
                     </cfif>
 

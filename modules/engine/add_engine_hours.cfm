@@ -5,10 +5,12 @@
 	order by a.ehDate
 </cfquery>
 
+<!--- <cfdump var="#engineHours#"> --->
+
 <div id="mainVue">
 	<div class="row justify-content-center">
-		<button class="col-6 btn btn-block btn-outline-primary m-2" style="max-width:150px" @click="saveData(false)">Save</button>
-		<button class="col-6 btn btn-block btn-outline-primary m-2" style="max-width:150px" @click="saveData(true)">Save and Close</button>
+		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
+		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
 	</div>
 
 	<!--- Display data for all years. --->
@@ -49,6 +51,7 @@
 
 							<div class="col-10">
 								<template v-for="event in getEvents(monthIdx,(currentYear - n + 1))">
+									<!--- {{event}} --->
 									<div class="row mt-2 mb-2">
 
 										<!--- Display the day in a input box. --->
@@ -90,8 +93,9 @@
 												M/C
 												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
 											</div>
-
+											
 											<div v-show="doesRepeat(event)">
+												{{doesRepeat(event)}}
 												<button class="btn btn-danger btn-sm" @click="deleteEngineHours(event)">X</button>
 											</div>
 										</div>
@@ -109,6 +113,7 @@
 		</div>
 	</div>
 </div>
+
 
 <script>
 	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
@@ -148,7 +153,7 @@
 			],
 
 			currentYear: dateObj.getFullYear(),
-			currentMonth: dateObj.getMonth(),
+			currentMonth: dateObj.getMonth()+1,
 			currentDay: dateObj.getDay(),
 
 			firstYear: 2014,
@@ -156,10 +161,14 @@
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
 			engineHours: lastSaved ? lastSaved: engineHours,
 			urlEID: urlEID,
+
+			saveButtonTest: "Save"
 		},
 		computed: {
 			dirtyHours: function(){ return this.engineHours.filter( function(x){ return (x.dirty == true)}); },
 
+			// Sorts the engine hours by their dates and adds a key prevID to engineHours.
+			// If the record if the first one the make the prevID the ehID of the record prevID is being added to.
 			engineHoursSorted: function(){
 				return this.engineHours
 				.sort(function(a,b){ return new Date(a.ehDate) - new Date(b.ehDate)})
@@ -233,10 +242,11 @@
 				return (item.ehHoursTotal - lastHours).toFixed(2);
 			},
 
-			setCurrentDay: function(item) { item.monthday = new Date().getDay(); },
+			setCurrentDay: function(item) { item.monthday = new Date().getDate(); },
 
 			doesRepeat: function(item){
-				if(!this.engineHoursByID.hasOwnProperty(item.prevID)){ return false; }
+				if(!this.engineHoursByID.hasOwnProperty(item.prevID) || item.prevID == item.ehID){ return false; }
+				// console.log(item);
 				var oldID = item.prevID;
 				var oldDate = new Date(this.engineHoursByID[oldID].ehDate);
 				var newDate = new Date(item.ehDate);
@@ -267,6 +277,9 @@
 			saveData: function(goBack)
 			{
 				var _self = this;
+
+				_self.saveButtonTest = "Saving..."
+
 				localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 				$.ajax({
 					url: "/modules/engine/save_engine_hours.cfm",
@@ -276,9 +289,11 @@
 					{
 						if(res.success){
 							localStorage.removeItem("lastSaved");
-							if(goBack) window.location = "/index.cfm?action=dsp_engine_hours";
+							if(goBack) window.location = "/index.cfm?action=engine_hours";
 							alert("Save successful.");
 						}
+
+						_self.saveButtonTest = "Save";
 					}
 				});
 			},
