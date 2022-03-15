@@ -2,18 +2,19 @@
     <!--- <cfdump var="#form#"><cfabort> --->
 
     <cfquery>
-        INSERT INTO engine(eName, eMake, eModel, eMaxHours, eGrower, eRanch, eFamilyHP, ePermit, eTeir, eLocation, eSerialNumber, eProject, eDID)
+        INSERT INTO engine(eName, eMake, eModel, eMaxHours, eGrower, eRanch, eHP, eFamily, ePermit, eTeir, eLocation, eSerialNumber, eProject, eDID)
         VALUES (<cfqueryparam value="#form.engineName#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.engineMake#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.engineModel#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.engineMaxHrs#" cfsqltype="cf_sql_integer">,
         <cfqueryparam value="#form.grower#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.ranch#" cfsqltype="cf_sql_varchar">,
-        <cfqueryparam value="#form.engineFamilyHP#" cfsqltype="cf_sql_varchar">,
+        <cfqueryparam value="#form.engineHP#" cfsqltype="cf_sql_varchar">,
+        <cfqueryparam value="#form.engineFamily#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.enginePermit#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.engineTeir#" cfsqltype="cf_sql_integer">,
         <cfqueryparam value="#form.engineLocation#" cfsqltype="cf_sql_varchar">,
-        <cfqueryparam value="#form.engineSerialNumber#" cfsqltype="cf_sql_integer">,
+        <cfqueryparam value="#form.engineSerialNumber#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.engineProject#" cfsqltype="cf_sql_varchar">,
         <cfqueryparam value="#form.dairyID#" cfsqltype="cf_sql_integer">)
     </cfquery>

@@ -22,6 +22,8 @@
         ORDER BY qPriority
 </cfquery>
 
+<!--- <cfdump var=#questionlist#> --->
+
 <style>
     .fa-6{
         font-size: 2em;
@@ -265,23 +267,23 @@
 							</td>
 						</cfif>
 
-						<cfset manureLevel = 0>
+						<cfset manureLevel = "">
 						<cfif questionlist.qShowManurelevel gt 0>
-							<cfif questionlist.iManureInchCorral gt 0 && questionlist.qShowManurelevel eq "corral">
+							<cfif questionlist.qShowManurelevel eq "corral">
 								<cfset manureLevel = '#questionlist.iManureInchCorral#'>
-							<cfelseif questionlist.iManureInchConcrete gt 0 && questionlist.qShowManurelevel eq "concrete">
+							<cfelseif questionlist.qShowManurelevel eq "concrete">
 								<cfset manureLevel = '#questionlist.iManureInchConcrete#'>
-							<cfelseif questionlist.iManureInchFenceline gt 0 && questionlist.qShowManurelevel eq "fenceline">
+							<cfelseif questionlist.qShowManurelevel eq "fenceline">
 								<cfset manureLevel = '#questionlist.iManureInchFenceline#'>
 							</cfif>
 						</cfif>
 						<cfif is_specific>
 							<td>
-								<cfif manureLevel neq 0>
+								<cfif manureLevel neq "">
 									#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 								<cfelse>
 									<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
-									<cfif questionlist.qID eq 5 or questionlist.qID eq 41 or questionlist.dqType eq "Specific">
+									<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
 										Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
 									</cfif>
 									<!--- </cfif> --->
@@ -291,7 +293,7 @@
 
 						<cfif show_M_level_column>
 							<td>
-								<cfif manureLevel neq 0>
+								<cfif manureLevel neq "">
 									#manureLevel#"
 								</cfif>
 							</td>

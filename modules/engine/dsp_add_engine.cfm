@@ -27,8 +27,13 @@
             </div>
 
             <div class="form-group">
+                <label>Engine HP</label>
+                <input type="text" name="engineHP" class="form-control">
+            </div>
+
+            <div class="form-group">
                 <label>Engine family</label>
-                <input type="text" name="engineFamilyHP" class="form-control">
+                <input type="text" name="engineFamily" class="form-control">
             </div>
 
             <div class="form-group">
@@ -48,7 +53,7 @@
 
             <div class="form-group">
                 <label>Engine serial number</label>
-                <input type="number" name="engineSerialNumber" class="form-control">
+                <input type="text" name="engineSerialNumber" class="form-control">
             </div>
             
             <div class="form-group">
