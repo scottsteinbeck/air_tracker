@@ -11,7 +11,7 @@
 	WHERE eID = #url.eID#
 </cfquery>
 
-<!--- <cfdump var="#engineHours#"> --->
+<cfdump var="#engineHours#">
 
 <div id="mainVue">
 	<div class="row justify-content-center">
