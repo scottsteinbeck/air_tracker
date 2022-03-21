@@ -29,9 +29,9 @@
             <div class="col-sm-8">
                 <div class="input-group mb-3 mt-2 ml-2">
                     <form action="index.cfm" method="GET">
-                    <input type="hidden" name="eID" value="#url.eID#">
-                    <input type="hidden" name="action" value="check_engine_hours">
-                    <select name="year" onchange="form.submit()" class="form-control">
+                        <input type="hidden" name="eID" value="#url.eID#">
+                        <input type="hidden" name="action" value="check_engine_hours">
+                        <select name="year" onchange="form.submit()" class="form-control">
                             <cfloop from="2014" to=#year(now())# index="YR">
                                 <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
                             </cfloop>

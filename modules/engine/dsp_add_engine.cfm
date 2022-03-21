@@ -23,6 +23,7 @@
         <cfset engine.eSerialNumber = "">
         <cfset engine.eProject = "">
         <cfset engine.eFamily = "">
+        <cfset engine.eStartDate = "2014">
 
         <cfset submitButton = "Create engine">
 
@@ -93,9 +94,9 @@
 
                 <div class="form-group">
                     <label>Starting year</label>
-                    <select class="form-control">
+                    <select class="form-control" name="engineStartDate">
                         <cfloop from="2014" to="#year(now())#" index="year">
-                            <option value="#year#">
+                            <option value="#year#" <cfif "#engine.eStartDate#" == "#year#">selected</cfif>>
                                 #year#
                             </option>
                         </cfloop>

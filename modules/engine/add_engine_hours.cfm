@@ -5,6 +5,12 @@
 	order by a.ehDate
 </cfquery>
 
+<cfquery name="startYearQry" returntype="ARRAY">
+	SELECT eStartDate
+	FROM engine
+	WHERE eID = #url.eID#
+</cfquery>
+
 <!--- <cfdump var="#engineHours#"> --->
 
 <div id="mainVue">
@@ -118,6 +124,7 @@
 <script>
 	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
+	var startYear = <cfoutput> #structKeyExists(startYearQry[1], "eStartDate") ? "2014" : startYearQry[1].eStartDate# </cfoutput>;
 	var urlEID = <cfoutput>#url.eID#</cfoutput>;
 	var dateObj = new Date();
 
@@ -156,7 +163,7 @@
 			currentMonth: dateObj.getMonth()+1,
 			currentDay: dateObj.getDay(),
 
-			firstYear: 2014,
+			firstYear: startYear,
 
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
 			engineHours: lastSaved ? lastSaved: engineHours,
