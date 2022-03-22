@@ -5,8 +5,8 @@
 	order by a.ehDate
 </cfquery>
 
-<cfquery name="startYearQry" returntype="ARRAY">
-	SELECT eStartDate
+<cfquery name="engineData" returntype="ARRAY">
+	SELECT *
 	FROM engine
 	WHERE eID = #url.eID#
 </cfquery>
@@ -17,7 +17,10 @@
 	<div class="row justify-content-center">
 		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
 		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
+		<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
 	</div>
+
+	<h5 class="m-2">{{engineData.eName}}</h5>
 
 	<!--- Display data for all years. --->
 	<div class="row">
@@ -57,7 +60,6 @@
 
 							<div class="col-10">
 								<template v-for="event in getEvents(monthIdx,(currentYear - n + 1))">
-									<!--- {{event}} --->
 									<div class="row mt-2 mb-2">
 
 										<!--- Display the day in a input box. --->
@@ -92,10 +94,10 @@
 											This data comes directaly from the query.
 										--->
 										<div class="col-2 text-center p-0  border-left">
-											<div v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</div>
-											<div v-if="event.ehMeterChanged == true">--</div>
+											<div v-if="event.ehMeterChanged == false" @dblclick="showMeterChange(event)" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</div>
+											<div v-if="event.ehMeterChanged == true" @dblclick="showMeterChange(event)">--</div>
 
-											<div v-show="calculateHoursRun(event) < 0">
+											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showMC">
 												M/C
 												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
 											</div>
@@ -113,7 +115,7 @@
 
 					<!--- Display the total the engine has been running for this year. --->
 					<span class="pr-2 border-right">Yearly total: {{monthTotals[currentYear - n + 1]["service"] | toDecimalFormat}}</span>
-					Yearly P/L total: {{monthTotals[currentYear - n + 1]["pl"]}}
+					Yearly P/L total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 				</div>
 			</div>
 		</div>
@@ -124,7 +126,8 @@
 <script>
 	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
-	var startYear = <cfoutput> #structKeyExists(startYearQry[1], "eStartDate") ? "2014" : startYearQry[1].eStartDate# </cfoutput>;
+	var startYear = <cfoutput> #structKeyExists(engineData[1], "eStartDate") ? "2014" : engineData[1].eStartDate# </cfoutput>;
+	var engineData = <cfoutput>#serializeJSON(engineData[1])#</cfoutput>
 	var urlEID = <cfoutput>#url.eID#</cfoutput>;
 	var dateObj = new Date();
 
@@ -165,6 +168,8 @@
 
 			firstYear: startYear,
 
+			engineData: engineData,
+
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
 			engineHours: lastSaved ? lastSaved: engineHours,
 			urlEID: urlEID,
@@ -196,21 +201,33 @@
 				var _self = this;
 				return this.engineHours.reduce(function(acc,x){
 					var dte = new Date(x.ehDate);
+
+					// Check if the year has bean created for when the current hours where entered
 					if(!acc.hasOwnProperty(dte.getFullYear())){
 						// Add in default year totals
 						acc[dte.getFullYear()] = { "pl": 0, "service": 0 };
 					}
+
 					var hours = parseFloat((_self.calculateHoursRun(x) == "--" || x.ehMeterChanged == 1) ? 0 : _self.calculateHoursRun(x));
-					if(x.ehUseType == 0){
-						acc[dte.getFullYear()]['service'] += hours;
-					} else {
-						acc[dte.getFullYear()]['pl'] += hours;
+					if(hours >= 0){
+						if(x.ehUseType == 0){
+							acc[dte.getFullYear()]['service'] += hours;
+						} else {
+							acc[dte.getFullYear()]['pl'] += hours;
+						}
 					}
+
 					return acc;
 				},{});
 			},
 		},
 		methods: {
+			// When the total hours are doubble clicked show the M/C checkbox
+			showMeterChange: function(event){
+				if(!event.showMC) { Vue.set(event,"showMC","true"); }
+				else { Vue.delete(event,"showMC"); }
+			},
+
 			// This function filters the data in engineHours and only returns data from the year and
 			// the month passed in to it.
 			getEvents: function(_month,_year){
