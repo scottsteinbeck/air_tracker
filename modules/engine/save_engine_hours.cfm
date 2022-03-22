@@ -1,10 +1,8 @@
 <cfset result={"success": true, "message": ""}>
 <cftry>
-	<!--- <cfdump var="egnHrs"><cfabort> --->
+	
 	<cfset egnHrs=deserializeJson(form.egnHrs)>
-
-	<!--- <cfdump var="#egnHrs#"><cfabort> --->
-
+	
 	<cfloop array="#egnHrs#" item="engineData">
 
 		<cfset date = createDate(year(engineData.ehDate),month(engineData.ehDate),engineData.monthDay)>
@@ -25,6 +23,12 @@
 			ehHoursTotal = VALUES(ehHoursTotal),
 			ehMeterChanged = VALUES(ehMeterChanged),
 			ehUseType = VALUES(ehUseType)
+		</cfquery>
+
+		<cfquery>
+			UPDATE engine
+			SET eYearlyTotals = <cfqueryparam value="#yearlyTotals#" cfsqltype="cf_sql_varchar">
+			WHERE eID = <cfqueryparam value="#engineData.ehEID#" cfsqltype="cf_sql_integer">
 		</cfquery>
 	</cfloop>
 

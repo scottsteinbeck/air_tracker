@@ -20,7 +20,26 @@
 		<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
 	</div>
 
-	<h5 class="m-2">{{engineData.eName}}</h5>
+	<h4 class="ml-3">Engine data</h4>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Max hours</th>
+				<th>Make</th>
+				<th>Model</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<tr>
+				<td> {{engineData.eName}} </td>
+				<td> {{engineData.eMaxHours}} </td>
+				<td>  {{engineData.eMake}} </td>
+				<td>  {{engineData.eModel}} </td>
+			</tr>
+		</tbody>
+	</table>
 
 	<!--- Display data for all years. --->
 	<div class="row">
@@ -308,7 +327,7 @@
 				$.ajax({
 					url: "/modules/engine/save_engine_hours.cfm",
 					type: "POST",
-					data: { egnHrs: JSON.stringify(_self.dirtyHours) },
+					data: { egnHrs: JSON.stringify(_self.dirtyHours), yearlyTotals: JSON.stringify(_self.monthTotals) },
 					success: function(res)
 					{
 						if(res.success){
