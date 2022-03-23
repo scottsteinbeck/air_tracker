@@ -133,8 +133,8 @@
 					</cfoutput>
 
 					<!--- Display the total the engine has been running for this year. --->
-					<span class="pr-2 border-right">Yearly total: {{monthTotals[currentYear - n + 1]["service"] | toDecimalFormat}}</span>
-					Yearly P/L total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+					<span class="pr-2 border-right">{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"]| toDecimalFormat}}</span>
+					{{currentYear - n + 1}} P/L Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 				</div>
 			</div>
 		</div>
