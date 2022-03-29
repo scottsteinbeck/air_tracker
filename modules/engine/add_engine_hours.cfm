@@ -105,7 +105,7 @@
 
 											<br>
 											<!--- A button for adding a new entry for the same month. --->
-											<button class="btn btn-success btn-sm m-1 float-left" v-show="event.showDetails" v-if="!doesRepeat(event)" @click="addEntry(index, event)">+</button>
+											<button class="btn btn-success btn-sm m-1 float-left" v-show="event.showDetails" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" @click="addEntry(index, event)">+</button>
 										</div>
 
 										<!--- Display a check box that can be selected if the monthly total hours is for power loss. --->
@@ -125,7 +125,7 @@
 											<span v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</span>
 											<span v-if="event.ehMeterChanged == true">--</span>
 
-											<button @click="showMeterChange(event)" v-if="!doesRepeat(event)" class="btn btn-sm btn-secondary ml-1">Details</button>
+											<button @click="showMeterChange(event)" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" class="btn btn-sm btn-secondary ml-1">Details</button>
 
 											<!--- In the right conditions display a checkbox for settings the engine to a meter change --->
 											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showDetails">
@@ -135,7 +135,7 @@
 										</div>
 
 										<div class="row">
-											<textarea type="text" placeholder="Notes" v-show="event.showDetails" v-if="!doesRepeat(event)" class="m-2 ml-3"></textarea>
+											<textarea type="text" placeholder="Notes" v-show="event.showDetails" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" class="m-2 ml-3"></textarea>
 										</div>
 
 									</div>
@@ -268,7 +268,10 @@
 					monthday: 1,
 					dirty: true,
 					prevID: event.ehID,
+					showDetails: true
 				};
+
+				event.showDetails = false;
 
 				_self.engineHours.splice(eventIndex - 1, 0, newEvent);
 			},
@@ -320,6 +323,7 @@
 			setCurrentDay: function(item) { item.monthday = new Date().getDate(); },
 
 			doesRepeat: function(item){
+				if(item == undefined) return false;
 				if(!this.engineHoursByID.hasOwnProperty(item.prevID) || item.prevID == item.ehID){ return true; }
 				// console.log(item);
 				var oldID = item.prevID;
