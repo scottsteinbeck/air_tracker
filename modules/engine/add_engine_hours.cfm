@@ -63,7 +63,7 @@
 							</div>
 
 							<div class="col-2 border-left">
-								P/L
+								Power loss
 							</div>
 
 							<div class="col-3 border-left">
@@ -78,7 +78,7 @@
 							<div class="col-2">{{month}}</div>
 
 							<div class="col-10">
-								<template v-for="event in getEvents(monthIdx,(currentYear - n + 1))">
+								<template v-for="(event, index) in getEvents(monthIdx,(currentYear - n + 1))">
 									<div class="row mt-2 mb-2">
 
 										<!--- Display the day in a input box. --->
@@ -95,8 +95,17 @@
 										<!--- Display the monthly total hours in an input box. --->
 										<div class="col-4 text-center p-0  border-left">
 											<input @input="event.dirty = true" type="number" v-model="event.ehHoursTotal"
-												style="width:80px" onclick="$(this).select()"
-												:style="[(calculateHoursRun(event) <= 0 && event.ehHoursTotal == 0) ? {'border-color': '##d10011'} : {}]">
+											style="width:80px" onclick="$(this).select()"
+											:style="[(calculateHoursRun(event) <= 0 && event.ehHoursTotal == 0) ? {'border-color': '##d10011'} : {}]">
+
+											<!--- A button that allow the to delete records if ther is more than one. --->
+											<span v-show="doesRepeat(event)">
+												<button class="btn btn-danger btn-sm" @click="deleteEngineHours(event)">X</button>
+											</span>
+
+											<br>
+											<!--- A button for adding a new entry for the same month. --->
+											<button class="btn btn-success btn-sm m-1 float-left" v-show="event.showDetails" v-if="!doesRepeat(event)" @click="addEntry(index, event)">+</button>
 										</div>
 
 										<!--- Display a check box that can be selected if the monthly total hours is for power loss. --->
@@ -112,20 +121,23 @@
 
 											This data comes directaly from the query.
 										--->
-										<div class="col-2 text-center p-0  border-left">
-											<div v-if="event.ehMeterChanged == false" @dblclick="showMeterChange(event)" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</div>
-											<div v-if="event.ehMeterChanged == true" @dblclick="showMeterChange(event)">--</div>
+										<div class="col-4 text-center p-0  border-left">
+											<span v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</span>
+											<span v-if="event.ehMeterChanged == true">--</span>
 
-											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showMC">
+											<button @click="showMeterChange(event)" v-if="!doesRepeat(event)" class="btn btn-sm btn-secondary ml-1">Details</button>
+
+											<!--- In the right conditions display a checkbox for settings the engine to a meter change --->
+											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showDetails">
 												M/C
 												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
 											</div>
-											
-											<div v-show="doesRepeat(event)">
-												{{doesRepeat(event)}}
-												<button class="btn btn-danger btn-sm" @click="deleteEngineHours(event)">X</button>
-											</div>
 										</div>
+
+										<div class="row">
+											<textarea type="text" placeholder="Notes" v-show="event.showDetails" v-if="!doesRepeat(event)" class="m-2 ml-3"></textarea>
+										</div>
+
 									</div>
 								</template>
 							</div>
@@ -209,6 +221,7 @@
 					return x;
 				});
 			},
+
 			engineHoursByID: function(){
 				return this.engineHours.reduce(function(acc,x){
 					acc[x.ehID] = x;
@@ -241,10 +254,29 @@
 			},
 		},
 		methods: {
+			addEntry: function(eventIndex, event){
+				var _self = this;
+
+				var newEvent = {
+					ehDate: event.ehDate,
+					ehEID: event.ehEID,
+					ehHoursTotal: 0,
+					ehID: 0,
+					ehMeterChanged: 0,
+					ehNotes: "",
+					ehUseType: 0,
+					monthday: 1,
+					dirty: true,
+					prevID: event.ehID,
+				};
+
+				_self.engineHours.splice(eventIndex - 1, 0, newEvent);
+			},
+
 			// When the total hours are doubble clicked show the M/C checkbox
 			showMeterChange: function(event){
-				if(!event.showMC) { Vue.set(event,"showMC","true"); }
-				else { Vue.delete(event,"showMC"); }
+				if(!event.showDetails) { Vue.set(event,"showDetails","true"); }
+				else { Vue.delete(event,"showDetails"); }
 			},
 
 			// This function filters the data in engineHours and only returns data from the year and
@@ -264,12 +296,12 @@
 					// rerun the function.
 					var newEvent = {
 						ehDate:new Date(_year, _month, 1),
-						ehEID:_self.urlEID,
-						ehHoursTotal:0,
-						ehID:0,
-						ehMeterChanged:0,
-						ehNotes:"",
-						ehUseType:0,
+						ehEID: _self.urlEID,
+						ehHoursTotal: 0,
+						ehID: 0,
+						ehMeterChanged: 0,
+						ehNotes: "",
+						ehUseType: 0,
 						monthday: 1,
 						dirty: true
 					};
@@ -288,15 +320,11 @@
 			setCurrentDay: function(item) { item.monthday = new Date().getDate(); },
 
 			doesRepeat: function(item){
-				if(!this.engineHoursByID.hasOwnProperty(item.prevID) || item.prevID == item.ehID){ return false; }
+				if(!this.engineHoursByID.hasOwnProperty(item.prevID) || item.prevID == item.ehID){ return true; }
 				// console.log(item);
 				var oldID = item.prevID;
 				var oldDate = new Date(this.engineHoursByID[oldID].ehDate);
 				var newDate = new Date(item.ehDate);
-				if(item.ehHoursTotal == 28.2){
-					// console.log(item,oldDate.getMonth(), newDate.getMonth());
-
-				}
 				return (oldDate.getMonth() == newDate.getMonth());
 			},
 
