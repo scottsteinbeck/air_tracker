@@ -75,10 +75,17 @@
 						<div class="row mb-2 border" v-for="(month,monthIdx) in months"
 							:style="[(months[currentMonth - 1] == months[monthIdx] && n == 1) ? {'background' : '##fdffb8'} : {}]">
 
-							<div class="col-2">{{month}}</div>
+							<div class="col-2">
+								{{month}}
+							
+								<br>
+								<!--- A button for adding a new entry for the same month. --->
+								<button class="btn btn-success btn-sm m-1 float-left" 
+									@click="addEntry(monthIdx, n)">+</button>
+							</div>
 
 							<div class="col-10">
-								<template v-for="(event, index) in getEvents(monthIdx,(currentYear - n + 1))">
+								<template v-for="(event, eventIndex) in getEvents(monthIdx,(currentYear - n + 1))">
 									<div class="row mt-2 mb-2">
 
 										<!--- Display the day in a input box. --->
@@ -99,13 +106,9 @@
 											:style="[(calculateHoursRun(event) <= 0 && event.ehHoursTotal == 0) ? {'border-color': '##d10011'} : {}]">
 
 											<!--- A button that allow the to delete records if ther is more than one. --->
-											<span v-show="doesRepeat(event)">
+											<span v-show="eventIndex > 0">
 												<button class="btn btn-danger btn-sm" @click="deleteEngineHours(event)">X</button>
 											</span>
-
-											<br>
-											<!--- A button for adding a new entry for the same month. --->
-											<button class="btn btn-success btn-sm m-1 float-left" v-show="event.showDetails" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" @click="addEntry(index, event)">+</button>
 										</div>
 
 										<!--- Display a check box that can be selected if the monthly total hours is for power loss. --->
@@ -125,7 +128,10 @@
 											<span v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</span>
 											<span v-if="event.ehMeterChanged == true">--</span>
 
-											<button @click="showMeterChange(event)" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" class="btn btn-sm btn-secondary ml-1">Details</button>
+											<button @click="showDetails(event)" class="btn btn-sm btn-secondary ml-1">
+												<i class="fas fa-angle-right" v-show="!event.showDetails"></i>
+												<i class="fas fa-angle-down" v-show="event.showDetails"></i>
+											</button>
 
 											<!--- In the right conditions display a checkbox for settings the engine to a meter change --->
 											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showDetails">
@@ -135,7 +141,7 @@
 										</div>
 
 										<div class="row">
-											<textarea type="text" placeholder="Notes" v-show="event.showDetails" v-if="!doesRepeat(getEvents(monthIdx,(currentYear - n + 1))[index + 1])" class="m-2 ml-3"></textarea>
+											<textarea v-model="event.ehTypedNotes" v-on:keyup="checkDirty(event)" type="text" placeholder="Notes" v-show="event.showDetails" class="m-2 ml-3"></textarea>
 										</div>
 
 									</div>
@@ -210,21 +216,14 @@
 		computed: {
 			dirtyHours: function(){ return this.engineHours.filter( function(x){ return (x.dirty == true)}); },
 
-			// Sorts the engine hours by their dates and adds a key prevID to engineHours.
-			// If the record if the first one the make the prevID the ehID of the record prevID is being added to.
+			// Sorts the engine hours by their dates.
 			engineHoursSorted: function(){
-				return this.engineHours
-				.sort(function(a,b){ return new Date(a.ehDate) - new Date(b.ehDate)})
-				.map(function(x,i,a){
-					var prevArrItem = i <= 0 ? 0 : i-1;
-					x.prevID = a[prevArrItem].ehID;
-					return x;
-				});
+				return this.engineHours.sort(function(a,b){ return new Date(a.ehDate) - new Date(b.ehDate)});
 			},
 
-			engineHoursByID: function(){
+			engineHoursByDate: function(){
 				return this.engineHours.reduce(function(acc,x){
-					acc[x.ehID] = x;
+					acc[x.ehDate] = x;
 					return acc;
 				},{});
 			},
@@ -254,30 +253,37 @@
 			},
 		},
 		methods: {
-			addEntry: function(eventIndex, event){
+			checkDirty:function (event) {
+				event.dirty = true;
+			},
+			
+			addEntry: function(_month, _year){
 				var _self = this;
 
+				var prevEvents = _self.getEvents(_month, _self.currentYear - _year + 1);
+				var prevEvent = prevEvents[prevEvents.length - 1];
+				var entryDate = new Date(event.ehDate);
+
 				var newEvent = {
-					ehDate: event.ehDate,
-					ehEID: event.ehEID,
+					ehDate: prevEvent.ehDate,
+					ehEID: prevEvent.ehEID,
 					ehHoursTotal: 0,
 					ehID: 0,
 					ehMeterChanged: 0,
 					ehNotes: "",
 					ehUseType: 0,
-					monthday: 1,
+					monthday: +prevEvent.monthday + 1,
 					dirty: true,
-					prevID: event.ehID,
-					showDetails: true
+					showDetails: false
 				};
 
-				event.showDetails = false;
-
-				_self.engineHours.splice(eventIndex - 1, 0, newEvent);
+				_self.engineHours.push(newEvent);
 			},
 
 			// When the total hours are doubble clicked show the M/C checkbox
-			showMeterChange: function(event){
+			showDetails: function(event){
+				var _self = this;
+
 				if(!event.showDetails) { Vue.set(event,"showDetails","true"); }
 				else { Vue.delete(event,"showDetails"); }
 			},
@@ -315,22 +321,19 @@
 			},
 
 			calculateHoursRun: function(item) {
-				if(!this.engineHoursByID.hasOwnProperty(item.prevID)) return "--";
-				var lastHours = this.engineHoursByID[item.prevID].ehHoursTotal;
+				var _self = this;
+
+				itemIndexInSorted = _self.engineHoursSorted.find(function(x){
+					return (x.ehID == item.ehID);
+				});
+				console.log(itemIndexInSorted);
+
+				var lastHours = _self.engineHoursSorted[itemIndexInSorted - 1]?.ehHoursTotal;
+
 				return (item.ehHoursTotal - lastHours).toFixed(2);
 			},
 
 			setCurrentDay: function(item) { item.monthday = new Date().getDate(); },
-
-			doesRepeat: function(item){
-				if(item == undefined) return false;
-				if(!this.engineHoursByID.hasOwnProperty(item.prevID) || item.prevID == item.ehID){ return true; }
-				// console.log(item);
-				var oldID = item.prevID;
-				var oldDate = new Date(this.engineHoursByID[oldID].ehDate);
-				var newDate = new Date(item.ehDate);
-				return (oldDate.getMonth() == newDate.getMonth());
-			},
 
 			deleteEngineHours: function(item)
 			{
