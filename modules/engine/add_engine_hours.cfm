@@ -151,7 +151,7 @@
 					</cfoutput>
 
 					<!--- Display the total the engine has been running for this year. --->
-					<span class="pr-2 border-right">{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"]| toDecimalFormat}}</span>
+					<span class="pr-2 border-right">{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}</span>
 					{{currentYear - n + 1}} P/L Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 				</div>
 			</div>
@@ -170,7 +170,6 @@
 
 	Vue.filter('toDecimalFormat', function (value) {
 		if (isNaN( parseFloat(value) )) {
-			console.log(value)
 			return value;
 		}
 		var formatter = new Intl.NumberFormat({
@@ -221,6 +220,31 @@
 				return this.engineHours.sort(function(a,b){ return new Date(a.ehDate) - new Date(b.ehDate)});
 			},
 
+			ehTotals: function(){
+				var _self = this;
+				var totalsLookup = {};
+
+				_self.engineHoursSorted.forEach(function(x,i,a){
+					var val = 0;
+					var prevX = a[i-1];
+					if(i > 0 && !x.ehMeterChanged){
+						val = x.ehHoursTotal - prevX.ehHoursTotal;
+						
+						if(x.monthday == prevX.monthday && new Date(x.ehDate).getMonth() == new Date(prevX.ehDate).getMonth()){
+							x["error"] = "Two records can not have the same date.";
+							prevX["error"] = "Two records can not have the same date.";
+						}
+						else if(x["error"] != undefined){
+							x.error = undefined;
+							prevX.error = undefined;
+						}
+					}
+					totalsLookup[x.ehID] = val;
+				});
+
+				return totalsLookup;
+			},
+
 			engineHoursByDate: function(){
 				return this.engineHours.reduce(function(acc,x){
 					acc[x.ehDate] = x;
@@ -239,7 +263,7 @@
 						acc[dte.getFullYear()] = { "pl": 0, "service": 0 };
 					}
 
-					var hours = parseFloat((_self.calculateHoursRun(x) == "--" || x.ehMeterChanged == 1) ? 0 : _self.calculateHoursRun(x));
+					var hours = parseFloat((x.ehMeterChanged == 1) ? 0 : _self.calculateHoursRun(x));
 					if(hours >= 0){
 						if(x.ehUseType == 0){
 							acc[dte.getFullYear()]['service'] += hours;
@@ -323,14 +347,8 @@
 			calculateHoursRun: function(item) {
 				var _self = this;
 
-				itemIndexInSorted = _self.engineHoursSorted.find(function(x){
-					return (x.ehID == item.ehID);
-				});
-				console.log(itemIndexInSorted);
-
-				var lastHours = _self.engineHoursSorted[itemIndexInSorted - 1]?.ehHoursTotal;
-
-				return (item.ehHoursTotal - lastHours).toFixed(2);
+				if(_self.ehTotals.hasOwnProperty(item.ehID)) return Math.round(_self.ehTotals[item.ehID] * 100) / 100;
+				return 0;
 			},
 
 			setCurrentDay: function(item) { item.monthday = new Date().getDate(); },
