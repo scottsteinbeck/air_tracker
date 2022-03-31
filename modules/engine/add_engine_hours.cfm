@@ -90,7 +90,7 @@
 
 										<!--- Display the day in a input box. --->
 										<div class="col-2 text-center p-0 border-left">
-											<input @input="event.dirty = true" type="text" v-model="event.monthday"
+											<input :style="[(event.error != undefined) ? {'border-color': '##d10011'} : {}]" @input="event.dirty = true" type="text" v-model="event.monthday"
 											style="width:30px" onclick="$(this).select()">
 
 											<button v-if="months[currentMonth - 1] == months[monthIdx] && n == 1"
@@ -152,7 +152,7 @@
 
 					<!--- Display the total the engine has been running for this year. --->
 					<span class="pr-2 border-right">{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}</span>
-					{{currentYear - n + 1}} P/L Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+					{{currentYear - n + 1}} Power loss Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 				</div>
 			</div>
 		</div>
@@ -210,10 +210,19 @@
 			engineHours: lastSaved ? lastSaved: engineHours,
 			urlEID: urlEID,
 
-			saveButtonTest: "Save"
+			saveButtonTest: "Save",
 		},
 		computed: {
-			dirtyHours: function(){ return this.engineHours.filter( function(x){ return (x.dirty == true)}); },
+			dirtyHours: function(){
+				var errorFound = undefined;
+				var dirtyResolts = this.engineHours.filter( function(x){
+					if(x.error != undefined) errorFound = x.error;
+					return (x.dirty == true);
+				});
+
+				if(errorFound != undefined) return errorFound;
+				return dirtyResolts;
+			},
 
 			// Sorts the engine hours by their dates.
 			engineHoursSorted: function(){
@@ -374,24 +383,29 @@
 			{
 				var _self = this;
 
-				_self.saveButtonTest = "Saving..."
+				var dirtyHrs = _self.dirtyHours;
+				if(Array.isArray(dirtyHrs))
+				{
+					_self.saveButtonTest = "Saving..."
 
-				localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
-				$.ajax({
-					url: "/modules/engine/save_engine_hours.cfm",
-					type: "POST",
-					data: { egnHrs: JSON.stringify(_self.dirtyHours), yearlyTotals: JSON.stringify(_self.monthTotals) },
-					success: function(res)
-					{
-						if(res.success){
-							localStorage.removeItem("lastSaved");
-							if(goBack) window.location = "/index.cfm?action=engine_hours";
-							alert("Save successful.");
+					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
+					$.ajax({
+						url: "/modules/engine/save_engine_hours.cfm",
+						type: "POST",
+						data: { egnHrs: JSON.stringify(dirtyHrs), yearlyTotals: JSON.stringify(_self.monthTotals) },
+						success: function(res)
+						{
+							if(res.success){
+								localStorage.removeItem("lastSaved");
+								if(goBack) window.location = "/index.cfm?action=engine_hours";
+								alert("Save successful.");
+							}
+
+							_self.saveButtonTest = "Save";
 						}
-
-						_self.saveButtonTest = "Save";
-					}
-				});
+					});
+				}
+				else{ alert(dirtyHrs); }
 			},
 		},
 	});

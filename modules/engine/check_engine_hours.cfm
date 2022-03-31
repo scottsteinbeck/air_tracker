@@ -94,8 +94,16 @@
                         #currentHours#
                     </td>
                 </tr>
+
             </cfloop>
         </cfoutput>
     </table>
-    <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary ml-2">Engine Hours<a/>
+    <cfoutput>
+        <div class="m-2">
+            <cfset yearlyTotals = deserializeJSON(engineInfo.eYearlyTotals)>
+            Yearly hours: #round(yearlyTotals[url.year]["service"] * 100) / 100# | Power loss hours: #round(yearlyTotals[url.year]["pl"] * 100) / 100#
+        </div>
+    </cfoutput>
+    <br>
+    <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary m-2">Engine Hours<a/>
 </div>
