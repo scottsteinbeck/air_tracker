@@ -19,6 +19,7 @@
 		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
 		<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
 	</div>
+	<div class="row justify-content-center text-danger" v-if="!Array.isArray(displaySavingError)">{{displaySavingError}}</div>
 
 	<h4 class="ml-3">Engine data</h4>
 	<table class="table">
@@ -86,7 +87,7 @@
 
 							<div class="col-10">
 								<template v-for="(event, eventIndex) in getEvents(monthIdx,(currentYear - n + 1))">
-									<div class="row mt-2 mb-2">
+									<div class="row mt-2 mb-2" v-if="!event.deleted">
 
 										<!--- Display the day in a input box. --->
 										<div class="col-2 text-center p-0 border-left">
@@ -142,6 +143,7 @@
 
 										<div class="row">
 											<textarea v-model="event.ehTypedNotes" v-on:keyup="checkDirty(event)" type="text" placeholder="Notes" v-show="event.showDetails" class="m-2 ml-3"></textarea>
+											<div v-show="!event.showDetails">{{event.ehTypedNotes}}</div>
 										</div>
 
 									</div>
@@ -151,8 +153,11 @@
 					</cfoutput>
 
 					<!--- Display the total the engine has been running for this year. --->
-					<span class="pr-2 border-right">{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}</span>
+					{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+					<br>
 					{{currentYear - n + 1}} Power loss Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+					<br>
+					{{currentYear - n + 1}} Non power loss total: {{monthTotals[currentYear - n + 1]["service"]}}
 				</div>
 			</div>
 		</div>
@@ -163,7 +168,7 @@
 <script>
 	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
-	var startYear = <cfoutput> #structKeyExists(engineData[1], "eStartDate") ? "2014" : engineData[1].eStartDate# </cfoutput>;
+	var startYear = <cfoutput> #(structKeyExists(engineData[1], "eStartDate") && engineData[1].eStartDate != "") ? engineData[1].eStartDate : "2014"# </cfoutput>;
 	var engineData = <cfoutput>#serializeJSON(engineData[1])#</cfoutput>
 	var urlEID = <cfoutput>#url.eID#</cfoutput>;
 	var dateObj = new Date();
@@ -211,6 +216,7 @@
 			urlEID: urlEID,
 
 			saveButtonTest: "Save",
+			displaySavingError: "",
 		},
 		computed: {
 			dirtyHours: function(){
@@ -233,23 +239,27 @@
 				var _self = this;
 				var totalsLookup = {};
 
-				_self.engineHoursSorted.forEach(function(x,i,a){
+				for(var i=0; i < _self.engineHoursSorted.length; i++){
 					var val = 0;
-					var prevX = a[i-1];
+					var x = _self.engineHoursSorted[i];
+					var prevX = _self.engineHoursSorted[i-1];
+
 					if(i > 0 && !x.ehMeterChanged){
 						val = x.ehHoursTotal - prevX.ehHoursTotal;
 						
 						if(x.monthday == prevX.monthday && new Date(x.ehDate).getMonth() == new Date(prevX.ehDate).getMonth()){
-							x["error"] = "Two records can not have the same date.";
-							prevX["error"] = "Two records can not have the same date.";
+							var errorMessage = "Two records can not have the same date."
+							x["error"] = errorMessage;
+							prevX["error"] = errorMessage;
+							break;
 						}
 						else if(x["error"] != undefined){
-							x.error = undefined;
 							prevX.error = undefined;
 						}
 					}
+					x.error = undefined;
 					totalsLookup[x.ehID] = val;
-				});
+				};
 
 				return totalsLookup;
 			},
@@ -263,7 +273,8 @@
 
 			monthTotals: function(){
 				var _self = this;
-				return this.engineHours.reduce(function(acc,x){
+				
+				return _self.engineHours.reduce(function(acc,x){
 					var dte = new Date(x.ehDate);
 
 					// Check if the year has bean created for when the current hours where entered
@@ -285,6 +296,7 @@
 				},{});
 			},
 		},
+
 		methods: {
 			checkDirty:function (event) {
 				event.dirty = true;
@@ -332,24 +344,24 @@
 					return (dte.getFullYear() == _year && dte.getMonth() == _month);
 				});
 
-				// If filteredEngHrs is empty their is not data yet for that month.
-				if(!filteredEgnHrs.length){
-					// If their is no data for that month create a blank data set and add it to engineHours then
-					// rerun the function.
-					var newEvent = {
-						ehDate:new Date(_year, _month, 1),
-						ehEID: _self.urlEID,
-						ehHoursTotal: 0,
-						ehID: 0,
-						ehMeterChanged: 0,
-						ehNotes: "",
-						ehUseType: 0,
-						monthday: 1,
-						dirty: true
-					};
-					_self.engineHours.push(newEvent);
-					return _self.getEvents(_month,_year);
-				}
+				// // If filteredEngHrs is empty their is not data yet for that month.
+				// if(!filteredEgnHrs.length){
+				// 	// If their is no data for that month create a blank data set and add it to engineHours then
+				// 	// rerun the function.
+				// 	var newEvent = {
+				// 		ehDate:new Date(_year, _month, 1),
+				// 		ehEID: _self.urlEID,
+				// 		ehHoursTotal: 0,
+				// 		ehID: 0,
+				// 		ehMeterChanged: 0,
+				// 		ehNotes: "",
+				// 		ehUseType: 0,
+				// 		monthday: 1,
+				// 		dirty: true
+				// 	};
+				// 	_self.engineHours.push(newEvent);
+				// 	return _self.getEvents(_month,_year);
+				// }
 				return filteredEgnHrs;
 			},
 
@@ -365,34 +377,26 @@
 			deleteEngineHours: function(item)
 			{
 				var _self = this;
-				$.ajax({
-					url: "/modules/engine/delete_engine_hours.cfm",
-					type: "POST",
-					data: { ehID: item.ehID },
-					success: function(res)
-					{
-						if(res.success){
-							var itemIndex = _self.engineHours.indexOf(item);
-							_self.engineHours.splice(itemIndex,1);
-						}
-					}
-				});
+				
+				Vue.set(item,"deleted",true);
+				item.dirty = true;
 			},
 
 			saveData: function(goBack)
 			{
 				var _self = this;
 
-				var dirtyHrs = _self.dirtyHours;
-				if(Array.isArray(dirtyHrs))
+				_self.displaySavingError = _self.dirtyHours;
+				if(Array.isArray(_self.displaySavingError))
 				{
+					// console.log("saving");
 					_self.saveButtonTest = "Saving..."
 
 					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
-						data: { egnHrs: JSON.stringify(dirtyHrs), yearlyTotals: JSON.stringify(_self.monthTotals) },
+						data: { egnHrs: JSON.stringify(_self.displaySavingError), yearlyTotals: JSON.stringify(_self.monthTotals) },
 						success: function(res)
 						{
 							if(res.success){
@@ -405,7 +409,7 @@
 						}
 					});
 				}
-				else{ alert(dirtyHrs); }
+				else{ alert(_self.displaySavingError); }
 			},
 		},
 	});
