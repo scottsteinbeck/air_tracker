@@ -60,7 +60,7 @@
         </div>
     </form>
 
-    <form action="index.cfm?action=act_save_numbers" method="POST">
+    <form action="index.cfm?action=act_save_numbers" method="POST" id="cowNums">
         <input type="hidden" name="dID" value="<cfoutput>#url.dID#</cfoutput>">
         <input type="hidden" name="year" value="<cfoutput>#url.year#</cfoutput>">
         <div id="no-more-tables">
@@ -70,7 +70,7 @@
                         <th>Type</th>
                         <th>Permitted
 							<cfif session.USer_TYPEID eq 1>
-								<button type="button" @click="unlockPermitted" class="btn btn-outline-primary margin-left mb-1">
+								<button type="button" @click="lockUnlock('permitted')" class="btn btn-outline-primary margin-left mb-1">
 									<i v-if="canEdit.permitted" class="fas fa-lock-open"></i>
 									<i v-if="!canEdit.permitted" class="fas fa-lock"></i>
 								</button>
@@ -78,7 +78,7 @@
 						</th>
                         <th>Qtr1
 							<cfif session.USer_TYPEID eq 1>
-								<button type="button" @click="canEdit.qtr1 = !canEdit.qtr1" class="btn btn-outline-primary margin-left mb-1">
+								<button type="button" @click="lockUnlock('qtr1')" class="btn btn-outline-primary margin-left mb-1">
 									<i v-if="canEdit.qtr1" class="fas fa-lock-open"></i>
 									<i v-if="!canEdit.qtr1" class="fas fa-lock"></i>
 								</button>
@@ -86,7 +86,7 @@
 						</th>
                         <th>Qtr2
 							<cfif session.USer_TYPEID eq 1>
-								<button type="button" @click="canEdit.qtr2 = !canEdit.qtr2" class="btn btn-outline-primary margin-left mb-1">
+								<button type="button" @click="lockUnlock('qtr2')" class="btn btn-outline-primary margin-left mb-1">
 									<i v-if="canEdit.qtr2" class="fas fa-lock-open"></i>
 									<i v-if="!canEdit.qtr2" class="fas fa-lock"></i>
 								</button>
@@ -94,7 +94,7 @@
 						</th>
                         <th>Qtr3
 							<cfif session.USer_TYPEID eq 1>
-								<button type="button" @click="canEdit.qtr3 = !canEdit.qtr3" class="btn btn-outline-primary margin-left mb-1">
+								<button type="button" @click="lockUnlock('qtr3')" class="btn btn-outline-primary margin-left mb-1">
 									<i v-if="canEdit.qtr3" class="fas fa-lock-open"></i>
 									<i v-if="!canEdit.qtr3" class="fas fa-lock"></i>
 								</button>
@@ -102,7 +102,7 @@
 						</th>
                         <th>Qtr4
 							<cfif session.USer_TYPEID eq 1>
-								<button type="button" @click="canEdit.qtr4 = !canEdit.qtr4" class="btn btn-outline-primary margin-left mb-1">
+								<button type="button" @click="lockUnlock('qtr4')" class="btn btn-outline-primary margin-left mb-1">
 									<i v-if="canEdit.qtr4" class="fas fa-lock-open"></i>
 									<i v-if="!canEdit.qtr4" class="fas fa-lock"></i>
 								</button>
@@ -286,15 +286,23 @@ cowNumbers = new Vue({
     },
 
     methods: {
-		unlockPermitted: function()
+		lockUnlock: function(columnName)
 		{
-			if(this.canEdit.permitted == true){
-				this.canEdit.permitted = false;
+            var _self = this;
+			if(_self.canEdit[columnName] == true){
+				_self.canEdit[columnName] = false;
+
+                var cowNumsForm = document.getElementById("cowNums");
+                cowNumsForm.submit();
 			}
-			else{
-				if(confirm("Are you shure you want to unlock the Permitted input boxes?"))
+			else if(columnName != "permitted"){
+				_self.canEdit[columnName] = true;
+			}
+            else
+            {
+                if(confirm("Are you shure you want to unlock the Permitted input boxes?"))
 				{ this.canEdit.permitted = true; }
-			}
+            }
 		},
 
         replaceFromOtherYear: function()
