@@ -61,7 +61,7 @@
     </cfif>
 
 	<!--- <cfdump var=#url#> --->
-	<cfif url.action != "question_months">
+	<cfif url.action != "question_months" && url.action != "login">
 		<h2 class="d-flex justify-content-center"><cfoutput>#dairyName.dCompanyName#</cfoutput></h2>
 	</cfif>
 
