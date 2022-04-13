@@ -104,7 +104,7 @@
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
-    <!--- phone vue --->
+    <!------------------------------------------- phone vue ------------------------------------------->
 	<div class="stay-top">
 		<div class="container">
 			<div class="d-lg-none">
@@ -150,8 +150,10 @@
 				</form>
 			</div>
 
-			<!--- computer vue --->
+			<!------------------------------------------- computer vue ------------------------------------------->
 			<div class="d-none d-lg-block">
+
+				<!--- A forme that contains a dropdown used for selecting the dairy. --->
 				<form action="index.cfm" method="GET">
 					<input type="hidden" name="action" value="dairy_inspections">
 					<div class="row">
@@ -167,6 +169,7 @@
 						</div>
 					</div>
 
+					<!--- A group of radio buttons that are used to select the month. --->
 					<div class="row">
 						<div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
 							<cfoutput query="monthList">
@@ -176,6 +179,7 @@
 							</cfoutput>
 						</div>
 
+						<!--- A dropdown that is used to select the year. --->
 						<div class="col">
 							<div class="input-group">
 								<select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
@@ -187,6 +191,7 @@
 								</select>
 							</div>
 						</div>
+						
 					</div>
 				</form>
 			</div>
@@ -197,6 +202,7 @@
     <cfset is_specific=false>
     <cfset daily_weekly_set=false>
     <cfset show_M_level_column=(replace(valuelist(questionlist.qShowManurelevel),",","","All") != "")>
+
     <cfloop query="questionlist">
         <cfif questionlist.dqType eq "Specific">
             <cfset is_specific=true>
@@ -222,88 +228,118 @@
     </cfloop>
 
 
-	<div class="">
-		<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
-			<thead class="thead-dark">
-				<tr class="stay-top">
-					<th>Question</th>
-					<cfif daily_weekly_set>
-						<th width=70>Day</th>
-						<th width=70>Weekly</th>
-					</cfif>
-					<cfif is_specific><th width=300>Recorded dates</th></cfif>
-					<cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
-				</tr>
-			</thead>
-			<tbody>
-				<cfoutput query="questionlist" group="qID" >
-					<tr>
-						<td class="heading">
-							<cfif questionlist.qType is "Heading">
-								<h4>
-									<!--- #questionlist.qID#.---> #questionlist.qTitle#
-								<h4>
-								<cfelse>
-									#questionlist.qNumber# #questionlist.qTitle#
-									<br><br>
-							</cfif>
+	<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
+		<thead class="thead-dark">
+			<tr class="stay-top">
+				<th>Question</th>
+
+				<!--- If their are questions that are daily or weekly display the header for the daily and weekly columns. --->
+				<cfif daily_weekly_set>
+					<th width=70>Day</th>
+					<th width=70>Weekly</th>
+				</cfif>
+
+				<!--- If their are spesific questions display the record date header. --->
+				<cfif is_specific><th width=300>Recorded dates</th></cfif>
+
+				<cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
+			</tr>
+		</thead>
+		<tbody>
+			<!--- Loop over all the questions to display in the table. --->
+			<cfoutput query="questionlist" group="qID" >
+				<tr>
+
+					<td class="heading">
+
+						<cfif questionlist.qType is "Heading">
+
+							<!--- If this record is a heading display it as a heading. --->
+							<h4>#questionlist.qTitle#<h4>
+
+						<cfelse>
+
+							<!--- If the record is not a heading display it as a normle question row --->
+							#questionlist.qNumber# #questionlist.qTitle#
+							<!--- <br><br> --->
+							
+						</cfif>
 
 						<cfoutput>
+
+							<!--- If the question is a document type display small text under the question. --->
 							<cfif questionlist.qType eq "Documents">
 								<div class="small">
 									#questionlist.qDescription#
+									<!--- A link that goes the the documents tab. --->
 									<a href="##" @click="change_tab(2)">4570 Documents</a>
 								</div>
 							</cfif>
+
 						</cfoutput>
+					</td>
+
+					<!--- Display the daly and weekly column --->
+					<cfif daily_weekly_set>
+						<td>
+
+							<!--- If the question is daly mark the row on the daily column with a checkmark. --->
+							<cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+						
 						</td>
+						<td>
+							<!--- If the question is weekly mark the row on the weekly column with a checkmark. --->
+							<cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+						
+						</td>
+					</cfif>
 
-						<cfif daily_weekly_set>
-							<td>
-								<cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-							</td>
-							<td>
-								<cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
-							</td>
+					<!--- Set the manureLevel variable to the manuer level recorded for this question last. --->
+					<cfset manureLevel = "">
+					<cfif questionlist.qShowManurelevel gt 0>
+						<cfif questionlist.qShowManurelevel eq "corral">
+							<cfset manureLevel = '#questionlist.iManureInchCorral#'>
+						<cfelseif questionlist.qShowManurelevel eq "concrete">
+							<cfset manureLevel = '#questionlist.iManureInchConcrete#'>
+						<cfelseif questionlist.qShowManurelevel eq "fenceline">
+							<cfset manureLevel = '#questionlist.iManureInchFenceline#'>
 						</cfif>
+					</cfif>
 
-						<cfset manureLevel = "">
-						<cfif questionlist.qShowManurelevel gt 0>
-							<cfif questionlist.qShowManurelevel eq "corral">
-								<cfset manureLevel = '#questionlist.iManureInchCorral#'>
-							<cfelseif questionlist.qShowManurelevel eq "concrete">
-								<cfset manureLevel = '#questionlist.iManureInchConcrete#'>
-							<cfelseif questionlist.qShowManurelevel eq "fenceline">
-								<cfset manureLevel = '#questionlist.iManureInchFenceline#'>
+					<cfif is_specific || find("from October through May", questionlist.qTitle) gt 0>
+						<td>
+							<cfif manureLevel neq "">
+
+								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
+							
+							<cfelseif find("from October through May", questionlist.qTitle) gt 0>
+								Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
+
+							<cfelse>
+								
+								<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
+								<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
+									Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
+								</cfif>
+								<!--- </cfif> --->
+
 							</cfif>
-						</cfif>
-						<cfif is_specific>
-							<td>
-								<cfif manureLevel neq "">
-									#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
-								<cfelse>
-									<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
-									<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
-										Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
-									</cfif>
-									<!--- </cfif> --->
-								</cfif>
-							</td>
-						</cfif>
 
-						<cfif show_M_level_column>
-							<td>
-								<cfif manureLevel neq "">
-									#manureLevel#"
-								</cfif>
-							</td>
-						</cfif>
-					</tr>
-				</cfoutput>
+						</td>
+					</cfif>
 
-			</tbody>
-		</table>
-	</div>
+					<cfif show_M_level_column>
+						<td>
+							<cfif manureLevel neq "">
+								#manureLevel#"
+							</cfif>
+						</td>
+					</cfif>
+				</tr>
+			</cfoutput>
+
+		</tbody>
+	</table>
 
 
     <div v-if="active_tab == 2">
