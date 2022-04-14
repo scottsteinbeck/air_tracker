@@ -66,7 +66,8 @@
                         <div v-if="item.qType == 'Heading'"><h4>{{item.qTitle}}</h4></div>
                         <div v-else>
                             <button class="btn btn-sm btn-primary" @click="selectClick(item)" :class="[(item.qID == active.qID)?'disabled':'']"><i class="fa fa-6 fa-plus-circle"></i></button>
-                            {{item.qNumber}} {{item.qTitle}}
+                            <span v-html="item.qNumber + ' ' + item.qTitle"></span>
+                            
                             <br/><small v-for="(id,idx) in item.months">
                                 {{months_names[id]}}<span v-if="idx < item.months.length-1">,</span>
                             </small>

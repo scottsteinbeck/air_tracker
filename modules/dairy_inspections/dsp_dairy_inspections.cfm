@@ -104,10 +104,13 @@
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
-    <!------------------------------------------- phone vue ------------------------------------------->
 	<div class="stay-top">
 		<div class="container">
+			
+			<!------------------------------------------- phone vue ------------------------------------------->
 			<div class="d-lg-none">
+
+				<!--- A forme that contains a dropdown used for selecting the dairy. --->
 				<form action="index.cfm" method="GET">
 					<input type="hidden" name="action" value="dairy_inspections">
 					<div class="row">
@@ -123,6 +126,7 @@
 						</div>
 					</div>
 
+					<!--- A dropdown that are used to select the month. --->
 					<div class="row">
 						<div class="col">
 							<div class="input-group mb-3">
@@ -135,6 +139,7 @@
 							</div>
 						</div>
 
+						<!--- A dropdown that is used to select the year. --->
 						<div class="col">
 							<div class="input-group">
 								<select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
@@ -199,26 +204,13 @@
 		</div>
 	</div>
 
-    <cfset is_specific=false>
-    <cfset daily_weekly_set=false>
-    <cfset show_M_level_column=(replace(valuelist(questionlist.qShowManurelevel),",","","All") != "")>
-
-    <cfloop query="questionlist">
-        <cfif questionlist.dqType eq "Specific">
-            <cfset is_specific=true>
-        </cfif>
-        <cfif questionlist.dqType eq "Daily" or questionlist.dqType eq "Weekly">
-            <cfset daily_weekly_set=true/>
-        </cfif>
-        <cfif is_specific eq true and daily_weekly_set eq true><cfbreak/></cfif>
-    </cfloop>
-
+	
     <cfif isEmpty(lastInspection.lastDate)>
         <cfset newDate=dateAdd("d",randRange(80,90),createDate(2017,"01","01"))>
     <cfelse>
         <cfset newDate=dateAdd("d",randRange(80,90),lastInspection.lastDate)>
     </cfif>
-
+	
     <cfloop condition="newDate lt now()">
         <cfquery name="addNewDates">
             INSERT INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
@@ -226,11 +218,26 @@
         </cfquery>
 		<cfset newDate=dateAdd("d",randRange(80,90),newDate)>
     </cfloop>
+	
+	<!--- If their is any data in a row on the qShowManurelevel column set the show_M_level_column to 
+		true so that column will be displayed on the table. --->
+	<cfset show_M_level_column=(replace(valuelist(questionlist.qShowManurelevel),",","","All") != "")>
 
+	<!--- Set the is_specific variable to true if their are any specific records.
+		 If this variable is true display a Recorded dates column.  --->
+	<cfset is_specific = "#find("Specific", valuelist(questionlist.qFrequencyType)) gt 0#">
+
+	<!--- Set the daly_weekly_set variable to true if their are any dqTypes that are marked as daly or weekly.
+		If the daly_weekly_set variable is true create a daly and weekly column. --->
+	<cfset daily_weekly_set = 
+		"#find("Daily", valuelist(questionlist.dqType)) gt 0 or find("Weekly", valuelist(questionlist.dqType)) gt 0#">
 
 	<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
+
+		<!--- Display the correct table headers based on the data from the database. --->
 		<thead class="thead-dark">
 			<tr class="stay-top">
+
 				<th>Question</th>
 
 				<!--- If their are questions that are daily or weekly display the header for the daily and weekly columns. --->
@@ -243,14 +250,17 @@
 				<cfif is_specific><th width=300>Recorded dates</th></cfif>
 
 				<cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
+
 			</tr>
 		</thead>
+
+		<!--- Display the columns based on the data from the database. --->
 		<tbody>
 			<!--- Loop over all the questions to display in the table. --->
 			<cfoutput query="questionlist" group="qID" >
 				<tr>
 
-					<td class="heading">
+					<td class="heading pt-0 pb-0 pl-2">
 
 						<cfif questionlist.qType is "Heading">
 
@@ -261,7 +271,6 @@
 
 							<!--- If the record is not a heading display it as a normle question row --->
 							#questionlist.qNumber# #questionlist.qTitle#
-							<!--- <br><br> --->
 							
 						</cfif>
 
@@ -281,15 +290,20 @@
 
 					<!--- Display the daly and weekly column --->
 					<cfif daily_weekly_set>
-						<td>
+						<td class="pb-0 pt-1 pl-3">
 
-							<!--- If the question is daly mark the row on the daily column with a checkmark. --->
-							<cfif questionlist.dqType eq "Daily"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+							<!--- If the question is only suposed to be daly if the month range is from October through May only 
+								mark the row as daly if it is between that date range. --->
+							<cfif !(find("October through May", questionlist.qTitle)) or
+								(find("October through May", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10)>
+								<!--- If the question is daly mark the row on the daily column with a checkmark. --->
+								<cfif questionlist.dqType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
+							</cfif>
 						
 						</td>
-						<td>
+						<td class="pb-0 pt-1 pl-3">
 							<!--- If the question is weekly mark the row on the weekly column with a checkmark. --->
-							<cfif questionlist.dqType eq "Weekly"><i class="fa fa-6 fa-check" aria-hidden="true"></i></cfif>
+							<cfif questionlist.dqType eq "Weekly"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 						
 						</td>
 					</cfif>
@@ -306,30 +320,29 @@
 						</cfif>
 					</cfif>
 
-					<cfif is_specific || find("from October through May", questionlist.qTitle) gt 0>
-						<td>
+					<!--- Display data in the Recorded dates column. --->
+					<cfif is_specific>
+						<td class="pt-0 pb-0 pl-2">
+
+							<!--- If their is a manure level for this row display the date it was recorded. --->
 							<cfif manureLevel neq "">
 
 								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 							
-							<cfelseif find("from October through May", questionlist.qTitle) gt 0>
-								Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
+							<!--- If their was no manure level and if the question requires somthing to be 
+								done from October through May display that date range for this year --->
+							<cfelseif find("October through May", questionlist.qTitle) gt 0>
 
-							<cfelse>
-								
-								<!--- <cfif questionlist.dqType eq "specific"> This code is commented ought because it excludes the question with qID of 5. The question with the qID of 5 is not set to specific for all dairies --->
-								<cfif questionlist.qID eq 5 or questionlist.qID eq 41>
-									Form: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-1
-								</cfif>
-								<!--- </cfif> --->
+								Form: #url.year#-5-1&nbsp;&nbsp;&nbsp;To: #url.year#-10-1
 
 							</cfif>
 
 						</td>
 					</cfif>
 
+					<!--- Display a column for the depth of manure if aplicable. --->
 					<cfif show_M_level_column>
-						<td>
+						<td class="pt-0 pb-0 pl-2">
 							<cfif manureLevel neq "">
 								#manureLevel#"
 							</cfif>
@@ -342,6 +355,7 @@
 	</table>
 
 
+	<!------------------------------------------- Tab 2 ------------------------------------------->
     <div v-if="active_tab == 2">
         <div class="row">
             <div class="col offset-md-3 mt-3">
