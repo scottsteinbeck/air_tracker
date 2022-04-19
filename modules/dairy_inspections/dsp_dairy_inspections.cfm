@@ -18,7 +18,8 @@
     LEFT JOIN inspections ON idID=#url.dID#
                     AND year(iDate)=#url.Year#
                     AND month(iDate)=#url.Month#
-                WHERE qType <> "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
+                -- WHERE qType != "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
+				WHERE dairy_question_link.dID IS NOT NULL
         ORDER BY qPriority
 </cfquery>
 
@@ -92,7 +93,17 @@
     }
 </style>
 
+
 <div id="mainVue">
+
+	<cfif now() gt createDate(url.year, url.month, 1)>
+		<div class="row m-2 d-flex align-items-end flex-column bd-highlight">
+			Signature
+			<img src=""
+					alt="logo" style="width:200px" class="border">
+		</div>
+	</cfif>
+	
     <ul class="nav nav-tabs">
         <li class="nav-item">
             <button :class="[(active_tab == 1) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(1)">Farm</button>
@@ -126,7 +137,7 @@
 						</div>
 					</div>
 
-					<!--- A dropdown that are used to select the month. --->
+					<!--- A dropdown that is used to select the month. --->
 					<div class="row">
 						<div class="col">
 							<div class="input-group mb-3">
@@ -204,17 +215,24 @@
 		</div>
 	</div>
 
-	
     <cfif isEmpty(lastInspection.lastDate)>
+
+		<!--- If their is not previous inspections create one 80 to 90 days after the first day of the first month of 2017. --->
         <cfset newDate=dateAdd("d",randRange(80,90),createDate(2017,"01","01"))>
+
     <cfelse>
+
+		<!--- If their is already previous inspection dates create another one 80 to 90 days later. --->
         <cfset newDate=dateAdd("d",randRange(80,90),lastInspection.lastDate)>
+
     </cfif>
 	
+	<!--- Loop through creating new dates 80 to 90 days apart and create data for those inspections. 
+		Stop if the new generated date exceeds the current date. --->
     <cfloop condition="newDate lt now()">
         <cfquery name="addNewDates">
-            INSERT INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline)
-            VALUES (#newDate#,#url.dID#,#randRange(0,3)#,#randRange(2,10)#,#randRange(2,10)#);
+            INSERT INTO inspections (iDate,idID,iManureInchConcrete,iManureInchCorral,iManureInchFenceline,iManureMoisture)
+            VALUES (#newDate#,#url.dID#,#randRange(0,3)#,#randRange(2,10)#,#randRange(2,10)#,#randRange(10,49)#);
         </cfquery>
 		<cfset newDate=dateAdd("d",randRange(80,90),newDate)>
     </cfloop>
@@ -227,10 +245,10 @@
 		 If this variable is true display a Recorded dates column.  --->
 	<cfset is_specific = "#find("Specific", valuelist(questionlist.qFrequencyType)) gt 0#">
 
-	<!--- Set the daly_weekly_set variable to true if their are any dqTypes that are marked as daly or weekly.
+	<!--- Set the daly_weekly_set variable to true if their are any qFrequencyType that are marked as daly or weekly.
 		If the daly_weekly_set variable is true create a daly and weekly column. --->
 	<cfset daily_weekly_set = 
-		"#find("Daily", valuelist(questionlist.dqType)) gt 0 or find("Weekly", valuelist(questionlist.dqType)) gt 0#">
+		"#find("Daily", valuelist(questionlist.qFrequencyType)) gt 0 or find("Weekly", valuelist(questionlist.qFrequencyType)) gt 0#">
 
 	<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
 
@@ -297,27 +315,15 @@
 							<cfif !(find("October through May", questionlist.qTitle)) or
 								(find("October through May", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10)>
 								<!--- If the question is daly mark the row on the daily column with a checkmark. --->
-								<cfif questionlist.dqType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
+								<cfif questionlist.qFrequencyType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 							</cfif>
 						
 						</td>
 						<td class="pb-0 pt-1 pl-3">
 							<!--- If the question is weekly mark the row on the weekly column with a checkmark. --->
-							<cfif questionlist.dqType eq "Weekly"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
+							<cfif questionlist.qFrequencyType eq "Weekly"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 						
 						</td>
-					</cfif>
-
-					<!--- Set the manureLevel variable to the manuer level recorded for this question last. --->
-					<cfset manureLevel = "">
-					<cfif questionlist.qShowManurelevel gt 0>
-						<cfif questionlist.qShowManurelevel eq "corral">
-							<cfset manureLevel = '#questionlist.iManureInchCorral#'>
-						<cfelseif questionlist.qShowManurelevel eq "concrete">
-							<cfset manureLevel = '#questionlist.iManureInchConcrete#'>
-						<cfelseif questionlist.qShowManurelevel eq "fenceline">
-							<cfset manureLevel = '#questionlist.iManureInchFenceline#'>
-						</cfif>
 					</cfif>
 
 					<!--- Display data in the Recorded dates column. --->
@@ -325,7 +331,7 @@
 						<td class="pt-0 pb-0 pl-2">
 
 							<!--- If their is a manure level for this row display the date it was recorded. --->
-							<cfif manureLevel neq "">
+							<cfif questionlist.qShowManurelevel neq "">
 
 								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 							
@@ -343,8 +349,14 @@
 					<!--- Display a column for the depth of manure if aplicable. --->
 					<cfif show_M_level_column>
 						<td class="pt-0 pb-0 pl-2">
-							<cfif manureLevel neq "">
-								#manureLevel#"
+							<cfif questionlist.qShowManurelevel eq "corral" and questionlist.iManureInchCorral != "">
+								#questionlist.iManureInchCorral#"
+							<cfelseif questionlist.qShowManurelevel eq "concrete" and questionlist.iManureInchConcrete != "">
+								#questionlist.iManureInchConcrete#"
+							<cfelseif questionlist.qShowManurelevel eq "fenceline" and questionlist.iManureInchFenceline != "">
+								#questionlist.iManureInchFenceline#"
+							<cfelseif questionlist.qShowManurelevel eq "moisture" and questionlist.iManureMoisture != "">
+								#questionlist.iManureMoisture#%
 							</cfif>
 						</td>
 					</cfif>
