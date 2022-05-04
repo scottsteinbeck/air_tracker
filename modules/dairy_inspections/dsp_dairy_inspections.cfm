@@ -22,8 +22,6 @@
         ORDER BY qPriority
 </cfquery>
 
-<!--- <cfdump var=#questionlist#> --->
-
 <style>
     .fa-6{
         font-size: 2em;
