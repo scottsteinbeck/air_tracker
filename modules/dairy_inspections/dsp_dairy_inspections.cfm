@@ -7,7 +7,9 @@
 </cfquery>
 <cfquery name="MonthList">
     SELECT * FROM Month_Names
+	WHERE mName != "all"
 </cfquery>
+
 <cfquery name="inspectionDays">
     SELECT * FROM inspections
 </cfquery>
@@ -150,7 +152,6 @@
 						<div class="col">
 							<div class="input-group mb-3">
 								<select name="Month" id="" onchange="form.submit()"  class="form-control"> <!--- Month Select --->
-									<option value="0"> none</option>
 									<cfoutput query="monthList" >
 										<option value="#mID#" <cfif url.Month eq mID>selected ="selected"</cfif> >#mName#</option>
 									</cfoutput>
