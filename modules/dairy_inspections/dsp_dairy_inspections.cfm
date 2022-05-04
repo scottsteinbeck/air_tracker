@@ -18,7 +18,6 @@
     LEFT JOIN inspections ON idID=#url.dID#
                     AND year(iDate)=#url.Year#
                     AND month(iDate)=#url.Month#
-                -- WHERE qType != "question" OR (qtype = "question" AND dairy_question_link.dID is not null)
 				WHERE dairy_question_link.dID IS NOT NULL
         ORDER BY qPriority
 </cfquery>
@@ -96,12 +95,23 @@
 
 <div id="mainVue">
 
-	<cfif now() gt createDate(url.year, url.month, 1)>
+	<!--- Get the active dairy selected by the user. --->
+	<cfset activeDairy = "">
+	<cfoutput query="DairyList">
+		<cfif url.dID eq dID> <cfset activeDairy = dCompanyName></cfif>
+	</cfoutput>
+
+	<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
+	<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
+
+		<!--- If the user did not select a date in the future display the signiture. --->
 		<div class="row m-2 d-flex align-items-end flex-column bd-highlight">
-			Signature
-			<img src=""
-					alt="logo" style="width:200px" class="border">
+			<div class="mr-5">Signature</div>
+			<cfoutput>
+				<img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border">
+			</cfoutput>
 		</div>
+
 	</cfif>
 	
     <ul class="nav nav-tabs">
@@ -237,9 +247,9 @@
 		<cfset newDate=dateAdd("d",randRange(80,90),newDate)>
     </cfloop>
 	
-	<!--- If their is any data in a row on the qShowManurelevel column set the show_M_level_column to 
+	<!--- If their is any data in a row on the qShowOtherData column set the showOtherData to 
 		true so that column will be displayed on the table. --->
-	<cfset show_M_level_column=(replace(valuelist(questionlist.qShowManurelevel),",","","All") != "")>
+	<cfset showOtherData=(replace(valuelist(questionlist.qShowOtherData),",","","All") != "")>
 
 	<!--- Set the is_specific variable to true if their are any specific records.
 		 If this variable is true display a Recorded dates column.  --->
@@ -267,7 +277,7 @@
 				<!--- If their are spesific questions display the record date header. --->
 				<cfif is_specific><th width=300>Recorded dates</th></cfif>
 
-				<cfif show_M_level_column eq true><th width=150>manure level</th></cfif>
+				<cfif showOtherData eq true><th width=150>Other data</th></cfif>
 
 			</tr>
 		</thead>
@@ -331,7 +341,7 @@
 						<td class="pt-0 pb-0 pl-2">
 
 							<!--- If their is a manure level for this row display the date it was recorded. --->
-							<cfif questionlist.qShowManurelevel neq "">
+							<cfif questionlist.qShowOtherData neq "">
 
 								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 							
@@ -347,16 +357,16 @@
 					</cfif>
 
 					<!--- Display a column for the depth of manure if aplicable. --->
-					<cfif show_M_level_column>
+					<cfif showOtherData>
 						<td class="pt-0 pb-0 pl-2">
-							<cfif questionlist.qShowManurelevel eq "corral" and questionlist.iManureInchCorral != "">
-								#questionlist.iManureInchCorral#"
-							<cfelseif questionlist.qShowManurelevel eq "concrete" and questionlist.iManureInchConcrete != "">
-								#questionlist.iManureInchConcrete#"
-							<cfelseif questionlist.qShowManurelevel eq "fenceline" and questionlist.iManureInchFenceline != "">
-								#questionlist.iManureInchFenceline#"
-							<cfelseif questionlist.qShowManurelevel eq "moisture" and questionlist.iManureMoisture != "">
-								#questionlist.iManureMoisture#%
+							<cfif questionlist.qShowOtherData eq "corral" and questionlist.iManureInchCorral != "">
+								Manure level #questionlist.iManureInchCorral#"
+							<cfelseif questionlist.qShowOtherData eq "concrete" and questionlist.iManureInchConcrete != "">
+								Manure level #questionlist.iManureInchConcrete#"
+							<cfelseif questionlist.qShowOtherData eq "fenceline" and questionlist.iManureInchFenceline != "">
+								Manure level #questionlist.iManureInchFenceline#"
+							<cfelseif questionlist.qShowOtherData eq "moisture" and questionlist.iManureMoisture != "">
+								Moisture level #questionlist.iManureMoisture#%
 							</cfif>
 						</td>
 					</cfif>
