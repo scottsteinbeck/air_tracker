@@ -70,7 +70,7 @@
 
     .stay-top > th{
         position: sticky;
-        top: 110px;
+        top: 160px;
     }
 
 	div.stay-top{
@@ -100,19 +100,6 @@
 	<cfoutput query="DairyList">
 		<cfif url.dID eq dID> <cfset activeDairy = dCompanyName></cfif>
 	</cfoutput>
-
-	<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
-	<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
-
-		<!--- If the user did not select a date in the future display the signiture. --->
-		<div class="row m-2 d-flex align-items-end flex-column bd-highlight">
-			<div class="mr-5">Signature</div>
-			<cfoutput>
-				<img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border">
-			</cfoutput>
-		</div>
-
-	</cfif>
 	
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -122,6 +109,17 @@
             <button :class="[(active_tab == 2) ? 'active' : '']" class="nav-link btn focusOff" @click="change_tab(2)">Documents</button>
         </li>
     </ul>
+
+	<!--- Display the signiture here if on a phone. --->
+	<div class="d-lg-none">
+		<div class="p-2">
+			<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
+			<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
+				<!--- If the user did not select a date in the future display the signiture. --->
+				<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border"> </cfoutput>
+			</cfif>
+		</div>
+	</div>
 
     <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
@@ -196,7 +194,7 @@
 
 					<!--- A group of radio buttons that are used to select the month. --->
 					<div class="row">
-						<div class="btn-group btn-group-toggle ml-3" data-toggle="buttons">
+						<div class="btn-group btn-group-toggle ml-3 col-7 align-items-start" data-toggle="buttons">
 							<cfoutput query="monthList">
 								<label class="btn btn-outline-secondary active">
 									<input type="radio" onchange="form.submit()"  name="Month" value="#mID#" <cfif url.Month eq "#mID#"> checked </cfif>>#mName#</input>
@@ -205,7 +203,7 @@
 						</div>
 
 						<!--- A dropdown that is used to select the year. --->
-						<div class="col">
+						<div class="col-2">
 							<div class="input-group">
 								<select name="year" id="" onchange="form.submit()"  class="form-control">  <!--- Year Select --->
 									<cfoutput>
@@ -215,6 +213,14 @@
 									</cfoutput>
 								</select>
 							</div>
+						</div>
+
+						<div class="col-2">
+							<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
+							<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
+								<!--- If the user did not select a date in the future display the signiture. --->
+								<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border"> </cfoutput>
+							</cfif>
 						</div>
 						
 					</div>

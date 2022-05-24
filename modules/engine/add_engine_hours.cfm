@@ -14,11 +14,20 @@
 <!--- <cfdump var="#engineHours#"> --->
 
 <div id="mainVue">
-	<div class="row justify-content-center">
+	<div class="d-none d-lg-inline">
+		<div class="row justify-content-center">
+			<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
+			<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
+			<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
+		</div>
+	</div>
+
+	<div class="row justify-content-center d-lg-none sticky-top pt-3 border" style="background-color: #ffff">
 		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
 		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
 		<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
 	</div>
+
 	<div class="row justify-content-center text-danger" v-if="!Array.isArray(displaySavingError)">{{displaySavingError}}</div>
 
 	<h4 class="ml-3">Engine data</h4>

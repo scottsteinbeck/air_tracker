@@ -87,51 +87,53 @@
     </div>
 
     <cfoutput>
-        <table class="table">
-            <thead class="thead-dark">
-                <tr>
-                    <cfloop item="colItem" collection="#tableData#">
-                        <th>#tableData[colItem]#</th>
-                    </cfloop>
-                    <th>Current Hours</th>
-                    <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
-                    <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
-                </tr>
-            </thead>
-                <tbody>
-                <cfloop query="engineInfo">
+        <span class="d-none d-lg-inline">
+            <table class="table">
+                <thead class="thead-dark">
                     <tr>
                         <cfloop item="colItem" collection="#tableData#">
-                            <td>#engineInfo[colItem][engineInfo.currentRow]#</td>
+                            <th>#tableData[colItem]#</th>
                         </cfloop>
-
-                        <td>
-                            <cfset yearTotals = deserializeJSON(engineInfo.eYearlyTotals)>
-                            <cfif isStruct(yearTotals) and structKeyExists(yearTotals, url.year)>
-                                <strong>Max Hours</strong> #yearTotals[url.year].service# / #engineInfo.eMaxHours[engineInfo.currentRow]#
-                                <br/>
-                                <progress value="#yearTotals[url.year].service#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
-                            <cfelse>
-                                No data entered.
-                            </cfif>
-                        </td>
-
-                        <cfif session.USER_TYPEID eq 1>
-                            <td>
-                                <a class="btn btn-outline-primary btn-block" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
-                                <a href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#" class="btn btn-outline-primary btn-block">Edit engine</a>
-                            </td>
-                        </cfif>
-
-                        <cfif session.USer_TYPEID eq 2>
-                            <td>
-                                <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a>
-                            </td>
-                        </cfif>
+                        <th>Current Hours</th>
+                        <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
+                        <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
                     </tr>
-                </cfloop>
-            </tbody>
-        </table>
+                </thead>
+                    <tbody>
+                    <cfloop query="engineInfo">
+                        <tr>
+                            <cfloop item="colItem" collection="#tableData#">
+                                <td>#engineInfo[colItem][engineInfo.currentRow]#</td>
+                            </cfloop>
+
+                            <td>
+                                <cfset yearTotals = deserializeJSON(engineInfo.eYearlyTotals)>
+                                <cfif isStruct(yearTotals) and structKeyExists(yearTotals, url.year)>
+                                    <strong>Max Hours</strong> #yearTotals[url.year].service# / #engineInfo.eMaxHours[engineInfo.currentRow]#
+                                    <br/>
+                                    <progress value="#yearTotals[url.year].service#" max=#engineInfo.eMaxHours[engineInfo.currentRow]#></progress>
+                                <cfelse>
+                                    No data entered.
+                                </cfif>
+                            </td>
+
+                            <cfif session.USER_TYPEID eq 1>
+                                <td>
+                                    <a class="btn btn-outline-primary btn-block" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
+                                    <a href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#" class="btn btn-outline-primary btn-block">Edit engine</a>
+                                </td>
+                            </cfif>
+
+                            <cfif session.USer_TYPEID eq 2>
+                                <td>
+                                    <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a>
+                                </td>
+                            </cfif>
+                        </tr>
+                    </cfloop>
+                </tbody>
+            </table>
+        </span>
     </cfoutput>
 
     <!---
@@ -143,9 +145,9 @@
 
     <cfoutput query="engineInfo">
         <div class="card d-lg-none">
-        <div class="card-header text-white bg-secondary py-1 mt-3">
-            <div>#engineInfo.eName[engineInfo.currentRow]#</div>
-        </div>
+            <div class="card-header text-white bg-secondary">
+                <div>#engineInfo.eName[engineInfo.currentRow]#</div>
+            </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Grower</strong> #engineInfo.eGrower[engineInfo.currentRow]#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Ranch</strong> #engineInfo.eRanch[engineInfo.currentRow]#</li>

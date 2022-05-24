@@ -1,5 +1,6 @@
 component {
     this.name = "Air District Checklist";
+    // this.sessionTimout = createTimespan(0,0,1,0);
     this.datasource = "air_district"
     this.datasources["air_district"] = {
         class: 'com.mysql.cj.jdbc.Driver'
