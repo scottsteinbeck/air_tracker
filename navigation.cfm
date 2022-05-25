@@ -29,8 +29,7 @@
         </div>
 
         <div class="col-4">    
-            <img src="images/ATS_logo_top-843.png"
-            alt="logo" style="width:150px">
+            <img align="bottom" src="images/ATS_logo_top-843.png" alt="logo" style="width:100%">
         </div>
     </div>
 </nav>
