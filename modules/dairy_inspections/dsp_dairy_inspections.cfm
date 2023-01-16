@@ -90,6 +90,12 @@
         padding: 5px;
         font-size: 10px;
     }
+	.floatingSig {
+		position: absolute;
+		top: -38px;
+		height: 106px;
+		right: 14px;
+	}
 </style>
 
 
@@ -111,17 +117,7 @@
     </ul>
 
 	<!--- Display the signiture here if on a phone. --->
-	<div class="d-lg-none">
-		<div class="p-2">
-			<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
-			<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
-				<!--- If the user did not select a date in the future display the signiture. --->
-				<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border"> </cfoutput>
-			</cfif>
-		</div>
-	</div>
 
-    <br>
     <!--- Form to get the dairy, month, year that an inspection will be added to--->
 	<div class="stay-top">
 		<div class="container">
@@ -215,11 +211,12 @@
 							</div>
 						</div>
 
-						<div class="col-2">
+						<div class="floatingSig">
 							<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
 							<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
+								<h4 class="text-center">Signature</h4>
 								<!--- If the user did not select a date in the future display the signiture. --->
-								<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border"> </cfoutput>
+								<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border p-2"> </cfoutput>
 							</cfif>
 						</div>
 						
@@ -264,8 +261,8 @@
 		If the daly_weekly_set variable is true create a daly and weekly column. --->
 	<cfset daily_weekly_set = 
 		"#find("Daily", valuelist(questionlist.qFrequencyType)) gt 0 or find("Weekly", valuelist(questionlist.qFrequencyType)) gt 0#">
-
-	<table class="table table-hover table-striped table-bordered" v-if="active_tab == 1">
+	<div v-if="active_tab == 1">
+	<table class="table table-hover table-striped table-bordered">
 
 		<!--- Display the correct table headers based on the data from the database. --->
 		<thead class="thead-dark">
@@ -380,6 +377,17 @@
 
 		</tbody>
 	</table>
+	<div class="d-lg-none">
+		<div class="pb-4 text-center">
+			<h4 class="text-center mb-4 border-bottom">Signature</h4>
+			<!--- Compare the current date with the date selected by the user where the day is the last day of the month. --->
+			<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
+				<!--- If the user did not select a date in the future display the signiture. --->
+				<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:85%" class=""> </cfoutput>
+			</cfif>
+		</div>
+	</div>
+</div>
 
 
 	<!------------------------------------------- Tab 2 ------------------------------------------->
