@@ -162,11 +162,21 @@
 					</cfoutput>
 
 					<!--- Display the total the engine has been running for this year. --->
-					{{currentYear - n + 1}} Total: {{monthTotals[currentYear - n + 1]["service"] + monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
-					<br>
-					{{currentYear - n + 1}} Power loss Total: {{monthTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
-					<br>
-					{{currentYear - n + 1}} Non power loss total: {{monthTotals[currentYear - n + 1]["service"]}}
+					<div v-if="yearTotals[currentYear - n + 1]">
+						{{currentYear - n + 1}} Total: {{yearTotals[currentYear - n + 1]["service"] + yearTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+						<br>
+						{{currentYear - n + 1}} Power loss Total: {{yearTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
+						<br>
+						{{currentYear - n + 1}} Non power loss total: {{yearTotals[currentYear - n + 1]["service"]}}
+					</div>
+					<div v-if="!yearTotals[currentYear - n + 1]">
+						2021 Total: 0
+						<br>
+						2021 Power loss Total: 0
+						<br>
+						2021 Non power loss total: 0
+					</div>
+				</div>
 				</div>
 			</div>
 		</div>
@@ -176,6 +186,7 @@
 
 <script>
 	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
+	lastSaved = null;
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
 	var startYear = <cfoutput> #(structKeyExists(engineData[1], "eStartDate") && engineData[1].eStartDate != "") ? engineData[1].eStartDate : "2014"# </cfoutput>;
 	var engineData = <cfoutput>#serializeJSON(engineData[1])#</cfoutput>
@@ -227,6 +238,35 @@
 			saveButtonTest: "Save",
 			displaySavingError: "",
 		},
+
+		mounted: function(){
+			var _self = this;
+			var curDate = new Date().getFullYear();
+			var mostRecentEngineDate = new Date(_self.engineHours[_self.engineHours.length - 1].ehDate).getFullYear();
+
+			console.log(_self.engineHours[_self.engineHours.length - 1].ehDate);
+
+			for(var year = mostRecentEngineDate + 1; year <= curDate; year++){
+				for(var month = 0; month < 12; month++){
+
+					_self.engineHours.push({
+						dirty: true,
+						ehDate: new Date(year, month),
+						ehDeleteDate: "",
+						ehEID: _self.engineData.eID,
+						ehID: 0,
+						ehHoursTotal: 0,
+						ehMeterChanged: 0,
+						ehNotes: "",
+						ehTypedNotes: "",
+						ehUseType: 0,
+						error: undefined,
+						monthday: "1"
+					});
+				}
+			}
+		},
+
 		computed: {
 			dirtyHours: function(){
 				var errorFound = undefined;
@@ -280,12 +320,12 @@
 				},{});
 			},
 
-			monthTotals: function(){
+			yearTotals: function(){
 				var _self = this;
 				
 				return _self.engineHours.reduce(function(acc,x){
 					var dte = new Date(x.ehDate);
-
+					
 					// Check if the year has bean created for when the current hours where entered
 					if(!acc.hasOwnProperty(dte.getFullYear())){
 						// Add in default year totals
@@ -396,6 +436,7 @@
 				var _self = this;
 
 				_self.displaySavingError = _self.dirtyHours;
+				console.log(_self.displaySavingError);
 				if(Array.isArray(_self.displaySavingError))
 				{
 					// console.log("saving");
@@ -405,7 +446,7 @@
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
-						data: { egnHrs: JSON.stringify(_self.displaySavingError), yearlyTotals: JSON.stringify(_self.monthTotals) },
+						data: { egnHrs: JSON.stringify(_self.displaySavingError), yearlyTotals: JSON.stringify(_self.yearTotals) },
 						success: function(res)
 						{
 							if(res.success){

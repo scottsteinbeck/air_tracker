@@ -64,7 +64,7 @@
                 <form action="index.cfm">
                     <input type="hidden" name="action" value="engine_hours">
                     <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
-						<option value="">none</option>
+						<option value="" selected disabled>none</option>
                         <cfoutput query="DairyList">
                             <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                         </cfoutput>
