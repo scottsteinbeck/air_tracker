@@ -1,5 +1,10 @@
 {
     "app":{
-        "cfengine":"lucee@5.3.7"
+        "cfengine":"lucee@5.3.9"
+    },
+    "web":{
+        "http":{
+            "port":"35999"
+        }
     }
 }

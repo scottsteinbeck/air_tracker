@@ -23,7 +23,7 @@
 				WHERE dairy_question_link.dID IS NOT NULL
         ORDER BY qPriority
 </cfquery>
-
+<cfset isFuture = (dateformat(now(),'YYYY-MM-01') lt createDate(url.Year,url.month,1))>
 <style>
     .fa-6{
         font-size: 2em;
@@ -324,8 +324,8 @@
 
 							<!--- If the question is only suposed to be daly if the month range is from May through October only 
 								mark the row as daly if it is between that date range. --->
-							<cfif !(find("May through October", questionlist.qTitle)) or
-								(find("May through October", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10)>
+							<cfif !isFuture and (!(find("October through May", questionlist.qTitle)) or
+								(find("October through May", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10))>
 								<!--- If the question is daly mark the row on the daily column with a checkmark. --->
 								<cfif questionlist.qFrequencyType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 							</cfif>
@@ -333,7 +333,7 @@
 						</td>
 						<td class="pb-0 pt-1 pl-3">
 							<!--- If the question is weekly mark the row on the weekly column with a checkmark. --->
-							<cfif questionlist.qFrequencyType eq "Weekly"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
+							<cfif !isFuture and questionlist.qFrequencyType eq "Weekly"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 						
 						</td>
 					</cfif>
@@ -343,16 +343,18 @@
 						<td class="pt-0 pb-0 pl-2">
 
 							<!--- If their is a manure level for this row display the date it was recorded. --->
-							<cfif questionlist.qShowOtherData neq "">
+							<cfif !isFuture>
+								<cfif questionlist.qShowOtherData neq "">
 
-								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
-							
-							<!--- If their was no manure level and if the question requires somthing to be 
-								done from May through October display that date range for this year --->
-							<cfelseif find("May through October", questionlist.qTitle) gt 0>
+									#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
+								
+								<!--- If their was no manure level and if the question requires somthing to be 
+									done from October through May display that date range for this year --->
+								<cfelseif find("October through May", questionlist.qTitle) gt 0>
 
-								Form: #url.year#-5-1&nbsp;&nbsp;&nbsp;To: #url.year#-10-1
+									Form: #url.year#-5-1&nbsp;&nbsp;&nbsp;To: #url.year#-10-1
 
+								</cfif>
 							</cfif>
 
 						</td>
@@ -361,14 +363,16 @@
 					<!--- Display a column for the depth of manure if aplicable. --->
 					<cfif showOtherData>
 						<td class="pt-0 pb-0 pl-2">
-							<cfif questionlist.qShowOtherData eq "corral" and questionlist.iManureInchCorral != "">
-								Manure level #questionlist.iManureInchCorral#"
-							<cfelseif questionlist.qShowOtherData eq "concrete" and questionlist.iManureInchConcrete != "">
-								Manure level #questionlist.iManureInchConcrete#"
-							<cfelseif questionlist.qShowOtherData eq "fenceline" and questionlist.iManureInchFenceline != "">
-								Manure level #questionlist.iManureInchFenceline#"
-							<cfelseif questionlist.qShowOtherData eq "moisture" and questionlist.iManureMoisture != "">
-								Moisture level #questionlist.iManureMoisture#%
+							<cfif !isFuture>
+								<cfif questionlist.qShowOtherData eq "corral" and questionlist.iManureInchCorral != "">
+									Manure level #questionlist.iManureInchCorral#"
+								<cfelseif questionlist.qShowOtherData eq "concrete" and questionlist.iManureInchConcrete != "">
+									Manure level #questionlist.iManureInchConcrete#"
+								<cfelseif questionlist.qShowOtherData eq "fenceline" and questionlist.iManureInchFenceline != "">
+									Manure level #questionlist.iManureInchFenceline#"
+								<cfelseif questionlist.qShowOtherData eq "moisture" and questionlist.iManureMoisture != "">
+									Moisture level #questionlist.iManureMoisture#%
+								</cfif>
 							</cfif>
 						</td>
 					</cfif>
@@ -394,7 +398,7 @@
     <div v-if="active_tab == 2">
         <div class="row">
             <div class="col offset-md-3 mt-3">
-                <cfdirectory action="list" directory="user_files/#url.dID#/" recurse="false" name="files4570">
+                <cfdirectory action="list" directory="#expandPath('./user_files/#url.dID#/')#" recurse="false" name="files4570">
                 <cfoutput query="files4570"><a href="user_files/#url.dID#/#files4570.name#">#files4570.name#</a><br></cfoutput>
             </div>
             <cfif session.USer_TYPEID eq 1>
