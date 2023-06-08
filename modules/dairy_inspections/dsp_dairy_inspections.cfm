@@ -70,7 +70,7 @@
 
     .stay-top > th{
         position: sticky;
-        top: 160px;
+        top: 135px;
     }
 
 	div.stay-top{
@@ -322,10 +322,10 @@
 					<cfif daily_weekly_set>
 						<td class="pb-0 pt-1 pl-3">
 
-							<!--- If the question is only suposed to be daly if the month range is from October through May only 
+							<!--- If the question is only suposed to be daly if the month range is from May through October only 
 								mark the row as daly if it is between that date range. --->
-							<cfif !(find("October through May", questionlist.qTitle)) or
-								(find("October through May", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10)>
+							<cfif !(find("May through October", questionlist.qTitle)) or
+								(find("May through October", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10)>
 								<!--- If the question is daly mark the row on the daily column with a checkmark. --->
 								<cfif questionlist.qFrequencyType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 							</cfif>
@@ -348,8 +348,8 @@
 								#dateFormat(questionlist.iDate,"yyyy-mm-dd")#
 							
 							<!--- If their was no manure level and if the question requires somthing to be 
-								done from October through May display that date range for this year --->
-							<cfelseif find("October through May", questionlist.qTitle) gt 0>
+								done from May through October display that date range for this year --->
+							<cfelseif find("May through October", questionlist.qTitle) gt 0>
 
 								Form: #url.year#-5-1&nbsp;&nbsp;&nbsp;To: #url.year#-10-1
 
