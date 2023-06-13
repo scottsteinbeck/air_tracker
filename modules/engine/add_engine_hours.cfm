@@ -91,7 +91,7 @@
 								<br>
 								<!--- A button for adding a new entry for the same month. --->
 								<button class="btn btn-success btn-sm m-1 float-left" 
-									@click="addEntry(monthIdx, n)">+</button>
+									@click="addEntry(monthIdx, n, (currentYear - n + 1))">+</button>
 							</div>
 
 							<div class="col-10">
@@ -246,25 +246,25 @@
 
 			console.log(_self.engineHours[_self.engineHours.length - 1].ehDate);
 
-			for(var year = mostRecentEngineDate + 1; year <= curDate; year++){
-				for(var month = 0; month < 12; month++){
+			// for(var year = mostRecentEngineDate + 1; year <= curDate; year++){
+			// 	for(var month = 0; month < 12; month++){
 
-					_self.engineHours.push({
-						dirty: true,
-						ehDate: new Date(year, month),
-						ehDeleteDate: "",
-						ehEID: _self.engineData.eID,
-						ehID: 0,
-						ehHoursTotal: 0,
-						ehMeterChanged: 0,
-						ehNotes: "",
-						ehTypedNotes: "",
-						ehUseType: 0,
-						error: undefined,
-						monthday: "1"
-					});
-				}
-			}
+			// 		_self.engineHours.push({
+			// 			dirty: true,
+			// 			ehDate: new Date(year, month),
+			// 			ehDeleteDate: "",
+			// 			ehEID: _self.engineData.eID,
+			// 			ehID: 0,
+			// 			ehHoursTotal: 0,
+			// 			ehMeterChanged: 0,
+			// 			ehNotes: "",
+			// 			ehTypedNotes: "",
+			// 			ehUseType: 0,
+			// 			error: undefined,
+			// 			monthday: "1"
+			// 		});
+			// 	}
+			// }
 		},
 
 		computed: {
@@ -353,20 +353,29 @@
 			
 			addEntry: function(_month, _year){
 				var _self = this;
+				var yr = _self.currentYear - _year + 1;
 
-				var prevEvents = _self.getEvents(_month, _self.currentYear - _year + 1);
-				var prevEvent = prevEvents[prevEvents.length - 1];
-				var entryDate = new Date(event.ehDate);
+				var prevEvents = _self.getEvents(_month, yr);
+				if(prevEvents.length){
+					var prevEvent = prevEvents[prevEvents.length - 1];
+					var entryDate = new Date(prevEvent.ehDate);
+					entryDate.setDate(entryDate.getDate() + 1)
+					var monthday = +prevEvent.monthday + 1;
+				} else {
+					var entryDate = new Date(yr, _month, 1);
+					var monthday = 1;
+					
+				}
 
 				var newEvent = {
-					ehDate: prevEvent.ehDate,
-					ehEID: prevEvent.ehEID,
+					ehDate: entryDate,
+					ehEID: _self.urlEID,
 					ehHoursTotal: 0,
 					ehID: 0,
 					ehMeterChanged: 0,
 					ehNotes: "",
 					ehUseType: 0,
-					monthday: +prevEvent.monthday + 1,
+					monthday: monthday,
 					dirty: true,
 					showDetails: false
 				};

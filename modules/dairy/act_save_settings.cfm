@@ -8,16 +8,17 @@
 </cfloop>
 
 <cfdump var="#selections#">
+<cfdump var="#form#">
 <cfquery name="clearDairyQuestions">
     delete from dairy_question_link where dID= #form.dID#
 </cfquery>
 
 <cfif structKeyExists(form,"questions")>
     <cfquery name="insertDairyQuestions">
-        insert into dairy_question_link(dID, dqType, qID)
+        insert into dairy_question_link(dID, qID)
         values
         <cfloop list="#form.questions#" index="qID">
-            (#form.dID#,"#selections[qID]#", #qID#)
+            (#form.dID#, #qID#)
             <cfif qID neq listLast(form.questions)>,</cfif>
         </cfloop>
     </cfquery>
