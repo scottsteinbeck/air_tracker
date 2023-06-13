@@ -7,6 +7,57 @@
     SELECT * FROM dairies
 </cfquery>
 
+<cffunction returntype="array" name="getTypelist">
+    <cfquery name="typelist" returntype="array">
+        SELECT *
+        FROM cow_types
+        LEFT JOIN cow_numbers ON cow_types.tID=cow_numbers.cnTID AND cndID=#url.dID# AND cnYear = #url.year#
+    </cfquery>
+    <cfreturn typelist>
+</cffunction>
+
+<cfset typelist = getTypelist()>
+
+<!--- If there is not any permitted record for this year set them to the last year that there was permitted. --->
+<!--- QUESTION Noah Should I put this around the permitted auto updater so it will wonly run if the user is of high enough permitions?
+    <cfif session.USer_TYPEID eq 1><cfif> --->
+<cfset permittedIsBlank = true>
+<cfloop index="i" from="1" to="#arrayLen(typelist)#">
+    <cfif typelist[i].cnPermitted neq ''>
+        <cfset permittedIsBlank = false>
+        <cfbreak>
+    </cfif>
+</cfloop>
+
+<cfif permittedIsBlank>
+    <cfquery name="prevYearPermitted" returntype="array">
+        SELECT CnYear, cnPermitted, cnTID
+        FROM cow_numbers
+        WHERE CndID = #url.dID# AND CnYear < <cfqueryparam value="#url.year#" cfsqltype="cf_sql_integer">
+        ORDER BY CnYear DESC
+        LIMIT 7
+    </cfquery>
+    <cfloop index="i" from="1" to="#arrayLen(prevYearPermitted)#">
+        <!--- <cfdump var="#prevYearPermitted[i]#"> --->
+        <cfquery>
+            INSERT INTO cow_numbers(CnYear, cnPermitted, CndID, cnTID, CnQtr1, CnQtr2, CnQtr3, CnQtr4)
+            VALUES (
+                <cfqueryparam value="#url.year#" cfsqltype="cf_sql_integer">,
+                <cfqueryparam value="#prevYearPermitted[i].cnPermitted#" cfsqltype="cf_sql_integer">,
+                #url.dID#,
+                #prevYearPermitted[i].cnTID#,
+                0,
+                0,
+                0,
+                0
+            )
+        </cfquery>
+    </cfloop>
+
+    <cfset typelist = getTypelist()>
+</cfif>
+
+
 <cfquery name="cownumbers">
     SELECT *
     FROM cow_numbers 
@@ -29,12 +80,6 @@
     </cfquery>
 
 </cfif>
-
-<cfquery name="typelist" returntype="array">
-    SELECT *
-    FROM cow_types
-    LEFT JOIN cow_numbers ON cow_types.tID=cow_numbers.cnTID AND cndID=#url.dID# AND cnYear = #url.year#
-</cfquery>
 
 <div id='mainVue'>
 
@@ -195,7 +240,7 @@
 		<cfif session.USer_TYPEID eq 1> <input type="submit" value="Save Questions" class = "btn btn-outline-primary margin-left mb-3"> </cfif>
 	</form>
     
-    <cfif session.USer_TYPEID eq 1>
+    <cfif session.USer_TYPEID eq 1 and cownumbers.recordCount() gt 0>
         <div class="d-flex justify-content-end mr-2 ml-auto">
             <form method="GET" action="/index.cfm" class="form-inline" id="replaceYearForm">
                 <label>Replace the data from this year with data from another year. &nbsp;</label>
