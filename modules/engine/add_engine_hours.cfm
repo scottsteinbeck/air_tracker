@@ -13,19 +13,81 @@
 
 <!--- <cfdump var="#engineHours#"> --->
 
+<style>
+	.saving-popup {
+		position: fixed;
+		bottom: 0;
+		right: 0;
+		padding: 10px 40px 10px 40px;
+	}
+
+	.save-success {
+		border: 2px solid #68c368;
+		background-color: #7fde7f;
+	}
+
+	.saving-error {
+		border: 2px solid #840000;
+		background-color: #ff2d2d;
+	}
+</style>
+
 <div id="mainVue">
 	<div class="d-none d-lg-inline">
 		<div class="row justify-content-center">
-			<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
-			<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
-			<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
+
+			<button class="col-6 btn btn-block btn-outline-primary m-2"
+				:disabled="isSaving"
+				style="max-width:150px"
+				@click="saveData(false)"
+			>
+				<div v-if="isSaving">Saving...</div>
+				<div v-if="!isSaving">Save</div>
+			</button>
+
+			<button class="col-6 btn btn-block btn-outline-primary m-2"
+				:disabled="isSaving"
+				style="max-width:150px"
+				@click="saveData(true)"
+			>
+				<div v-if="isSaving">Saving...</div>
+				<div v-if="!isSaving">Save and Close</div>
+			</button>
+
+			<a href="/index.cfm?action=engine_hours"
+				class="col-3 btn btn-block btn-danger m-2"
+				:disabled="isSaving"
+				style="max-width:150px"
+			>Cancel</a>
+
 		</div>
 	</div>
 
 	<div class="row justify-content-center d-lg-none sticky-top pt-3 border" style="background-color: #ffff">
-		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(false)">{{saveButtonTest}}</button>
-		<button class="col-6 btn btn-block btn-outline-primary m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px" @click="saveData(true)">{{saveButtonTest}} <template v-if="saveButtonTest == 'Save'">and Close</template></button>
-		<a href="/index.cfm?action=engine_hours" class="col-3 btn btn-block btn-danger m-2" :disabled="saveButtonTest == 'Saving...'" style="max-width:150px">Cancel</a>
+
+		<button class="col-6 btn btn-block btn-outline-primary m-2"
+			:disabled="isSaving"
+			style="max-width:150px" @click="saveData(false)"
+		>
+			<div v-if="isSaving">Saving...</div>
+			<div v-if="!isSaving">Save</div>
+		</button>
+
+		<button class="col-6 btn btn-block btn-outline-primary m-2"
+			:disabled="isSaving"
+			style="max-width:150px"
+			@click="saveData(true)"
+		>
+			<div v-if="isSaving">Saving...</div>
+			<div v-if="!isSaving">Save and Close</div>
+		</button>
+
+		<a href="/index.cfm?action=engine_hours"
+			class="col-3 btn btn-block btn-danger m-2"
+			:disabled="isSaving"
+			style="max-width:150px"
+		>Cancel</a>
+
 	</div>
 
 	<div class="row justify-content-center text-danger" v-if="!Array.isArray(displaySavingError)">{{displaySavingError}}</div>
@@ -135,7 +197,9 @@
 											This data comes directaly from the query.
 										--->
 										<div class="col-4 text-center p-0  border-left">
-											<span v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">{{calculateHoursRun(event)}}</span>
+											<span v-if="event.ehMeterChanged == false" :style="[(calculateHoursRun(event) < 0) ? {'color': '##d10011'} : {}]">
+												{{calculateHoursRun(event)}}
+											</span>
 											<span v-if="event.ehMeterChanged == true">--</span>
 
 											<button @click="showDetails(event)" class="btn btn-sm btn-secondary ml-1">
@@ -177,10 +241,24 @@
 						2021 Non power loss total: 0
 					</div>
 				</div>
-				</div>
 			</div>
 		</div>
 	</div>
+
+	<div class="saving-popup"
+		:class="[displaySavingError.length ? 'saving-error' : 'save-success']"
+		v-show="isSaving || finishedSaving || displaySavingError.length">
+		<div v-if="!finishedSaving && !displaySavingError.length">
+			Saving <i class="fas fa-spinner fa-spin"></i>
+		</div>
+		<div v-if="finishedSaving && !displaySavingError.length">
+			Save Successful <i class="fas fa-check"></i>
+		</div>
+		<div v-if="!isSaving && displaySavingError.length">
+			Saving Error {{displaySavingError}}
+		</div>
+	</div>
+
 </div>
 
 
@@ -234,9 +312,11 @@
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
 			engineHours: lastSaved ? lastSaved: engineHours,
 			urlEID: urlEID,
-
-			saveButtonTest: "Save",
+			
 			displaySavingError: "",
+
+			isSaving: false,
+			finishedSaving: false,
 		},
 
 		mounted: function(){
@@ -307,6 +387,7 @@
 						}
 					}
 					x.error = undefined;
+						
 					totalsLookup[x.ehID] = val;
 				};
 
@@ -380,7 +461,14 @@
 					showDetails: false
 				};
 
-				_self.engineHours.push(newEvent);
+				$.ajax({
+					url: "/modules/engine/save_engine_hours.cfm",
+					type: "POST",
+					data: {egnHrs: JSON.stringify(newEvent), single: true}
+				}).done(function(res){
+					newEvent.ehID = res.addedHrsId;
+					_self.engineHours.push(newEvent);
+				});
 			},
 
 			// When the total hours are doubble clicked show the M/C checkbox
@@ -444,27 +532,38 @@
 			{
 				var _self = this;
 
+				_self.isSaving = true;
+
 				_self.displaySavingError = _self.dirtyHours;
-				console.log(_self.displaySavingError);
 				if(Array.isArray(_self.displaySavingError))
 				{
-					// console.log("saving");
-					_self.saveButtonTest = "Saving..."
 
 					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
 						data: { egnHrs: JSON.stringify(_self.displaySavingError), yearlyTotals: JSON.stringify(_self.yearTotals) },
-						success: function(res)
-						{
+						success: function(res){
 							if(res.success){
 								localStorage.removeItem("lastSaved");
 								if(goBack) window.location = "/index.cfm?action=engine_hours";
-								alert("Save successful.");
+								// alert("Save successful.");
 							}
 
-							_self.saveButtonTest = "Save";
+							_self.finishedSaving = true;
+							_self.isSaving = false;
+							setTimeout(function(){
+								_self.finishedSaving = false;
+							}, 3000);
+						},
+						error: function(res){
+							_self.finishedSaving = false;
+							_self.isSaving = false;
+							_self.displaySavingError = res.responseJSON.message;
+
+							setTimeout(function(){
+								_self.displaySavingError = "";
+							}, 5000);
 						}
 					});
 				}
