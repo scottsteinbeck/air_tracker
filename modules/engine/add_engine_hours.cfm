@@ -231,7 +231,7 @@
 						<br>
 						{{currentYear - n + 1}} Power loss Total: {{yearTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 						<br>
-						{{currentYear - n + 1}} Non power loss total: {{yearTotals[currentYear - n + 1]["service"]}}
+						{{currentYear - n + 1}} Non power loss total: {{yearTotals[currentYear - n + 1]["service"] | toDecimalFormat}}
 					</div>
 					<div v-if="!yearTotals[currentYear - n + 1]">
 						2021 Total: 0
@@ -275,11 +275,15 @@
 		if (isNaN( parseFloat(value) )) {
 			return value;
 		}
-		var formatter = new Intl.NumberFormat({
-			style: 'decimal',
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 3,
-		});
+		
+		var formatter = new Intl.NumberFormat(
+			'decimal',
+			{
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			}
+		);
+		
 		return formatter.format(parseFloat(value));
 	});
 

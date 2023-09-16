@@ -59,5 +59,5 @@
 		ehDeleteDate = VALUEs(ehDeleteDate)
 	</cfquery>
 
-	<cfreturn addHoursDta.generatedKey>
+	<cfreturn addHoursDta.generated_key>
 </cffunction>
