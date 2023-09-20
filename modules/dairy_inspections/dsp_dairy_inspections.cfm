@@ -217,6 +217,7 @@
 								<h4 class="text-center">Signature</h4>
 								<!--- If the user did not select a date in the future display the signiture. --->
 								<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:200px" class="border p-2"> </cfoutput>
+								<div class="text-center"><strong>Fuel Supplier:</strong> Greg’s Petroleum </div>
 							</cfif>
 						</div>
 						
@@ -289,23 +290,22 @@
 			<!--- Loop over all the questions to display in the table. --->
 			<cfoutput query="questionlist" group="qID" >
 				<tr>
+					<cfif questionlist.qType is "Heading">
 
-					<td class="heading pt-0 pb-0 pl-2">
-
-						<cfif questionlist.qType is "Heading">
-
+						<td colspan="100%" style="background:##bbb" class="heading pt-2 pb-2 pl-2">
 							<!--- If this record is a heading display it as a heading. --->
-							<h4>#questionlist.qTitle#<h4>
+							<h5 class="m-0">#questionlist.qTitle#</h5>
+						</td>
+					<cfelse>
+					<td  class="heading pt-2 pb-2 pl-2">
 
-						<cfelse>
+						
 
 							<!--- If the record is not a heading display it as a normle question row --->
 							#questionlist.qNumber# #questionlist.qTitle#
 							
-						</cfif>
 
 						<cfoutput>
-
 							<!--- If the question is a document type display small text under the question. --->
 							<cfif questionlist.qType eq "Documents">
 								<div class="small">
@@ -314,7 +314,6 @@
 									<a href="##" @click="change_tab(2)">4570 Documents</a>
 								</div>
 							</cfif>
-
 						</cfoutput>
 					</td>
 
@@ -324,8 +323,15 @@
 
 							<!--- If the question is only suposed to be daly if the month range is from May through October only 
 								mark the row as daly if it is between that date range. --->
-							<cfif !isFuture and (!(find("October through May", questionlist.qTitle)) or
-								(find("October through May", questionlist.qTitle) gt 0 and url.Month gte 5 and url.Month lte 10))>
+							<cfif 
+								!isFuture and 
+								(
+									!(findNoCase("October through May", questionlist.qTitle)) or
+									(
+										findNoCase("October through May", questionlist.qTitle) gt 0 
+									 	and (url.Month lte 5 or url.Month gte 10)
+									 )
+								)>
 								<!--- If the question is daly mark the row on the daily column with a checkmark. --->
 								<cfif questionlist.qFrequencyType eq "Daily"><i class="fa fa-4 fa-check" aria-hidden="true"></i></cfif>
 							</cfif>
@@ -350,9 +356,31 @@
 								
 								<!--- If their was no manure level and if the question requires somthing to be 
 									done from October through May display that date range for this year --->
-								<cfelseif find("October through May", questionlist.qTitle) gt 0>
+								<cfelseif 
+									!isFuture 
+									and findNoCase("October through May", questionlist.qTitle) gt 0
+									and url.month lte 5
+								>
 
-									Form: #url.year#-5-1&nbsp;&nbsp;&nbsp;To: #url.year#-10-1
+									From: #url.year#-1-1&nbsp;&nbsp;&nbsp;To: #url.year#-5-31
+								<cfelseif 
+									!isFuture 
+									and findNoCase("October through May", questionlist.qTitle) gt 0
+									and url.month gte 10
+								>
+									From: #url.year#-10-1&nbsp;&nbsp;&nbsp;To: #url.year#-12-31
+								<cfelseif 
+									!isFuture 
+									and findNoCase("April and July", questionlist.qTitle) gt 0
+									and url.month gte 4 and url.month lte 7
+								>
+									#url.year#-0#url.month#-01
+								<cfelseif 
+									!isFuture 
+									and findNoCase("September and December", questionlist.qTitle) gt 0
+									and url.month gte 9 and url.month lte 12
+								>
+									#url.year#-0#url.month#-01
 
 								</cfif>
 							</cfif>
@@ -376,6 +404,8 @@
 							</cfif>
 						</td>
 					</cfif>
+
+				</cfif>
 				</tr>
 			</cfoutput>
 
@@ -388,6 +418,8 @@
 			<cfif now() gt dateAdd("d", -1, dateAdd("m", 1, createDate(url.year, url.month, 1)))>
 				<!--- If the user did not select a date in the future display the signiture. --->
 				<cfoutput> <img src="/images/z_siglist/#activeDairy#.jpg" alt="logo" style="width:85%" class=""> </cfoutput>
+				<div class="text-center"><strong>Fuel Supplier:</strong> Greg’s Petroleum </div>
+
 			</cfif>
 		</div>
 	</div>

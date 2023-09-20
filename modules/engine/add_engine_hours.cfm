@@ -468,7 +468,8 @@
 				$.ajax({
 					url: "/modules/engine/save_engine_hours.cfm",
 					type: "POST",
-					data: {egnHrs: JSON.stringify(newEvent), single: true}
+					data: {egnHrs: JSON.stringify(newEvent), single: true},
+					dataType: "json",
 				}).done(function(res){
 					newEvent.ehID = res.addedHrsId;
 					_self.engineHours.push(newEvent);
@@ -538,20 +539,21 @@
 
 				_self.isSaving = true;
 
-				_self.displaySavingError = _self.dirtyHours;
-				if(Array.isArray(_self.displaySavingError))
+				if(Array.isArray(_self.dirtyHours))
 				{
 
 					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
-						data: { egnHrs: JSON.stringify(_self.displaySavingError), yearlyTotals: JSON.stringify(_self.yearTotals) },
+						data: { egnHrs: JSON.stringify(_self.dirtyHours), yearlyTotals: JSON.stringify(_self.yearTotals) },
+						dataType: "json",
 						success: function(res){
 							if(res.success){
 								localStorage.removeItem("lastSaved");
 								if(goBack) window.location = "/index.cfm?action=engine_hours";
-								// alert("Save successful.");
+							} else {
+								_self.displaySavingError = res.message;
 							}
 
 							_self.finishedSaving = true;
@@ -559,19 +561,9 @@
 							setTimeout(function(){
 								_self.finishedSaving = false;
 							}, 3000);
-						},
-						error: function(res){
-							_self.finishedSaving = false;
-							_self.isSaving = false;
-							_self.displaySavingError = res.responseJSON.message;
-
-							setTimeout(function(){
-								_self.displaySavingError = "";
-							}, 5000);
 						}
 					});
 				}
-				else{ alert(_self.displaySavingError); }
 			},
 		},
 	});

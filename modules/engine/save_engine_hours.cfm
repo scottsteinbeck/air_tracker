@@ -58,6 +58,9 @@
 		ehTypedNotes = VALUES(ehTypedNotes),
 		ehDeleteDate = VALUEs(ehDeleteDate)
 	</cfquery>
-
-	<cfreturn addHoursDta.generated_key>
+	<cfif engineData.ehID gt 0>
+		<cfreturn engineData.ehID>
+	<cfelse>
+		<cfreturn addHoursDta.generated_key>
+	</cfif>
 </cffunction>

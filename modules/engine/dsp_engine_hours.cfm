@@ -155,7 +155,7 @@
                 <li class="list-group-item py-1 pl-2 text-wrap">
                     <div style="float:right">
                         <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a> </cfif>
-                        <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">Vue Hours</a> </cfif>
+                        <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a> </cfif>
                     </div>
                 </li>
             </ul>
