@@ -8,6 +8,10 @@
 		<cfset result.addedHrsId = addHours(egnHrs)>
 	<cfelse>
 		<cfloop array="#egnHrs#" item="engineData">
+			<cfset clearHours(engineData)>
+		</cfloop>
+		
+		<cfloop array="#egnHrs#" item="engineData">
 			<cfset addHours(engineData)>
 
 			<cfquery>
@@ -30,6 +34,15 @@
 	</cffinally>
 </cftry>
 
+<cffunction name="clearHours">
+	<cfargument required="true" type="any" name="engineData">
+	
+	<cfquery>
+		DELETE FROM engine_hours
+		WHERE ehID = <cfqueryparam value="#engineData.ehID#" cfsqltype="cf_sql_integer">
+	</cfquery>
+</cffunction>
+
 <cffunction name="addHours"> 
 	<cfargument required="true" type="any" name="engineData">
 
@@ -39,28 +52,24 @@
 	<cfset typedNotes = (engineData.keyExists("ehTypedNotes") ? engineData.ehTypedNotes : "")>
 	<!--- <cfset deleteDate = (engineData.keyExists("deleted")) ? now() : "NULL"> --->
 
-	<cfquery result="addHoursDta">
-		INSERT INTO engine_hours (ehID, ehEID, ehDate, ehHoursTotal, ehMeterChanged, ehUseType, ehTypedNotes, ehDeleteDate)
-		VALUES (<cfqueryparam value="#engineData.ehID#" cfsqltype="cf_sql_integer">,
-			<cfqueryparam value="#engineData.ehEID#" cfsqltype="cf_sql_integer">,
-			<cfqueryparam cfsqltype="date" value="#date#">,
-			<cfqueryparam value="#engineData.ehHoursTotal#" cfsqltype="cf_sql_double">,
-			<cfqueryparam cfsqltype="cf_sql_integer" value="#meterChangeCheckbox#">,
-			<cfqueryparam cfsqltype="cf_sql_integer" value="#plCheckbox#">,
-			<cfqueryparam cfsqltype="cf_sql_varchar" value="#typedNotes#">,
-			<cfqueryparam value="#now()#" cfsqltype="cf_sql_date" null="#(!engineData.keyExists("deleted"))#">
-		)
-		ON DUPLICATE KEY UPDATE
-		ehDate = VALUES(ehDate),
-		ehHoursTotal = VALUES(ehHoursTotal),
-		ehMeterChanged = VALUES(ehMeterChanged),
-		ehUseType = VALUES(ehUseType),
-		ehTypedNotes = VALUES(ehTypedNotes),
-		ehDeleteDate = VALUEs(ehDeleteDate)
-	</cfquery>
-	<cfif engineData.ehID gt 0>
-		<cfreturn engineData.ehID>
-	<cfelse>
-		<cfreturn addHoursDta.generated_key>
+	<cfif !(engineData.keyExists("deleted") && engineData.deleted == true)>
+		<cfquery result="addHoursDta">
+			INSERT INTO engine_hours (ehID, ehEID, ehDate, ehHoursTotal, ehMeterChanged, ehUseType, ehTypedNotes, ehDeleteDate)
+			VALUES (<cfqueryparam value="#engineData.ehID#" cfsqltype="cf_sql_integer">,
+				<cfqueryparam value="#engineData.ehEID#" cfsqltype="cf_sql_integer">,
+				<cfqueryparam cfsqltype="date" value="#date#">,
+				<cfqueryparam value="#engineData.ehHoursTotal#" cfsqltype="cf_sql_double">,
+				<cfqueryparam cfsqltype="cf_sql_integer" value="#meterChangeCheckbox#">,
+				<cfqueryparam cfsqltype="cf_sql_integer" value="#plCheckbox#">,
+				<cfqueryparam cfsqltype="cf_sql_varchar" value="#typedNotes#">,
+				<cfqueryparam value="#now()#" cfsqltype="cf_sql_date" null="#(!engineData.keyExists("deleted"))#">
+			)
+		</cfquery>
+		
+		<cfif engineData.ehID gt 0>
+			<cfreturn engineData.ehID>
+		<cfelse>
+			<cfreturn addHoursDta.generated_key>
+		</cfif>
 	</cfif>
 </cffunction>

@@ -90,7 +90,9 @@
 
 	</div>
 
-	<div class="row justify-content-center text-danger" v-if="!Array.isArray(displaySavingError)">{{displaySavingError}}</div>
+	<div class="row justify-content-center text-danger" v-if="!Array.isArray(displaySavingError)">
+		{{displaySavingError}}
+	</div>
 
 	<h4 class="ml-3">Engine data</h4>
 	<table class="table">
@@ -255,7 +257,7 @@
 			Save Successful <i class="fas fa-check"></i>
 		</div>
 		<div v-if="!isSaving && displaySavingError.length">
-			Saving Error {{displaySavingError}}
+			Saving Error {{displaySavingError}} <i class="fas fa-exclamation-circle"></i>
 		</div>
 	</div>
 
@@ -320,7 +322,7 @@
 			displaySavingError: "",
 
 			isSaving: false,
-			finishedSaving: false,
+			finishedSaving: false
 		},
 
 		mounted: function(){
@@ -328,27 +330,7 @@
 			var curDate = new Date().getFullYear();
 			var mostRecentEngineDate = new Date(_self.engineHours[_self.engineHours.length - 1].ehDate).getFullYear();
 
-			console.log(_self.engineHours[_self.engineHours.length - 1].ehDate);
-
-			// for(var year = mostRecentEngineDate + 1; year <= curDate; year++){
-			// 	for(var month = 0; month < 12; month++){
-
-			// 		_self.engineHours.push({
-			// 			dirty: true,
-			// 			ehDate: new Date(year, month),
-			// 			ehDeleteDate: "",
-			// 			ehEID: _self.engineData.eID,
-			// 			ehID: 0,
-			// 			ehHoursTotal: 0,
-			// 			ehMeterChanged: 0,
-			// 			ehNotes: "",
-			// 			ehTypedNotes: "",
-			// 			ehUseType: 0,
-			// 			error: undefined,
-			// 			monthday: "1"
-			// 		});
-			// 	}
-			// }
+			// console.log(_self.engineHours[_self.engineHours.length - 1].ehDate);
 		},
 
 		computed: {
@@ -380,7 +362,10 @@
 					if(i > 0 && !x.ehMeterChanged){
 						val = x.ehHoursTotal - prevX.ehHoursTotal;
 						
-						if(x.monthday == prevX.monthday && new Date(x.ehDate).getMonth() == new Date(prevX.ehDate).getMonth()){
+						if(x.monthday == prevX.monthday &&
+							new Date(x.ehDate).getMonth() == new Date(prevX.ehDate).getMonth() && 
+							!(x.deleted || prevX.deleted)
+							){
 							var errorMessage = "Two records can not have the same date."
 							x["error"] = errorMessage;
 							prevX["error"] = errorMessage;
@@ -533,15 +518,11 @@
 				item.dirty = true;
 			},
 
-			saveData: function(goBack)
-			{
+			saveData: function(goBack){
 				var _self = this;
-
 				_self.isSaving = true;
 
-				if(Array.isArray(_self.dirtyHours))
-				{
-
+				if(Array.isArray(_self.dirtyHours)){
 					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
@@ -561,8 +542,21 @@
 							setTimeout(function(){
 								_self.finishedSaving = false;
 							}, 3000);
+						},
+						error: function(res){
+							_self.isSaving = false;
+							_self.displaySavingError = "Saving error!";
 						}
 					});
+				} else {
+					_self.isSaving = false;
+					_self.displaySavingError = "Saving error!";
+				}
+				
+				if(_self.displaySavingError){
+					setTimeout(function(){
+						_self.displaySavingError = "";
+					}, 3000);
 				}
 			},
 		},

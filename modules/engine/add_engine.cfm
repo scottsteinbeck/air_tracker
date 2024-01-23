@@ -9,7 +9,9 @@
             WHERE <cfqueryparam value="#form.eID#" cfsqltype="cf_sql_integer"> = eID
         </cfquery>
         <cfset #oldStartDate# = #oldStartDateQry[1].eStartDate#>
-
+        
+        <cfif form.engineStartDate == ""><cfset form.engineStartDate = "2014"></cfif>
+    
         <cfquery>
             UPDATE engine
             SET eName = <cfqueryparam value="#form.engineName#" cfsqltype="cf_sql_varchar">,
