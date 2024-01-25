@@ -33,35 +33,7 @@
 </style>
 
 <div id="mainVue">
-	<div class="d-none d-lg-inline">
-		<div class="row justify-content-center">
-
-			<button class="col-6 btn btn-block btn-outline-primary m-2"
-				:disabled="isSaving"
-				style="max-width:150px"
-				@click="saveData(false)"
-			>
-				<div v-if="isSaving">Saving...</div>
-				<div v-if="!isSaving">Save</div>
-			</button>
-
-			<button class="col-6 btn btn-block btn-outline-primary m-2"
-				:disabled="isSaving"
-				style="max-width:150px"
-				@click="saveData(true)"
-			>
-				<div v-if="isSaving">Saving...</div>
-				<div v-if="!isSaving">Save and Close</div>
-			</button>
-
-			<a href="/index.cfm?action=engine_hours"
-				class="col-3 btn btn-block btn-danger m-2"
-				:disabled="isSaving"
-				style="max-width:150px"
-			>Cancel</a>
-
-		</div>
-	</div>
+	
 
 	<div class="row justify-content-center d-lg-none sticky-top pt-3 border" style="background-color: #ffff">
 
@@ -245,6 +217,35 @@
 						2021 Power loss Total: 0
 						<br>
 						2021 Non power loss total: 0
+					</div>
+					<div class="d-none mt-2 d-lg-inline">
+						<div class="row justify-content-center">
+				
+							<button class="col-6 btn btn-block btn-outline-primary m-2"
+								:disabled="isSaving"
+								style="max-width:150px"
+								@click="saveData(false)"
+							>
+								<div v-if="isSaving">Saving...</div>
+								<div v-if="!isSaving">Save</div>
+							</button>
+				
+							<button class="col-6 btn btn-block btn-outline-primary m-2"
+								:disabled="isSaving"
+								style="max-width:150px"
+								@click="saveData(true)"
+							>
+								<div v-if="isSaving">Saving...</div>
+								<div v-if="!isSaving">Save and Close</div>
+							</button>
+				
+							<a href="/index.cfm?action=engine_hours"
+								class="col-3 btn btn-block btn-danger m-2"
+								:disabled="isSaving"
+								style="max-width:150px"
+							>Cancel</a>
+				
+						</div>
 					</div>
 				</div>
 			</div>

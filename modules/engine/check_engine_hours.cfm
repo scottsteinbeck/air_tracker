@@ -23,7 +23,7 @@
         WHERE b.ehEID=a.ehEID and b.ehDate < a.ehDate 
         order by b.ehDate Desc
         Limit 1
-    ),0)) as elapsedTotal
+    ),a.ehHoursTotal)) as elapsedTotal
     FROM engine_hours a
     WHERE ehEID=#url.eID# AND
         ehDeleteDate IS NULL
@@ -47,16 +47,20 @@
     }
 </style>
 
+<cfoutput>
 <div class="row">
     <div class="col"></div>
     <div class="col-2">
         <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary @media print{}">
             <i class="fas fa-angle-left"></i> Back to Engine Hours
         </a>
+        <a href="index.cfm?action=add_engine_hours&dID=#dairyName.dID#&eID=#url.eID#" class="mt-2 btn btn-outline-primary @media print{}">
+             Edit Hours
+        </a>
+        
     </div>
 </div>
 
-<cfoutput>
     <script>
     document.title = "#dairyName.dCompanyName# #engineInfo.eName# Engine Hour Records";
     </script>
