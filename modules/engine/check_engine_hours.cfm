@@ -17,16 +17,24 @@
 
 <cfquery name="engineHours">
     SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, a.ehHoursTotal, a.ehEID,
-    a.ehHoursTotal - ifNull((
+    greatest(0,a.ehHoursTotal - ifNull((
         select ehHoursTotal 
         from engine_hours b
         WHERE b.ehEID=a.ehEID and b.ehDate < a.ehDate 
         order by b.ehDate Desc
         Limit 1
-    ),0) as elapsedTotal
+    ),0)) as elapsedTotal
     FROM engine_hours a
     WHERE ehEID=#url.eID# AND
         ehDeleteDate IS NULL
+        and ehDate >= (
+            select c.ehDate 
+            from engine_hours c  
+            WHERE c.ehEID=a.ehEID 
+            and  c.ehHoursTotal > 0
+            order by c.ehDate
+            Limit 1
+        )
     ORDER BY yr, ehDate
 </cfquery> 
 <!--- <cfdump var="#engineHours#"> --->
