@@ -95,7 +95,11 @@
                             <th>#tableData[colItem]#</th>
                         </cfloop>
                         <th>Current Hours</th>
-                        <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
+                        <cfif session.USer_TYPEID eq 1>
+                            <th>Edit engine</th>
+                            <th>Change Hours</th>
+                            <th>View Hours</th>
+                        </cfif>
                         <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
                     </tr>
                 </thead>
@@ -119,16 +123,25 @@
 
                             <cfif session.USER_TYPEID eq 1>
                                 <td>
-                                    <a class="btn btn-outline-primary btn-block" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
-                                    <a href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#" class="btn btn-outline-primary btn-block">Edit engine</a>
+                                    <a class="btn btn-secondary btn-block" 
+                                        href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </td>
-                            </cfif>
-
-                            <cfif session.USer_TYPEID eq 2>
                                 <td>
-                                    <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a>
+                                    <a class="btn btn-outline-primary btn-block"
+                                        href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
+                                        <i class="fas fa-stopwatch"></i>
+                                    </a>
                                 </td>
                             </cfif>
+                            <td>
+                                <a class="btn btn-outline-primary"
+                                    href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#"
+                                    >
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            </td>
                         </tr>
                     </cfloop>
                 </tbody>
@@ -154,8 +167,16 @@
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Location</strong> #engineInfo.eLocation[engineInfo.currentRow] ?: "---"#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap">
                     <div style="float:right">
-                        <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a> </cfif>
-                        <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a> </cfif>
+                        <cfif session.USer_TYPEID eq 1>
+                            <a class="btn btn-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
+                                Change / View Hours
+                            </a>
+                        </cfif>
+                        <cfif session.USer_TYPEID eq 2>
+                            <a class="btn btn-secondary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">
+                                View / Print Hours
+                            </a>
+                        </cfif>
                     </div>
                 </li>
             </ul>

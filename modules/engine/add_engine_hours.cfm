@@ -229,8 +229,12 @@
 
 					<!--- Display the total the engine has been running for this year. --->
 					<div v-if="yearTotals[currentYear - n + 1]">
-						{{currentYear - n + 1}} Total: {{yearTotals[currentYear - n + 1]["service"] + yearTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
-						<br>
+						<h4 class="text-danger" v-if="getYearlyHours(currentYear - n + 1) > engineData.eMaxHours">
+							{{currentYear - n + 1}} Total: {{getYearlyHours(currentYear - n + 1) | toDecimalFormat}}
+						</h4>
+						<div v-if="getYearlyHours(currentYear - n + 1) < engineData.eMaxHours">
+							{{currentYear - n + 1}} Total: {{getYearlyHours(currentYear - n + 1) | toDecimalFormat}}
+						</div>
 						{{currentYear - n + 1}} Power loss Total: {{yearTotals[currentYear - n + 1]["pl"] | toDecimalFormat}}
 						<br>
 						{{currentYear - n + 1}} Non power loss total: {{yearTotals[currentYear - n + 1]["service"] | toDecimalFormat}}
@@ -395,19 +399,20 @@
 				
 				return _self.engineHours.reduce(function(acc,x){
 					var dte = new Date(x.ehDate);
+					var ehCurYear = dte.getFullYear();
 					
 					// Check if the year has bean created for when the current hours where entered
-					if(!acc.hasOwnProperty(dte.getFullYear())){
+					if(!acc.hasOwnProperty(ehCurYear)){
 						// Add in default year totals
-						acc[dte.getFullYear()] = { "pl": 0, "service": 0 };
+						acc[ehCurYear] = { "pl": 0, "service": 0 };
 					}
 
 					var hours = parseFloat((x.ehMeterChanged == 1) ? 0 : _self.calculateHoursRun(x));
 					if(hours >= 0){
 						if(x.ehUseType == 0){
-							acc[dte.getFullYear()]['service'] += hours;
+							acc[ehCurYear]['service'] += hours;
 						} else {
-							acc[dte.getFullYear()]['pl'] += hours;
+							acc[ehCurYear]['pl'] += hours;
 						}
 					}
 
@@ -479,26 +484,12 @@
 					var dte = new Date(x.ehDate);
 					return (dte.getFullYear() == _year && dte.getMonth() == _month);
 				});
-
-				// // If filteredEngHrs is empty their is not data yet for that month.
-				// if(!filteredEgnHrs.length){
-				// 	// If their is no data for that month create a blank data set and add it to engineHours then
-				// 	// rerun the function.
-				// 	var newEvent = {
-				// 		ehDate:new Date(_year, _month, 1),
-				// 		ehEID: _self.urlEID,
-				// 		ehHoursTotal: 0,
-				// 		ehID: 0,
-				// 		ehMeterChanged: 0,
-				// 		ehNotes: "",
-				// 		ehUseType: 0,
-				// 		monthday: 1,
-				// 		dirty: true
-				// 	};
-				// 	_self.engineHours.push(newEvent);
-				// 	return _self.getEvents(_month,_year);
-				// }
 				return filteredEgnHrs;
+			},
+
+			getYearlyHours: function(year){
+				var _self = this;
+				return _self.yearTotals[year].pl + _self.yearTotals[year].service;
 			},
 
 			calculateHoursRun: function(item) {
@@ -522,12 +513,18 @@
 				var _self = this;
 				_self.isSaving = true;
 
+				// console.log(_self.yearTotals); return;
+
 				if(Array.isArray(_self.dirtyHours)){
 					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
-						data: { egnHrs: JSON.stringify(_self.dirtyHours), yearlyTotals: JSON.stringify(_self.yearTotals) },
+						data: {
+							eID: _self.engineData.eID,
+							egnHrs: JSON.stringify(_self.dirtyHours),
+							yearlyTotals: JSON.stringify(_self.yearTotals),
+						},
 						dataType: "json",
 						success: function(res){
 							if(res.success){

@@ -9,17 +9,14 @@
 	<cfelse>
 		<cfloop array="#egnHrs#" item="engineData">
 			<cfset clearHours(engineData)>
+			<cfset addHours(engineData)>
 		</cfloop>
 		
-		<cfloop array="#egnHrs#" item="engineData">
-			<cfset addHours(engineData)>
-
-			<cfquery>
-				UPDATE engine
-				SET eYearlyTotals = <cfqueryparam value="#yearlyTotals#" cfsqltype="cf_sql_varchar">
-				WHERE eID = <cfqueryparam value="#engineData.ehEID#" cfsqltype="cf_sql_integer">
-			</cfquery>
-		</cfloop>
+		<cfquery>
+			UPDATE engine
+			SET eYearlyTotals = <cfqueryparam value="#yearlyTotals#" cfsqltype="cf_sql_varchar">
+			WHERE eID = <cfqueryparam value="#form.eID#" cfsqltype="cf_sql_integer">
+		</cfquery>
 	</cfif>
 
 	<cfcatch>
