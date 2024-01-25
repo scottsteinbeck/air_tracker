@@ -57,8 +57,6 @@
 </div>
 
 <cfoutput>
-    <h3 class="mt-n2 text-center">#engineInfo.eName#</h3>
-    <br/>
     <script>
     document.title = "#dairyName.dCompanyName# #engineInfo.eName# Engine Hour Records";
     </script>
@@ -87,12 +85,13 @@
                     <cfset onTheFlyYearlyHours += isNumeric(engineHours.elapsedTotal) ? engineHours.elapsedTotal : 0>
                 </cfoutput>
             </tbody>
+            <tfoot class="table-dark">
+                <tr>
+                    <th></th>
+                    <th> #NumberFormat(yearlyTotals[yr].service,"9.99")# Hours</th>
+                    <th>Power loss hours: #NumberFormat(yearlyTotals[yr].pl,"9.99")#</th>
+            </tfoot>
         </table>
-        <div class="pb-5" style="font-size: 20px">
-            Yearly hours: #NumberFormat(yearlyTotals[yr].service,"9.99")#| Power loss hours: #NumberFormat(yearlyTotals[yr].pl,"9.99")#
-            <!--- <br>
-            #onTheFlyYearlyHours# --->
-        </div>
     </cfoutput>
 </div>
 
