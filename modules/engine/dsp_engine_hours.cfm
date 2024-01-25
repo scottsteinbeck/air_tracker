@@ -32,6 +32,7 @@
 <cfquery name="DairyList">
     SELECT dID, dCompanyName
     FROM dairies
+    order by dCompanyName
 </cfquery>
 
 

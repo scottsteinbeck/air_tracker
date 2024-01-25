@@ -16,8 +16,8 @@
 </cfscript> --->
 
 <cfquery name="engineHours">
-    SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, a.ehHoursTotal, a.ehEID,
-    greatest(0,a.ehHoursTotal - ifNull((
+    SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, ifNull(a.ehHoursTotal,0) as ehHoursTotal, a.ehEID,
+    greatest(0,ifNull(a.ehHoursTotal,0) - ifNull((
         select ehHoursTotal 
         from engine_hours b
         WHERE b.ehEID=a.ehEID and b.ehDate < a.ehDate 
@@ -84,7 +84,7 @@
             </tbody>
         </table>
         <div class="pb-5" style="font-size: 20px">
-            Yearly hours: #yearlyTotals[yr].service# | Power loss hours: #yearlyTotals[yr].pl#
+            Yearly hours: #NumberFormat(yearlyTotals[yr].service,"9.99")#| Power loss hours: #NumberFormat(yearlyTotals[yr].pl,"9.99")#
             <!--- <br>
             #onTheFlyYearlyHours# --->
         </div>
