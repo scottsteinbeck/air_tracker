@@ -97,9 +97,9 @@
                         </cfloop>
                         <th>Current Hours</th>
                         <cfif session.USer_TYPEID eq 1>
-                            <th>Edit engine</th>
                             <th>Change Hours</th>
                             <th>View Hours</th>
+                            <th>Edit engine</th>
                         </cfif>
                         <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
                     </tr>
@@ -124,25 +124,27 @@
 
                             <cfif session.USER_TYPEID eq 1>
                                 <td>
-                                    <a class="btn btn-secondary btn-block" 
+                                    <a class="btn btn-outline-primary text-center"
+                                        href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
+                                        <i class="fas fa-stopwatch"></i> Hours
+                                    </a>
+                                </td>
+                            </cfif>
+                                <td>
+                                    <a class="btn btn-danger text-center"
+                                        href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#"
+                                        >
+                                        <i class="fas fa-print"></i> Print
+                                    </a>
+                                </td>
+                            <cfif session.USER_TYPEID eq 1>
+                                <td>
+                                    <a class="btn btn-secondary text-center" 
                                         href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </td>
-                                <td>
-                                    <a class="btn btn-outline-primary btn-block"
-                                        href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
-                                        <i class="fas fa-stopwatch"></i>
-                                    </a>
-                                </td>
                             </cfif>
-                            <td>
-                                <a class="btn btn-outline-primary"
-                                    href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#"
-                                    >
-                                    <i class="fas fa-print"></i>
-                                </a>
-                            </td>
                         </tr>
                     </cfloop>
                 </tbody>

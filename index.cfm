@@ -49,7 +49,7 @@
     </cfif>
 
 	<cfquery name="dairyName">
-		SELECT dCompanyName
+		SELECT dID, dCompanyName
 		FROM dairies
 		WHERE dID = #url.dID#
 	</cfquery>
