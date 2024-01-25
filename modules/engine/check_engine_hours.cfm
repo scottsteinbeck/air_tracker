@@ -57,14 +57,19 @@
 </div>
 
 <cfoutput>
-    <h3 class="text-center">#engineInfo.eName#</h3>
-</cfoutput>
-
+    <h3 class="mt-n2 text-center">#engineInfo.eName#</h3>
+    <br/>
+    <script>
+    document.title = "#dairyName.dCompanyName# #engineInfo.eName# Engine Hour Records";
+    </script>
+    </cfoutput>
 <div class="p-3">
     <cfoutput query="engineHours" group="yr">
         <cfset onTheFlyYearlyHours = 0>
-        <h3>#yr#</h3>
-        <table class="table table-fixed table-striped">
+        <h3 style="text-align:center">#dairyName.dCompanyName#</h3>
+        <h4 style="text-align:center">#engineInfo.eName#</h4>
+        <h4 style="text-align:center">Year #yr#</h4>
+        <table class="table table-fixed table-striped"  style="page-break-after: always">
             <thead>
                 <tr>
                     <th>Month</th>
