@@ -29,13 +29,6 @@
     WHERE eDID = #url.dID# AND eDeleteDate IS NULL
 </cfquery>
 
-<cfquery name="DairyList">
-    SELECT dID, dCompanyName
-    FROM dairies
-    order by dCompanyName
-</cfquery>
-
-
 <style>
     .stay-top > th{
         position: sticky;
@@ -66,7 +59,7 @@
                     <input type="hidden" name="action" value="engine_hours">
                     <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
 						<option value="" selected disabled>none</option>
-                        <cfoutput query="DairyList">
+                        <cfoutput query="dairylist">
                             <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                         </cfoutput>
                     </select>

@@ -3,9 +3,9 @@
 <cfparam name="url.year" default="#year(now())#">
 <cfparam name="url.Month" default="#month(now())#">
 
-<cfquery name="DairyList">
+<!--- <cfquery name="DairyList">
     SELECT * FROM dairies
-</cfquery>
+</cfquery> --->
 
 <cffunction returntype="array" name="getTypelist">
     <cfquery name="typelist" returntype="array">
@@ -89,7 +89,7 @@
                 <input type="hidden" name="action" value="cow_numbers">
                 <select name="dID" id="" onchange="form.submit()" class="form-control">
                     <option value="0"> none</option>
-                    <cfoutput query="DairyList" >
+                    <cfoutput query="dairylist" >
                         <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                     </cfoutput>
                 </select>
@@ -201,11 +201,16 @@
 									<!--- the inputs are named in a way that they can be easly red in the query by knowing the tID --->
 									<!--- canEdit is a struct that stores true or false values for Permitted Qtr1 Qtr2 ect that gove us the locked or unlokced state of the text box --->
 									<!--- the typeList values that are in each text box are models so the total rows will update when they are changed --->
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" 
+                                        v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" 
+                                        v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" 
+                                        v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" 
+                                        v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" 
+                                        v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4" onclick="$(this).select()"/>
 								<cfelse>
 									<!--- only show the text with no text box if the user is not an admin --->
 									<div class="text-center">

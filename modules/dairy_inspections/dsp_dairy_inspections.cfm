@@ -2,9 +2,7 @@
 <cfparam name="url.Month" default="#month(now())#">
 <cfparam name="url.dID" default="1">
 <cfinclude template="auto_inspection.cfm">
-<cfquery name="Dairylist">
-    SELECT * FROM Dairies
-</cfquery>
+
 <cfquery name="MonthList">
     SELECT * FROM Month_Names
 	WHERE mName != "all"
@@ -13,6 +11,7 @@
 <cfquery name="inspectionDays">
     SELECT * FROM inspections
 </cfquery>
+
 <cfquery name="questionlist">
     SELECT *
     FROM questions
@@ -103,7 +102,7 @@
 
 	<!--- Get the active dairy selected by the user. --->
 	<cfset activeDairy = "">
-	<cfoutput query="DairyList">
+	<cfoutput query="dairylist">
 		<cfif url.dID eq dID> <cfset activeDairy = dCompanyName></cfif>
 	</cfoutput>
 	
@@ -133,7 +132,7 @@
 							<div class="input-group mb-3">
 								<select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
 									<option value="0"> none</option>
-									<cfoutput query="DairyList">
+									<cfoutput query="dairylist">
 										<option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
 									</cfoutput>
 								</select>
@@ -180,7 +179,7 @@
 							<div class="input-group mb-3">
 								<select name="dID" id="" onchange="form.submit()"  class="form-control">  <!--- Dairy Select  --->
 									<option value="0"> none</option>
-									<cfoutput query="DairyList">
+									<cfoutput query="dairylist">
 										<option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
 									</cfoutput>
 								</select>
