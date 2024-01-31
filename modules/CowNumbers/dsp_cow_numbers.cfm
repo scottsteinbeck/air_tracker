@@ -1,4 +1,4 @@
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!--- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> --->
 <cfparam name="url.dID" default="0">
 <cfparam name="url.year" default="#year(now())#">
 <cfparam name="url.Month" default="#month(now())#">

@@ -39,9 +39,13 @@
     <div class="container-xxl">
         <div class="row mx-0 mt-2 mb-2">
             <div class="col-4">
-                <cfoutput>
-                    <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">Add Engine</a>
-                </cfoutput>
+                <cfif session.USER_TYPEID eq 1>
+                    <cfoutput>
+                        <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">
+                            Add Engine
+                        </a>
+                    </cfoutput>
+                </cfif>
 
                 <span class="d-none d-lg-inline">
                     <!--- <form action="ajax" --->
@@ -135,6 +139,7 @@
                                     <a class="btn btn-secondary text-center" 
                                         href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#">
                                         <i class="fas fa-edit"></i>
+                                        Edit
                                     </a>
                                 </td>
                             </cfif>

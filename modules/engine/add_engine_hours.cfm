@@ -270,8 +270,6 @@
 
 
 <script>
-	var lastSaved = JSON.parse(localStorage.getItem("lastSaved"));
-	lastSaved = null;
 	var engineHours = <cfoutput>#serializeJSON(engineHours)#</cfoutput>;
 	var startYear = <cfoutput> #(structKeyExists(engineData[1], "eStartDate") && engineData[1].eStartDate != "") ? engineData[1].eStartDate : "2014"# </cfoutput>;
 	var engineData = <cfoutput>#serializeJSON(engineData[1])#</cfoutput>
@@ -321,7 +319,7 @@
 			engineData: engineData,
 
 			// engineHours is an array of structs. It contains all the data for the selected dary for all of time.
-			engineHours: lastSaved ? lastSaved: engineHours,
+			engineHours: engineHours,
 			urlEID: urlEID,
 			
 			displaySavingError: "",
@@ -490,7 +488,7 @@
 
 			getYearlyHours: function(year){
 				var _self = this;
-				return _self.yearTotals[year].pl + _self.yearTotals[year].service;
+				return (_self.yearTotals[year]?.pl ?? 0) + (_self.yearTotals[year]?.service ?? 0);
 			},
 
 			calculateHoursRun: function(item) {
@@ -512,12 +510,25 @@
 
 			saveData: function(goBack){
 				var _self = this;
-				_self.isSaving = true;
-
-				// console.log(_self.yearTotals); return;
 
 				if(Array.isArray(_self.dirtyHours)){
-					localStorage.setItem("lastSaved",JSON.stringify(this.engineHours));
+
+					var yearsOver = [];
+					for(var yr=_self.firstYear; yr < _self.currentYear; yr++){
+						if(_self.getYearlyHours(yr) > _self.engineData.eMaxHours){
+							yearsOver.push(yr);
+							
+						}
+					}
+					if(yearsOver.length){
+						if(!window.confirm("The fallowing years have gon over "
+							+ yearsOver.join(", ") +
+							". Are your sure you want to save these hours?")){
+							return;
+						}
+					}
+					_self.isSaving = true;
+
 					$.ajax({
 						url: "/modules/engine/save_engine_hours.cfm",
 						type: "POST",
@@ -529,7 +540,6 @@
 						dataType: "json",
 						success: function(res){
 							if(res.success){
-								localStorage.removeItem("lastSaved");
 								if(goBack) window.location = "/index.cfm?action=engine_hours";
 							} else {
 								_self.displaySavingError = res.message;
