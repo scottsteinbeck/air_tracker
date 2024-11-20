@@ -14,7 +14,6 @@
     "eSerialNumber" : "Serial Number",
     "eProject" : "Project"
 ]>
-
 <cfset setDate=createDate(url.year,1,1)>
 
 <!---
@@ -29,13 +28,6 @@
     WHERE eDID = #url.dID# AND eDeleteDate IS NULL
 </cfquery>
 
-<cfquery name="DairyList">
-    SELECT dID, dCompanyName
-    FROM dairies
-    order by dCompanyName
-</cfquery>
-
-
 <style>
     .stay-top > th{
         position: sticky;
@@ -46,9 +38,13 @@
     <div class="container-xxl">
         <div class="row mx-0 mt-2 mb-2">
             <div class="col-4">
-                <cfoutput>
-                    <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">Add Engine</a>
-                </cfoutput>
+                <cfif session.USER_TYPEID eq 1>
+                    <cfoutput>
+                        <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">
+                            Add Engine
+                        </a>
+                    </cfoutput>
+                </cfif>
 
                 <span class="d-none d-lg-inline">
                     <!--- <form action="ajax" --->
@@ -66,7 +62,7 @@
                     <input type="hidden" name="action" value="engine_hours">
                     <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
 						<option value="" selected disabled>none</option>
-                        <cfoutput query="DairyList">
+                        <cfoutput query="dairylist">
                             <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                         </cfoutput>
                     </select>
@@ -142,6 +138,7 @@
                                     <a class="btn btn-secondary text-center" 
                                         href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#">
                                         <i class="fas fa-edit"></i>
+                                        Edit
                                     </a>
                                 </td>
                             </cfif>

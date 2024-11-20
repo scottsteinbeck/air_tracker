@@ -61,7 +61,7 @@
   }
   </style>
 </head>
-<cfinclude template="qry_sff_type.cfm">
+<!--- <cfinclude template="qry_sff_type.cfm">
 <cffunction name="structApply" returntype="Struct">
   <cfargument name="s1" required="true" type="struct">
   <cfargument name="s2" required="true" type="struct">
@@ -199,26 +199,52 @@
       <a class="btn btn-small btn-green" href="index.cfm?action=create_account">Create An Account</a>
     </div>
   </div>
-</div> <!-- #login --> --->
+</div> <!-- #login --> ---> --->
 
 <body class="text-center">
-  <form  action="index.cfm?action=login" class="form-signin" method="post">
+  <form action="index.cfm?action=login" class="form-signin" method="post">
     <img class="mb-4" src="https://standard.wellcertified.com/sites/all/themes/wellfl/images/air-aqua.png" alt="" width="72" height="72">
     <h1 class="h2 mb-3 font-weight-normal">ATS Air District</h1>
     <h2 class="h4 mb-3 font-weight-normal">Please Sign In </h2>
     <label for="user_name" class="sr-only">Email address</label>
-    <input type="text" id="user_name" name="user_name" class="form-control" placeholder="Username/Email address" required autofocus>
+    <input type="text" id="login_modal_user_name" name="user_name" class="form-control" placeholder="Username/Email address" required autofocus>
     <label for="password" class="sr-only">Password</label>
-    <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-    <cfif isDefined("message.error")>
+    <input type="password" id="login_modal_password" name="password" class="form-control" placeholder="Password" required>
+    <!--- <cfif isDefined("message.error")>
       <div class="form-control">
         <label>&nbsp;</label>
         <div class="" style="color:red; font-weight:bold">Error: <cfoutput>#message.error#</cfoutput></div>
       </div> <!-- .field -->
-    </cfif>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </cfif> --->
+    <div class="text-danger" id="login-error"></div>
+    <div class="" style="color:red; font-weight:bold" id="login-error"></div>
+    <button class="btn btn-lg btn-primary btn-block" type="button" onclick="login(this.form)">Sign in</button>
     <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
   </form>
+
+  <script>
+    function login(loginForm){
+
+      $.ajax({
+          url: "/ajax/auth.cfm",
+          type: "POST",
+          dataType: "json",
+          data: {
+              user_name: loginForm.login_modal_user_name.value,
+              password: loginForm.login_modal_password.value
+          }
+      }).done(function(message){
+        if(message.error != ""){
+            $("#login-error").text("Error: " + message.error);
+          }
+          else{
+            $("#login-error").text("");
+            window.location.href = "index.cfm";
+          }
+      });
+    }
+  </script>
+
 </body>
 </html>
 

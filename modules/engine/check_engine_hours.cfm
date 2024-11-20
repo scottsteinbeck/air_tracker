@@ -16,7 +16,7 @@
 </cfscript> --->
 
 <cfquery name="engineHours">
-    SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, ifNull(a.ehHoursTotal,0) as ehHoursTotal, a.ehEID,
+    SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, DATE_FORMAT(a.ehDate, '%D') as day, ifNull(a.ehHoursTotal,0) as ehHoursTotal, a.ehEID,
     greatest(0,ifNull(a.ehHoursTotal,0) - ifNull((
         select ehHoursTotal 
         from engine_hours b
@@ -74,7 +74,7 @@
         <table class="table table-fixed table-striped"  style="page-break-after: always">
             <thead>
                 <tr>
-                    <th>Month</th>
+                    <th>Month/Day</th>
                     <th>Month Hours</th>
                     <th>Total Hours</th>
                 </tr>
@@ -82,7 +82,7 @@
             <tbody>
                 <cfoutput>
                     <tr>
-                        <th>#engineHours.mo#</th>
+                        <th>#engineHours.mo# #engineHours.day#</th>
                         <th>#engineHours.elapsedTotal#</th>
                         <th>#engineHours.ehHoursTotal#</th>
                     </tr>
