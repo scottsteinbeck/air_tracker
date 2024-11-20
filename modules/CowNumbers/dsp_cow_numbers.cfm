@@ -201,16 +201,21 @@
 									<!--- the inputs are named in a way that they can be easly red in the query by knowing the tID --->
 									<!--- canEdit is a struct that stores true or false values for Permitted Qtr1 Qtr2 ect that gove us the locked or unlokced state of the text box --->
 									<!--- the typeList values that are in each text box are models so the total rows will update when they are changed --->
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" v-model="typeList[n][column]" 
-                                        v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" v-model="typeList[n][column]" 
-                                        v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" v-model="typeList[n][column]" 
-                                        v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" v-model="typeList[n][column]" 
-                                        v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3" onclick="$(this).select()"/>
-									<input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" v-model="typeList[n][column]" 
-                                        v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4" onclick="$(this).select()"/>
+									<input type="number" :name="'dn_'+typeList[n].TiD+'_Permitted'" :value="typeList[n][column]" 
+                                        @input="updateTypeList(n, column, $event)" v-if="column == 'cnPermitted'" :readonly="!canEdit.permitted" 
+                                        onclick="$(this).select()"/>
+                                    <input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr1'" :value="typeList[n][column]" 
+                                        @input="updateTypeList(n, column, $event)" v-if="column == 'CnQtr1'" :readonly="!canEdit.qtr1" 
+                                        onclick="$(this).select()"/>
+                                    <input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr2'" :value="typeList[n][column]" 
+                                        @input="updateTypeList(n, column, $event)" v-if="column == 'CnQtr2'" :readonly="!canEdit.qtr2" 
+                                        onclick="$(this).select()"/>
+                                    <input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr3'" :value="typeList[n][column]" 
+                                        @input="updateTypeList(n, column, $event)" v-if="column == 'CnQtr3'" :readonly="!canEdit.qtr3" 
+                                        onclick="$(this).select()"/>
+                                    <input type="number" :name="'dn_'+typeList[n].TiD+'_Qtr4'" :value="typeList[n][column]" 
+                                        @input="updateTypeList(n, column, $event)" v-if="column == 'CnQtr4'" :readonly="!canEdit.qtr4" 
+                                        onclick="$(this).select()"/>
 								<cfelse>
 									<!--- only show the text with no text box if the user is not an admin --->
 									<div class="text-center">
@@ -270,98 +275,108 @@
 
 <script>
 //vue version
-var typeList = <cfoutput>#serializeJSON(typelist)#</cfoutput>;
+    var typeList = <cfoutput>#serializeJSON(typelist)#</cfoutput>;
+    console.log(typeList);
 
-Vue.filter("formatNumber", function (value) {
-    return Number(value).toLocaleString()
-});
+    Vue.filter("formatNumber", function (value) {
+        return Number(value).toLocaleString()
+    });
 
-cowNumbers = new Vue({
-    el: '#mainVue',
-    computed: {
-		// the mature animals row is the milk and dry in each column to be added
-		// this function adds the minl and dry for each column and returns the resolt
-		matureAnimalsRow: function(){
-			var _self = this;
-			var totals = { Name:"Mature Animals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0 };
-            for(var i=0; i < _self.typeList.length; i++) {
-				var row = _self.typeList[i];
-				// since milk and dry are both of the mature type in row we are skipping everything that
-				// is not of the mature type
-				if(row.Type != "Mature"){ continue; }
-				for(var t=0; t < _self.columns.length; t++) {
-					// the column variable is a struct that contains string names for each column in the table
-					var colName = _self.columns[t];
-					if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
-					else{ totals[colName] += 0; }
-				}
-			}
-			return totals;
-		},
-
-        totalRow: function () {
-            var _self = this;
-            var totals = { Name:"Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
-            for(var i = 0; i < _self.typeList.length; i++){
-                var row = _self.typeList[i];
-                for(var t = 0; t < _self.columns.length; t++){
-                    var colName = _self.columns[t];
-                    if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
-					else{ totals[colName] += 0; }
+    cowNumbers = new Vue({
+        el: '#mainVue',
+        computed: {
+            // the mature animals row is the milk and dry in each column to be added
+            // this function adds the minl and dry for each column and returns the resolt
+            matureAnimalsRow: function(){
+                var _self = this;
+                var totals = { Name:"Mature Animals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0 };
+                for(var i=0; i < _self.typeList.length; i++) {
+                    var row = _self.typeList[i];
+                    // since milk and dry are both of the mature type in row we are skipping everything that
+                    // is not of the mature type
+                    if(row.Type != "Mature"){ continue; }
+                    for(var t=0; t < _self.columns.length; t++) {
+                        // the column variable is a struct that contains string names for each column in the table
+                        var colName = _self.columns[t];
+                        if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
+                        else{ totals[colName] += 0; }
+                    }
                 }
+                return totals;
+            },
+
+            totalRow: function () {
+                var _self = this;
+                var totals = { Name:"Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
+                for(var i = 0; i < _self.typeList.length; i++){
+                    var row = _self.typeList[i];
+                    for(var t = 0; t < _self.columns.length; t++){
+                        var colName = _self.columns[t];
+                        if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
+                        else{ totals[colName] += 0; }
+                    }
+                }
+                return totals;
+            },
+
+            supportStockRow: function () {
+                var _self = this;
+                var totals = { Name:"Support Stock Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
+                for(var i = 0; i < _self.typeList.length; i++){
+                    var row = _self.typeList[i];
+                    if(row.Type != "Support" || row.Name == "Calves"){ continue; }
+                    for(var t = 0; t < _self.columns.length; t++){
+                        var colName = _self.columns[t];
+                        if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
+                        else { totals[colName] += 0; }
+                    }
+                }
+                return totals;
             }
-            return totals;
+        },
+        data: {
+            typeList: typeList,
+            columns: ["cnPermitted","CnQtr1","CnQtr2","CnQtr3","CnQtr4"],
+            tableHeaders: {cnPermitted:"Permitted",CnQtr1:"Qtr1",CnQtr2:"Qtr2",CnQtr3:"Qtr3",CnQtr4:"Qtr4"},
+            canEdit: {permitted: false, qtr1: false, qtr2: false, qtr3: false, qtr4: false},
         },
 
-        supportStockRow: function () {
-            var _self = this;
-            var totals = { Name:"Support Stock Totals", cnPermitted:0, CnQtr1:0, CnQtr2:0, CnQtr3:0, CnQtr4:0};
-            for(var i = 0; i < _self.typeList.length; i++){
-                var row = _self.typeList[i];
-                if(row.Type != "Support" || row.Name == "Calves"){ continue; }
-                for(var t = 0; t < _self.columns.length; t++){
-                    var colName = _self.columns[t];
-                    if(row[colName] != ""){ totals[colName] += parseFloat(row[colName]); }
-					else { totals[colName] += 0; }
+        methods: {
+            updateTypeList: function(n, column, e){
+                var _self = this;
+                var newVal = e.target.value;
+
+                _self.typeList[n][column] = newVal;
+
+                if(column != 'cnPermitted' && _self.typeList[n]['cnPermitted'] < _self.typeList[n][column]){
+                    _self.typeList[n][column] = _self.typeList[n]['cnPermitted'];
                 }
-            }
-            return totals;
-        }
-    },
-    data: {
-        typeList: typeList,
-        columns: ["cnPermitted","CnQtr1","CnQtr2","CnQtr3","CnQtr4"],
-        tableHeaders: {cnPermitted:"Permitted",CnQtr1:"Qtr1",CnQtr2:"Qtr2",CnQtr3:"Qtr3",CnQtr4:"Qtr4"},
-		canEdit: {permitted: false, qtr1: false, qtr2: false, qtr3: false, qtr4: false},
-    },
+            },
+            lockUnlock: function(columnName) {
+                var _self = this;
+                if(_self.canEdit[columnName] == true){
+                    _self.canEdit[columnName] = false;
 
-    methods: {
-		lockUnlock: function(columnName)
-		{
-            var _self = this;
-			if(_self.canEdit[columnName] == true){
-				_self.canEdit[columnName] = false;
+                    var cowNumsForm = document.getElementById("cowNums");
+                    cowNumsForm.submit();
+                }
+                else if(columnName != "permitted"){
+                    _self.canEdit[columnName] = true;
+                }
+                else
+                {
+                    if(confirm("Are you shure you want to unlock the Permitted input boxes?"))
+                    { this.canEdit.permitted = true; }
+                }
+            },
 
-                var cowNumsForm = document.getElementById("cowNums");
-                cowNumsForm.submit();
-			}
-			else if(columnName != "permitted"){
-				_self.canEdit[columnName] = true;
-			}
-            else
+            replaceFromOtherYear: function()
             {
-                if(confirm("Are you shure you want to unlock the Permitted input boxes?"))
-				{ this.canEdit.permitted = true; }
-            }
-		},
-
-        replaceFromOtherYear: function()
-        {
-            if(confirm('Do you want to replace the data from this year with the data from another year?')) 
-            { document.getElementById("replaceYearForm").submit(); }
+                if(confirm('Do you want to replace the data from this year with the data from another year?')) 
+                { document.getElementById("replaceYearForm").submit(); }
+            },
         },
-    },
-});
+    });
 </script>
 
 <style>
