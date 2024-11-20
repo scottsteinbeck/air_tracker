@@ -3,107 +3,100 @@
     FROM engine
     WHERE eID=#url.eID#
 </cfquery>
+<!--- <cfdump var="#engineInfo#"> --->
+
+<cfset yearlyTotals = deserializeJSON(engineInfo.eYearlyTotals)>
+
+<!--- <cfscript>
+    mostRecentYear = yearlyTotals.keyArray().reduce(function(acc, x){
+        if(x > acc) acc = x;
+        return acc;
+    }, 2014);
+    currentYear = url.keyExists("year") ? url.year : mostRecentYear;
+</cfscript> --->
 
 <cfquery name="engineHours">
-    SELECT *
-    FROM engine_hours
-    WHERE ehEID=#url.eID# and YEAR(ehDate)=#url.year#
-    ORDER BY ehDate
-</cfquery>
+    SELECT YEAR(a.ehDate) as yr, DATE_FORMAT(a.ehDate,'%M') as mo, a.ehDate, DATE_FORMAT(a.ehDate, '%D') as day, ifNull(a.ehHoursTotal,0) as ehHoursTotal, a.ehEID,
+    greatest(0,ifNull(a.ehHoursTotal,0) - ifNull((
+        select ehHoursTotal 
+        from engine_hours b
+        WHERE b.ehEID=a.ehEID and b.ehDate < a.ehDate 
+        order by b.ehDate Desc
+        Limit 1
+    ),a.ehHoursTotal)) as elapsedTotal
+    FROM engine_hours a
+    WHERE ehEID=#url.eID# AND
+        ehDeleteDate IS NULL
+        and ehDate >= (
+            select c.ehDate 
+            from engine_hours c  
+            WHERE c.ehEID=a.ehEID 
+            and  c.ehHoursTotal > 0
+            order by c.ehDate
+            Limit 1
+        )
+    ORDER BY yr, ehDate
+</cfquery> 
+<!--- <cfdump var="#engineHours#"> --->
+
+<style>
+    @media print { 
+        a{
+            display: none !important;
+        }
+    }
+</style>
 
 <cfoutput>
-    <div id="mainVue">
+<div class="row">
+    <div class="col"></div>
+    <div class="col-2">
+        <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary @media print{}">
+            <i class="fas fa-angle-left"></i> Back to Engine Hours
+        </a>
+        <a href="index.cfm?action=add_engine_hours&dID=#dairyName.dID#&eID=#url.eID#" class="mt-2 btn btn-outline-primary @media print{}">
+             Edit Hours
+        </a>
+        
+    </div>
+</div>
 
-
-        <div class="row m-2 p-2">
-            <!--- Page tital and forward and backward arows --->
-            <cfoutput>
-                <h4 class="col text-center text-truncate">
-                    #engineInfo.eName# engine
-                </h4>
-            </cfoutput>
-        </div>
-
-        <!--- Date dropp down --->
-        <div class="row">
-            <div class="col-sm-8">
-                <div class="input-group mb-3 mt-2 ml-2">
-                    <form action="index.cfm" method="GET">
-                        <input type="hidden" name="eID" value="#url.eID#">
-                        <input type="hidden" name="action" value="check_engine_hours">
-                        <select name="year" onchange="form.submit()" class="form-control">
-                            <cfloop from="2014" to=#year(now())# index="YR">
-                                <option value="#YR#" <cfif YR eq url.year>selected="selected"</cfif>>#YR#</option>
-                            </cfloop>
-                        </select>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!--- Display table --->
-        <table class="table table-fixed table-striped">
+    <script>
+    document.title = "#dairyName.dCompanyName# #engineInfo.eName# Engine Hour Records";
+    </script>
+    </cfoutput>
+<div class="p-3">
+    <cfoutput query="engineHours" group="yr">
+        <cfset onTheFlyYearlyHours = 0>
+        <h3 style="text-align:center">#dairyName.dCompanyName#</h3>
+        <h4 style="text-align:center">#engineInfo.eName#</h4>
+        <h4 style="text-align:center">Year #yr#</h4>
+        <table class="table table-fixed table-striped"  style="page-break-after: always">
             <thead>
                 <tr>
-                    <th width="30%">
-                        Months
-                    </th>
-                    <th width="30%">
-                        Month Hours
-                    </th>
-                    <th width="30%">
-                        Total Hours
-                    </th>
+                    <th>Month/Day</th>
+                    <th>Month Hours</th>
+                    <th>Total Hours</th>
                 </tr>
             </thead>
-            <cfloop from="1" to="12" index="month">
-
-            <cfquery name="month_hours" dbtype="query">
-                SELECT ehDate,ehHoursTotal
-                FROM engineHours
-                WHERE MONTH(ehDate)=#month#
-            </cfquery>
-
-            <cfquery name="prev_month_hours" dbtype="query">
-                SELECT ehDate,ehHoursTotal
-                FROM engineHours
-                WHERE MONTH(ehDate)=#month - 1#
-            </cfquery>
-            
+            <tbody>
+                <cfoutput>
+                    <tr>
+                        <th>#engineHours.mo# #engineHours.day#</th>
+                        <th>#engineHours.elapsedTotal#</th>
+                        <th>#engineHours.ehHoursTotal#</th>
+                    </tr>
+                    <cfset onTheFlyYearlyHours += isNumeric(engineHours.elapsedTotal) ? engineHours.elapsedTotal : 0>
+                </cfoutput>
+            </tbody>
+            <tfoot class="table-dark">
                 <tr>
-                    <td>
-                        <!--- month of row --->
-                        #monthAsString(month)#
-                    </td>
-                    <td>
-                        <!--- month hours --->
-                        <!--- difference between las month and this month hours --->
-                        <cfif month_hours.recordCount && isNumeric(month_hours.ehHoursTotal) && isNumeric(prev_month_hours.ehHoursTotal) && month - 1 gt 0>
-                            #precisionEvaluate(month_hours.ehHoursTotal - prev_month_hours.ehHoursTotal)#
-                        <cfelse>
-                            ---
-                        </cfif>
-                    </td>
-                    <td>
-                        <!--- total hours --->
-                        <cfif month_hours.recordCount>
-                            <cfset currentHours = month_hours.ehHoursTotal>
-                        <cfelse>
-                            <cfset currentHours = "---" >
-                        </cfif>
-                        #currentHours#
-                    </td>
-                </tr>
-
-            </cfloop>
-        </cfoutput>
-    </table>
-    <cfoutput>
-        <div class="m-2">
-            <cfset yearlyTotals = deserializeJSON(engineInfo.eYearlyTotals)>
-            Yearly hours: #round(yearlyTotals[url.year]["service"] * 100) / 100# | Power loss hours: #round(yearlyTotals[url.year]["pl"] * 100) / 100#
-        </div>
+                    <th></th>
+                    <th> #NumberFormat(yearlyTotals[yr].service,"9.99")# Hours</th>
+                    <th>Power loss hours: #NumberFormat(yearlyTotals[yr].pl,"9.99")#</th>
+            </tfoot>
+        </table>
     </cfoutput>
-    <br>
-    <a href="index.cfm?action=engine_hours" class="btn btn-outline-primary m-2">Engine Hours<a/>
 </div>
+
+<!--- 2020 101.4+356.4+179.6+311.3+151.7+243.6+193.4+261.6+293.1+298.3+220=2,610.4 --->

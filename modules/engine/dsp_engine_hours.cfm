@@ -28,12 +28,6 @@
     WHERE eDID = #url.dID# AND eDeleteDate IS NULL
 </cfquery>
 
-<cfquery name="DairyList">
-    SELECT dID, dCompanyName
-    FROM dairies
-</cfquery>
-
-
 <style>
     .stay-top > th{
         position: sticky;
@@ -44,9 +38,13 @@
     <div class="container-xxl">
         <div class="row mx-0 mt-2 mb-2">
             <div class="col-4">
-                <cfoutput>
-                    <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">Add Engine</a>
-                </cfoutput>
+                <cfif session.USER_TYPEID eq 1>
+                    <cfoutput>
+                        <a class="btn btn-outline-primary ml-2 pl-3 pr-3" href="index.cfm?action=add_engine&dID=#url.dID#">
+                            Add Engine
+                        </a>
+                    </cfoutput>
+                </cfif>
 
                 <span class="d-none d-lg-inline">
                     <!--- <form action="ajax" --->
@@ -64,7 +62,7 @@
                     <input type="hidden" name="action" value="engine_hours">
                     <select name="dID" id="" onchange="form.submit()" class="form-control">  <!--- Dairy Select  --->
 						<option value="" selected disabled>none</option>
-                        <cfoutput query="DairyList">
+                        <cfoutput query="dairylist">
                             <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
                         </cfoutput>
                     </select>
@@ -94,7 +92,11 @@
                             <th>#tableData[colItem]#</th>
                         </cfloop>
                         <th>Current Hours</th>
-                        <cfif session.USer_TYPEID eq 1> <th>Add Hours</th> </cfif>
+                        <cfif session.USer_TYPEID eq 1>
+                            <th>Change Hours</th>
+                            <th>View Hours</th>
+                            <th>Edit engine</th>
+                        </cfif>
                         <cfif session.USer_TYPEID eq 2> <th>Vue Hours</th> </cfif>
                     </tr>
                 </thead>
@@ -118,14 +120,26 @@
 
                             <cfif session.USER_TYPEID eq 1>
                                 <td>
-                                    <a class="btn btn-outline-primary btn-block" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a>
-                                    <a href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#" class="btn btn-outline-primary btn-block">Edit engine</a>
+                                    <a class="btn btn-outline-primary text-center"
+                                        href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
+                                        <i class="fas fa-stopwatch"></i> Hours
+                                    </a>
                                 </td>
                             </cfif>
-
-                            <cfif session.USer_TYPEID eq 2>
                                 <td>
-                                    <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a>
+                                    <a class="btn btn-danger text-center"
+                                        href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#"
+                                        >
+                                        <i class="fas fa-print"></i> Print
+                                    </a>
+                                </td>
+                            <cfif session.USER_TYPEID eq 1>
+                                <td>
+                                    <a class="btn btn-secondary text-center" 
+                                        href="index.cfm?action=add_engine&dID=#url.dID#&eID=#engineInfo.eID#">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
                                 </td>
                             </cfif>
                         </tr>
@@ -153,8 +167,16 @@
                 <li class="list-group-item py-1 pl-2 text-wrap"><strong>Location</strong> #engineInfo.eLocation[engineInfo.currentRow] ?: "---"#</li>
                 <li class="list-group-item py-1 pl-2 text-wrap">
                     <div style="float:right">
-                        <cfif session.USer_TYPEID eq 1><a class="btn btn-outline-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">Change / view Hours</a> </cfif>
-                        <cfif session.USer_TYPEID eq 2> <a class="btn btn-outline-primary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">View Hours</a> </cfif>
+                        <cfif session.USer_TYPEID eq 1>
+                            <a class="btn btn-primary" href="index.cfm?action=add_engine_hours&eID=#engineInfo.eID#&eDate=#year(setDate)#">
+                                Change / View Hours
+                            </a>
+                        </cfif>
+                        <cfif session.USer_TYPEID eq 2>
+                            <a class="btn btn-secondary" href="index.cfm?action=check_engine_hours&eID=#engineInfo.eID#&year=#year(now())#">
+                                View / Print Hours
+                            </a>
+                        </cfif>
                     </div>
                 </li>
             </ul>

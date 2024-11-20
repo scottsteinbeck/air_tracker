@@ -10,7 +10,7 @@
         </cfquery>
         <cfset #oldStartDate# = #oldStartDateQry[1].eStartDate#>
         
-        <cfif form.engineStartDate == ""><cfset form.engineStartDate = "2014"></cfif>
+        <cfif oldStartDate == ""><cfset oldStartDate = "2014"></cfif>
     
         <cfquery>
             UPDATE engine

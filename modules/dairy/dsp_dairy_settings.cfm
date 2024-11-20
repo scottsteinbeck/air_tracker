@@ -3,17 +3,12 @@
 <cfparam name="url.dID" default="0">
 <!--- <cfparam name="url.dqType" default="0"> --->
 
-<cfquery name="dairylist">
-    select * from dairies
-</cfquery>
-
 <cfquery name="questionlist">
     select * 
     from questions
     left join dairy_question_link on dairy_question_link.qID=questions.qID and dID=#url.dID#
     ORDER BY qPriority
 </cfquery>
-
 
 <form action="index.cfm" method="GET">
     <input type="hidden" name="action" value="dairy_settings">
@@ -22,7 +17,7 @@
             <select class="form-control" name="dID" id="" onchange="form.submit()">
                 <option value="0"> none</option>
                 <cfoutput query="dairylist" >
-                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif> >#dCompanyName#</option>
+                    <option value="#dID#" <cfif url.dID eq dID>selected ="selected"</cfif>>#dCompanyName#</option>
                 </cfoutput>
             </select>
         </div>
