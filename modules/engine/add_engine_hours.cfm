@@ -184,7 +184,7 @@
 											<!--- In the right conditions display a checkbox for settings the engine to a meter change --->
 											<div v-show="calculateHoursRun(event) < 0 || event.ehMeterChanged || event.showDetails">
 												M/C
-												<input type="checkbox" value="1" v-model="event.ehMeterChanged" @click="event.dirty = true">
+												<input type="checkbox" value="1" :checked="event.ehMeterChanged" @click="makeMeterChange(event)">
 											</div>
 										</div>
 
@@ -465,6 +465,17 @@
 				});
 			},
 
+			makeMeterChange: function(event){
+				var _self = this;
+				event.dirty = true;
+				event.ehMeterChanged = !event.ehMeterChanged;
+				if(event.ehMeterChanged){
+					if(window.confirm("Would you like to save the changes?")){
+						_self.saveData(false);
+					}
+				}
+			},
+
 			// When the total hours are doubble clicked show the M/C checkbox
 			showDetails: function(event){
 				var _self = this;
@@ -521,7 +532,7 @@
 						}
 					}
 					if(yearsOver.length){
-						if(!window.confirm("The fallowing years have gon over "
+						if(!window.confirm("The following years have gon over "
 							+ yearsOver.join(", ") +
 							". Are your sure you want to save these hours?")){
 							return;
